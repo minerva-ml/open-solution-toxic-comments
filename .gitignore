@@ -1,0 +1,24 @@
+# Created with the help of the .ignore support plugin (hsz.mobi)
+
+### Python template
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.cache
+.cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Neptune
+output
+neptune.log
+offline_job.log
+
+# IntelliJ
+out/
+.idea/
+
+#minerva
+#resources/
