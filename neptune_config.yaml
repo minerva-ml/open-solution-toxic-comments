@@ -1,0 +1,17 @@
+project-key: TOX
+
+name: toxic
+
+parameters:
+  data_dir: /mnt/ml-team/minerva/toxic/data
+  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/weighted_average
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+  overwrite: false
+
+exclude:
+  - output
+  - neptune.log
+  - offline_job.log
+  - .git
+  - .idea
+  - .ipynb_checkpoints
