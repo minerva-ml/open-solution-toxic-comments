@@ -1,5 +1,6 @@
 import numpy as np
-from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, LSTM, Bidirectional, Dense, Dropout, concatenate
+from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, LSTM, Bidirectional, Dense, Dropout, \
+    BatchNormalization, concatenate
 from keras.models import Model
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.optimizers import Adam
@@ -114,6 +115,24 @@ class GloveCNN(CharacterClassifier):
         x = Conv1D(128, kernel_size=3, activation='relu')(x)
         x = GlobalMaxPool1D()(x)
         x = Dense(256, activation="relu")(x)
+        x = Dropout(0.5)(x)
+        predictions = Dense(6, activation="sigmoid")(x)
+
+        model = Model(inputs=input_text, outputs=predictions)
+        return model
+
+
+class GloveExp(GloveCNN):
+    def _build_model(self, maxlen, max_features, embedding_size, embedding_matrix):
+        input_text = Input(shape=(maxlen,))
+
+        x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=False)(input_text)
+        x = BatchNormalization()(x)
+        x = Conv1D(32, kernel_size=3, activation='relu')(x)
+        x = Conv1D(32, kernel_size=3, activation='relu')(x)
+        x = Conv1D(32, kernel_size=3, activation='relu')(x)
+        x = GlobalMaxPool1D()(x)
+        x = Dense(128, activation="relu")(x)
         x = Dropout(0.5)(x)
         predictions = Dense(6, activation="sigmoid")(x)
 
