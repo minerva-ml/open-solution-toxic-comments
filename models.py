@@ -1,6 +1,6 @@
 import numpy as np
 from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D, LSTM, Bidirectional, Dense, Dropout, \
-    BatchNormalization,LeakyReLU, PReLU, concatenate
+    BatchNormalization, LeakyReLU, PReLU, concatenate
 from keras.layers.merge import add
 from keras.models import Model
 from keras.callbacks import ModelCheckpoint, EarlyStopping
@@ -125,17 +125,19 @@ class GloveCNN(CharacterClassifier):
         model = Model(inputs=input_text, outputs=predictions)
         return model
 
+
 class GloveDPCNN(GloveCNN):
     def _build_optimizer(self, **kwargs):
         return SGD(**kwargs)
-    
-    def _build_model(self, maxlen, max_features, embedding_size, embedding_matrix, filter_nr, kernel_size, repeat_block, l2_reg, use_prelu):
+
+    def _build_model(self, maxlen, max_features, embedding_size, embedding_matrix, filter_nr, kernel_size, repeat_block,
+                     l2_reg, use_prelu):
         """
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
 
         def _base_layer(x):
-            x = Conv1D(filter_nr, kernel_size=kernel_size, padding='same',activation='linear',
+            x = Conv1D(filter_nr, kernel_size=kernel_size, padding='same', activation='linear',
                        kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
                        kernel_regularizer=regularizers.l2(l2_reg))(x)
             if use_prelu:
@@ -143,9 +145,9 @@ class GloveDPCNN(GloveCNN):
             else:
                 x = relu(x)
             return x
-        
+
         def _shape_matching_layer(x):
-            x = Conv1D(filter_nr, kernel_size=1, padding='same',activation='linear',
+            x = Conv1D(filter_nr, kernel_size=1, padding='same', activation='linear',
                        kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
                        kernel_regularizer=regularizers.l2(l2_reg))(x)
             if use_prelu:
@@ -153,17 +155,17 @@ class GloveDPCNN(GloveCNN):
             else:
                 x = relu(x)
             return x
-        
+
         def _dpcnn_block(x):
             x = MaxPooling1D(pool_size=3, stride=2)(x)
             x_conv = _base_layer(x)
             x_conv = _base_layer(x_conv)
             x = add([x_conv, x])
             return x
-        
+
         input_text = Input(shape=(maxlen,))
 
-        embedding = Embedding(max_features, embedding_size, weights=[embedding_matrix], 
+        embedding = Embedding(max_features, embedding_size, weights=[embedding_matrix],
                               trainable=False)(input_text)
         x = _base_layer(embedding)
         x = _base_layer(x)
@@ -172,7 +174,7 @@ class GloveDPCNN(GloveCNN):
         else:
             embedding_resized = _shape_matching_layer(embedding)
             x = add([embedding_resized, x])
-        
+
         for _ in range(repeat_block):
             x = _dpcnn_block(x)
 

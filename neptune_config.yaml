@@ -34,7 +34,7 @@ parameters:
   gamma: 0.97
   patience: 10
   # Regularization
-  l2_reg: 0.0001
+  l2_reg: 0.0
   
 
 exclude:
