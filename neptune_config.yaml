@@ -1,12 +1,12 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, dpcnn, sgd]
+tags: [glove, cnn, sgd]
 
 parameters:
   # Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/glove_dpcnn
+  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/glove_cnn
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: false
   num_workers: -2
@@ -18,10 +18,6 @@ parameters:
   char_embedding_size: 300
   word_embedding_size: 300
   char_ngram_max: 4
-  # Deep Pyramid Architecture
-  kernel_size: 3
-  filter_nr: 300
-  repeat_block: 2
   # Log Reg Params
   log_reg_c: 4.0
   # Training schedule
