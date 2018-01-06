@@ -1,6 +1,6 @@
 import numpy as np
 from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D, LSTM, Bidirectional, Dense, Dropout, \
-    BatchNormalization,LeakyReLU, concatenate
+    BatchNormalization, LeakyReLU, concatenate
 from keras.layers.merge import add
 from keras.models import Model
 from keras.callbacks import ModelCheckpoint, EarlyStopping
