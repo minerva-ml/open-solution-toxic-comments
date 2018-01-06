@@ -94,7 +94,7 @@ class GloveLSTM(CharacterClassifier):
 
 
 class GloveCNN(CharacterClassifier):
-    def fit(self, embedding_matrix, X, y, validation_data, ):
+    def fit(self, embedding_matrix, X, y, validation_data):
         self.callbacks = self._create_callbacks(**self.callbacks_config)
         self.architecture_config['model_params']['embedding_matrix'] = embedding_matrix
         self.model = self._compile_model(**self.architecture_config)
@@ -170,6 +170,7 @@ class GloveDPCNN(GloveCNN):
             x = _dpcnn_block(x)
 
         x = GlobalMaxPool1D()(x)
+        x = Dense(256)(x)
         predictions = Dense(6, activation="sigmoid")(x)
 
         model = Model(inputs=input_text, outputs=predictions)

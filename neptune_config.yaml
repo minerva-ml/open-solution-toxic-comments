@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, dpcnn, adam]
+tags: [glove, dpcnn, sgd]
 
 parameters:
   # Environment
@@ -22,13 +22,13 @@ parameters:
   kernel_size: 3
   filter_nr: 300
   repeat_block: 2
-  # Log Reg
+  # Log Reg Params
   log_reg_c: 4.0
   # Training schedule
   epochs_nr: 1000
   batch_size_train: 128
   batch_size_inference: 128
-  lr: 0.00025
+  lr: 0.001
   momentum: 0.9
   gamma: 0.97
   patience: 10

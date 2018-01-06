@@ -60,8 +60,8 @@ SOLUTION_CONFIG = AttrDict({
                              'neptune_monitor': {},
                          },
                          },
-    'word_lstm_network': {'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features_word'],
-                                                                   'maxlen': GLOBAL_CONFIG['maxlen_words'],
+    'word_lstm_network': {'architecture_config': {'model_params': {'max_features': neptune_config.parameters.max_features_word,
+                                                                   'maxlen': neptune_config.parameters.maxlen_words,
                                                                    'embedding_size': neptune_config.parameters.word_embedding_size
                                                                    },
                                                   'optimizer_params': {'lr': neptune_config.parameters.lr,
