@@ -102,28 +102,6 @@ SOLUTION_CONFIG = AttrDict({
             'neptune_monitor': {},
         },
     },
-    'word_glove_exp_network': {
-        'architecture_config': {'model_params': {'max_features': neptune_config.parameters.max_features_word,
-                                                 'maxlen': neptune_config.parameters.maxlen_words,
-                                                 'embedding_size': neptune_config.parameters.word_embedding_size
-                                                 },
-                                'optimizer_params': {'lr': neptune_config.parameters.lr
-                                                     },
-                                },
-        'training_config': {'epochs': neptune_config.parameters.epochs_nr,
-                            'batch_size': neptune_config.parameters.batch_size_train,
-                            },
-        'callbacks_config': {'model_checkpoint': {
-            'filepath': os.path.join(neptune_config.parameters.experiment_dir, 'checkpoints',
-                                     'word_glove_exp_network',
-                                     'word_glove_exp_network.h5'),
-            'save_best_only': True,
-            'save_weights_only': False},
-            'lr_scheduler': {'gamma': neptune_config.parameters.gamma},
-            'early_stopping': {'patience': neptune_config.parameters.patience},
-            'neptune_monitor': {},
-        },
-    },
     'word_glove_dpcnn_network': {
         'architecture_config': {'model_params': {'max_features': neptune_config.parameters.max_features_word,
                                                  'maxlen': neptune_config.parameters.maxlen_words,

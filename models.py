@@ -175,18 +175,3 @@ class GloveDPCNN(GloveCNN):
 
         model = Model(inputs=input_text, outputs=predictions)
         return model
-
-class GloveExp(GloveCNN):   
-    def _build_model(self, maxlen, max_features, embedding_size, embedding_matrix):
-        input_text = Input(shape=(maxlen,))
-
-        x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=False)(input_text)
-        x = Bidirectional(LSTM(128, return_sequences=True, dropout=0.5, recurrent_dropout=0.5))(x)
-        x = Bidirectional(LSTM(128, return_sequences=True, dropout=0.5, recurrent_dropout=0.5))(x)
-        x = Bidirectional(LSTM(128, return_sequences=False, dropout=0.5, recurrent_dropout=0.5))(x)
-        x = Dense(256, activation="relu")(x)
-        x = Dropout(0.5)(x)
-        predictions = Dense(6, activation="sigmoid")(x)
-
-        model = Model(inputs=input_text, outputs=predictions)
-        return model

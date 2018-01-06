@@ -6,7 +6,7 @@ from steps.models.keras.models import GloveEmbeddingsMatrix
 from steps.models.sklearn.models import LogisticRegressionMultilabel
 
 from utils import fetch_x_train, fetch_x_valid, join_valid
-from models import CharCNN, WordTrainableLSTM, GloveLSTM, GloveCNN, GloveDPCNN, GloveExp
+from models import CharCNN, WordTrainableLSTM, GloveLSTM, GloveCNN, GloveDPCNN
 
 
 def char_cnn_train_pipeline(config):
@@ -78,18 +78,6 @@ def tfidf_logreg_inference_pipeline(config):
     preprocessed_input = inference_preprocessing(config)
     logreg_output = tfidf_log_reg(config, preprocessed_input)
     return logreg_output
-
-
-def glove_exp_train_pipeline(config):
-    preprocessed_input = train_preprocessing(config)
-    network_output = glove_exp_train(config, preprocessed_input)
-    return network_output
-
-
-def glove_exp_inference_pipeline(config):
-    preprocessed_input = inference_preprocessing(config)
-    network_output = glove_exp_inference(config, preprocessed_input)
-    return network_output
 
 
 def ensemble_train_pipeline(config):
@@ -543,45 +531,6 @@ def glove_dpcnn_inference(config, preprocessed_input):
                         cache_dirpath=config.env.cache_dirpath)
     return glove_output
 
-def glove_exp_train(config, preprocessed_input):
-    word_tokenizer, glove_embeddings = glove_prepro_train(config, preprocessed_input)
-    glove_exp = Step(name='glove_exp',
-                     transformer=GloveExp(**config.word_glove_exp_network),
-                     input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
-                     adapter={'X': ([('word_tokenizer', 'X')]),
-                              'y': ([('xy_split', 'y')]),
-                              'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
-                              'validation_data': (
-                                  [('word_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
-                              },
-                     cache_dirpath=config.env.cache_dirpath)
-    glove_output = Step(name='output_glove',
-                        transformer=Dummy(),
-                        input_steps=[glove_exp],
-                        adapter={'y_pred': ([('glove_exp', 'prediction_probability')]),
-                                 },
-                        cache_dirpath=config.env.cache_dirpath)
-    return glove_output
-
-
-def glove_exp_inference(config, preprocessed_input):
-    word_tokenizer, glove_embeddings = glove_prepro_inference(config, preprocessed_input)
-    glove_exp = Step(name='glove_exp',
-                     transformer=GloveExp(**config.word_glove_exp_network),
-                     input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
-                     adapter={'X': ([('word_tokenizer', 'X')]),
-                              'y': ([('xy_split', 'y')]),
-                              'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
-                              },
-                     cache_dirpath=config.env.cache_dirpath)
-    glove_output = Step(name='output_glove',
-                        transformer=Dummy(),
-                        input_steps=[glove_exp],
-                        adapter={'y_pred': ([('glove_exp', 'prediction_probability')]),
-                                 },
-                        cache_dirpath=config.env.cache_dirpath)
-    return glove_output
-
 
 PIPELINES = {'char_cnn': {'train': char_cnn_train_pipeline,
                           'inference': char_cnn_inference_pipeline},
@@ -593,8 +542,6 @@ PIPELINES = {'char_cnn': {'train': char_cnn_train_pipeline,
                            'inference': glove_cnn_inference_pipeline},
              'glove_dpcnn': {'train': glove_dpcnn_train_pipeline,
                            'inference': glove_dpcnn_inference_pipeline},
-             'glove_exp': {'train': glove_exp_train_pipeline,
-                                       'inference': glove_exp_inference_pipeline},
              'tfidf_logreg': {'train': tfidf_logreg_train_pipeline,
                               'inference': tfidf_logreg_inference_pipeline},
              'weighted_average': {'train': ensemble_train_pipeline,
