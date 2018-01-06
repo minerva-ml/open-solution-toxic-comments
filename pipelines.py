@@ -56,6 +56,17 @@ def glove_cnn_inference_pipeline(config):
     network_output = glove_cnn_inference(config, preprocessed_input)
     return network_output
 
+def glove_dpcnn_train_pipeline(config):
+    preprocessed_input = train_preprocessing(config)
+    network_output = glove_dpcnn_train(config, preprocessed_input)
+    return network_output
+
+
+def glove_dpcnn_inference_pipeline(config):
+    preprocessed_input = inference_preprocessing(config)
+    network_output = glove_dpcnn_inference(config, preprocessed_input)
+    return network_output
+
 
 def tfidf_logreg_train_pipeline(config):
     preprocessed_input = train_preprocessing(config)
@@ -68,16 +79,6 @@ def tfidf_logreg_inference_pipeline(config):
     logreg_output = tfidf_log_reg(config, preprocessed_input)
     return logreg_output
 
-def glove_dpcnn_train_pipeline(config):
-    preprocessed_input = train_preprocessing(config)
-    network_output = glove_dpcnn_train(config, preprocessed_input)
-    return network_output
-
-
-def glove_dpcnn_inference_pipeline(config):
-    preprocessed_input = inference_preprocessing(config)
-    network_output = glove_dpcnn_inference(config, preprocessed_input)
-    return network_output
 
 def glove_exp_train_pipeline(config):
     preprocessed_input = train_preprocessing(config)

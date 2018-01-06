@@ -1,12 +1,41 @@
 project-key: TOX
 
 name: toxic
+tags: [glove, dpcnn, adam]
 
 parameters:
+  # General config
   data_dir: /mnt/ml-team/minerva/toxic/data
   experiment_dir: /mnt/ml-team/minerva/toxic/experiments/glove_dpcnn
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: false
+  num_workers: -2
+
+  # Pipeline config
+  max_features_char: 2000
+  max_features_word: 100000
+  maxlen_char: 512
+  maxlen_words: 64
+  char_embedding_size: 300
+  word_embedding_size: 300
+  char_ngram_max: 4
+  # Architecture
+  kernel_size: 3
+  filter_nr: 300
+  repeat_block: 2
+  # Training schedule
+  epochs_nr: 1000
+  batch_size_train: 128
+  batch_size_inference: 128
+  lr: 0.00025
+  momentum: 0.9
+  gamma: 0.97
+  patience: 10
+  # Regularization
+  l2_reg: 0.0001
+  # Misc
+  log_reg_c: 4.0
+  
 
 exclude:
   - output
