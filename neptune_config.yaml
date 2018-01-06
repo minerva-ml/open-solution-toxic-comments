@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, cnn, sgd]
+tags: [glove, dpcnn, sgd]
 
 parameters:
   # Environment
@@ -18,6 +18,10 @@ parameters:
   char_embedding_size: 300
   word_embedding_size: 300
   char_ngram_max: 4
+  # Deep Pyramid Architecture
+  kernel_size: 3
+  filter_nr: 300
+  repeat_block: 2
   # Log Reg Params
   log_reg_c: 4.0
   # Training schedule
