@@ -54,7 +54,6 @@ class BasicClassifier(BaseTransformer):
 
 class ClassifierXY(BasicClassifier):
     def fit(self, X, y, validation_data):
-
         self.callbacks = self._create_callbacks(**self.callbacks_config)
         self.model = self._compile_model(**self.architecture_config)
 
@@ -98,8 +97,12 @@ class GloveEmbeddingsMatrix(BaseTransformer):
         self.max_features = max_features
         self.embedding_size = embedding_size
 
+    def fit(self, tokenizer):
+        self.embedding_matrix = self._get_embedding_matrix(tokenizer)
+        return self
+
     def transform(self, tokenizer):
-        return {'embeddings_matrix': self._get_embedding_matrix(tokenizer)}
+        return {'embeddings_matrix': self.embedding_matrix}
 
     def _get_embedding_matrix(self, tokenizer):
         embeddings_index = dict()
@@ -124,7 +127,8 @@ class GloveEmbeddingsMatrix(BaseTransformer):
         return embedding_matrix
 
     def save(self, filepath):
-        joblib.dump({}, filepath)
+        joblib.dump(self.embedding_matrix, filepath)
 
     def load(self, filepath):
+        self.embedding_matrix = joblib.load(filepath)
         return self

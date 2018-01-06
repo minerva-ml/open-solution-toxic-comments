@@ -91,8 +91,9 @@ class Step:
             step_output_data = self.transformer.fit_transform(**step_inputs)
             logger.info('step {} saving transformer...'.format(self.name))
             self.transformer.save(self.cache_filepath_step_transformer)
-            logger.info('step {} saving outputs...'.format(self.name))
-            self._save_output(step_output_data)
+            if self.cache_output:
+                logger.info('step {} saving outputs...'.format(self.name))
+                self._save_output(step_output_data)
         return step_output_data
 
     def _load_output(self):

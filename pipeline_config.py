@@ -10,11 +10,12 @@ Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_h
 
 GLOBAL_CONFIG = {'exp_root': neptune_config.parameters.experiment_dir,
                  'num_workers': 6,
-                 'max_features': 100000,
+                 'max_features_char': 2000,
+                 'max_features_word': 100000,
                  'maxlen_char': 512,
                  'maxlen_words': 64,
-                 'batch_size_train': 128,
-                 'batch_size_inference': 128,
+                 'batch_size_train': 100,
+                 'batch_size_inference': 100
                  }
 
 SOLUTION_CONFIG = AttrDict({
@@ -24,31 +25,33 @@ SOLUTION_CONFIG = AttrDict({
                  'y_columns': Y_COLUMNS
                  },
     'char_tokenizer': {'char_level': True,
-                       'maxlen': GLOBAL_CONFIG['maxlen_char']
+                       'maxlen': GLOBAL_CONFIG['maxlen_char'],
+                       'num_words': GLOBAL_CONFIG['max_features_char']
                        },
     'word_tokenizer': {'char_level': False,
-                       'maxlen': GLOBAL_CONFIG['maxlen_words']
+                       'maxlen': GLOBAL_CONFIG['maxlen_words'],
+                       'num_words': GLOBAL_CONFIG['max_features_word']
                        },
     'tfidf_char_vectorizer': {'sublinear_tf': True,
                               'strip_accents': 'unicode',
                               'analyzer': 'char',
                               'token_pattern': r'\w{1,}',
                               'ngram_range': (1, 4),
-                              'max_features': GLOBAL_CONFIG['max_features']
+                              'max_features': GLOBAL_CONFIG['max_features_char']
                               },
     'tfidf_word_vectorizer': {'sublinear_tf': True,
                               'strip_accents': 'unicode',
                               'analyzer': 'word',
                               'token_pattern': r'\w{1,}',
                               'ngram_range': (1, 1),
-                              'max_features': GLOBAL_CONFIG['max_features']
+                              'max_features': GLOBAL_CONFIG['max_features_word']
                               },
     'glove_embeddings': {'pretrained_filepath': neptune_config.parameters.embedding_filepath,
-                         'max_features': GLOBAL_CONFIG['max_features'],
+                         'max_features': GLOBAL_CONFIG['max_features_word'],
                          'embedding_size': 300
                          },
     'char_cnn_network': {'architecture_config': {'model_params': {'maxlen': GLOBAL_CONFIG['maxlen_char'],
-                                                                  'max_features': 1989,
+                                                                  'max_features': GLOBAL_CONFIG['max_features_char'],
                                                                   'embedding_size': 256
                                                                   },
                                                  'optimizer_params': {'lr': 0.00025,
@@ -59,7 +62,7 @@ SOLUTION_CONFIG = AttrDict({
                                              },
                          'callbacks_config': {'model_checkpoint': {
                              'filepath': os.path.join(GLOBAL_CONFIG['exp_root'], 'checkpoints', 'char_cnn_network',
-                                                      'char_cnn_network_best.h5'),
+                                                      'char_cnn_network.h5'),
                              'save_best_only': True,
                              'save_weights_only': False},
                              'lr_scheduler': {'gamma': 0.99},
@@ -67,7 +70,7 @@ SOLUTION_CONFIG = AttrDict({
                              'neptune_monitor': {},
                          },
                          },
-    'word_lstm_network': {'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features'],
+    'word_lstm_network': {'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features_word'],
                                                                    'maxlen': GLOBAL_CONFIG['maxlen_words'],
                                                                    'embedding_size': 256
                                                                    },
@@ -79,7 +82,7 @@ SOLUTION_CONFIG = AttrDict({
                                               },
                           'callbacks_config': {'model_checkpoint': {
                               'filepath': os.path.join(GLOBAL_CONFIG['exp_root'], 'checkpoints', 'word_lstm_network',
-                                                       'word_lstm_network_best.h5'),
+                                                       'word_lstm_network.h5'),
                               'save_best_only': True,
                               'save_weights_only': False},
                               'lr_scheduler': {'gamma': 0.99},
@@ -88,7 +91,7 @@ SOLUTION_CONFIG = AttrDict({
                           },
                           },
     'word_glove_cnn_network': {
-        'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features'],
+        'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features_word'],
                                                  'maxlen': GLOBAL_CONFIG['maxlen_words'],
                                                  'embedding_size': 300
                                                  },
@@ -100,8 +103,8 @@ SOLUTION_CONFIG = AttrDict({
                             },
         'callbacks_config': {'model_checkpoint': {
             'filepath': os.path.join(GLOBAL_CONFIG['exp_root'], 'checkpoints',
-                                     'word_glove_lstm_network',
-                                     'word_glove_lstm_network.h5'),
+                                     'word_glove_cnn_network',
+                                     'word_glove_cnn_network.h5'),
             'save_best_only': True,
             'save_weights_only': False},
             'lr_scheduler': {'gamma': 0.99},
@@ -109,12 +112,12 @@ SOLUTION_CONFIG = AttrDict({
             'neptune_monitor': {},
         },
     },
-    'word_glove_dpcnn_network': {
-        'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features'],
+    'word_glove_exp_network': {
+        'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features_word'],
                                                  'maxlen': GLOBAL_CONFIG['maxlen_words'],
                                                  'embedding_size': 300
                                                  },
-                                'optimizer_params': {'lr': 0.00025,
+                                'optimizer_params': {'lr': 0.00025
                                                      },
                                 },
         'training_config': {'epochs': 1000,
@@ -122,8 +125,33 @@ SOLUTION_CONFIG = AttrDict({
                             },
         'callbacks_config': {'model_checkpoint': {
             'filepath': os.path.join(GLOBAL_CONFIG['exp_root'], 'checkpoints',
-                                     'word_glove_lstm_network',
-                                     'word_glove_lstm_network.h5'),
+                                     'word_glove_exp_network',
+                                     'word_glove_exp_network.h5'),
+            'save_best_only': True,
+            'save_weights_only': False},
+            'lr_scheduler': {'gamma': 0.99},
+            'early_stopping': {'patience': 20},
+            'neptune_monitor': {},
+        },
+    },
+    'word_glove_dpcnn_network': {
+        'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features_word'],
+                                                 'maxlen': GLOBAL_CONFIG['maxlen_words'],
+                                                 'embedding_size': 300,
+                                                 'repeat_nr': 2
+                                                 },
+                                'optimizer_params': {'lr': 0.001,
+                                                     'momentum':0.9,
+                                                     'nesterov':True
+                                                     },
+                                },
+        'training_config': {'epochs': 1000,
+                            'batch_size': GLOBAL_CONFIG['batch_size_train'],
+                            },
+        'callbacks_config': {'model_checkpoint': {
+            'filepath': os.path.join(GLOBAL_CONFIG['exp_root'], 'checkpoints',
+                                     'word_glove_dpcnn_network',
+                                     'word_glove_dpcnn_network.h5'),
             'save_best_only': True,
             'save_weights_only': False},
             'lr_scheduler': {'gamma': 0.99},
@@ -132,7 +160,7 @@ SOLUTION_CONFIG = AttrDict({
         },
     },
     'word_glove_lstm_network': {
-        'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features'],
+        'architecture_config': {'model_params': {'max_features': GLOBAL_CONFIG['max_features_word'],
                                                  'maxlen': GLOBAL_CONFIG['maxlen_words'],
                                                  'embedding_size': 300
                                                  },
