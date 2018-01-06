@@ -6,7 +6,7 @@ from steps.models.keras.models import GloveEmbeddingsMatrix
 from steps.models.sklearn.models import LogisticRegressionMultilabel
 
 from utils import fetch_x_train, fetch_x_valid, join_valid
-from models import CharCNN, WordTrainableLSTM, GloveLSTM, GloveCNN, GloveDPCNN, GloveExp
+from models import CharCNN, WordTrainableLSTM, GloveLSTM, GloveCNN
 
 
 def char_cnn_train_pipeline(config):
