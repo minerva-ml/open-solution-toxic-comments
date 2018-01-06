@@ -109,7 +109,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'filter_nr':neptune_config.parameters.filter_nr,
                                                  'kernel_size':neptune_config.parameters.kernel_size,
                                                  'l2_reg':neptune_config.parameters.l2_reg,
-                                                 'repeat_block': neptune_config.parameters.repeat_block
+                                                 'repeat_block': neptune_config.parameters.repeat_block,
+                                                 'use_prelu':neptune_config.parameters.use_prelu
                                                  },
                                 'optimizer_params': {'lr': neptune_config.parameters.lr,
                                                      'momentum':neptune_config.parameters.momentum,

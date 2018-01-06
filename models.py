@@ -1,12 +1,13 @@
 import numpy as np
 from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D, LSTM, Bidirectional, Dense, Dropout, \
-    BatchNormalization,LeakyReLU, concatenate
+    BatchNormalization,LeakyReLU, PReLU, concatenate
 from keras.layers.merge import add
 from keras.models import Model
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.optimizers import Adam, SGD
 from keras.initializers import RandomNormal
 from keras import regularizers
+from keras.activations import relu
 
 from steps.models.keras.callbacks import NeptuneMonitor, ReduceLR
 from steps.models.keras.models import ClassifierXY
@@ -128,23 +129,29 @@ class GloveDPCNN(GloveCNN):
     def _build_optimizer(self, **kwargs):
         return SGD(**kwargs)
     
-    def _build_model(self, maxlen, max_features, embedding_size, embedding_matrix, filter_nr, kernel_size, repeat_block, l2_reg):
+    def _build_model(self, maxlen, max_features, embedding_size, embedding_matrix, filter_nr, kernel_size, repeat_block, l2_reg, use_prelu):
         """
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
 
         def _base_layer(x):
-            x = Conv1D(filter_nr, kernel_size=kernel_size, padding='same',
+            x = Conv1D(filter_nr, kernel_size=kernel_size, padding='same',activation='linear',
                        kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
                        kernel_regularizer=regularizers.l2(l2_reg))(x)
-            x = LeakyReLU(alpha=0.3)(x)
+            if use_prelu:
+                x = PReLU()(x)
+            else:
+                x = relu(x)
             return x
         
         def _shape_matching_layer(x):
-            x = Conv1D(filter_nr, kernel_size=1, padding='same',
+            x = Conv1D(filter_nr, kernel_size=1, padding='same',activation='linear',
                        kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
                        kernel_regularizer=regularizers.l2(l2_reg))(x)
-            x = LeakyReLU(alpha=0.3)(x)
+            if use_prelu:
+                x = PReLU()(x)
+            else:
+                x = relu(x)
             return x
         
         def _dpcnn_block(x):
