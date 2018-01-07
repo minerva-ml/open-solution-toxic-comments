@@ -1,3 +1,7 @@
+"""
+Implement trainable ensemble: XGBoost, random forest, Logistic Regression
+"""
+
 from models import CharCNN, CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
 from steps.base import Step, Dummy, stack_inputs, sparse_hstack_inputs
 from steps.keras.loaders import Tokenizer

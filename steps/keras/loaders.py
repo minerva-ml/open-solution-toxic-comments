@@ -18,7 +18,7 @@ class Tokenizer(BaseTransformer):
 
     def transform(self, X, X_valid=None, train_mode=True):
         X_tokenized = self._transform(X)
-        
+
         if X_valid is not None:
             X_valid_tokenized = self._transform(X_valid)
         else:
@@ -43,6 +43,13 @@ class Tokenizer(BaseTransformer):
     def save(self, filepath):
         object_pickle = {'char_level': self.char_level,
                          'maxlen': self.maxlen,
-                         'num_words':self.num_words,
+                         'num_words': self.num_words,
                          'tokenizer': self.tokenizer}
         joblib.dump(object_pickle, filepath)
+
+
+class TextAugmenter(BaseTransformer):
+    pass
+    """
+    Augmentations by Thesaurus synonim substitution or typos
+    """

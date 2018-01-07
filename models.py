@@ -1,3 +1,10 @@
+"""
+Todo:
+Try Adagrad and Adadelta
+Implement cnn+lstm
+Implement FastText embedding + models
+"""
+
 from keras import regularizers
 from keras.activations import relu
 from keras.callbacks import ModelCheckpoint, EarlyStopping
@@ -152,6 +159,22 @@ class GloveDPCNN(GloveBasic):
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
         return dpcnn(embedding_matrix, embedding_size,
+                     maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block, dropout_convo,
+                     dense_size, repeat_dense, dropout_dense,
+                     l2_reg, use_prelu, trainable_embedding, use_batch_norm)
+
+
+class GloveCLSTM(GloveBasic):
+    def _build_optimizer(self, **kwargs):
+        return SGD(**kwargs)
+
+    def _build_model(self, embedding_matrix, embedding_size,
+                     maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block, dropout_convo,
+                     dense_size, repeat_dense, dropout_dense,
+                     l2_reg, use_prelu, trainable_embedding, use_batch_norm):
+        return clstm(embedding_matrix, embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
@@ -367,3 +390,14 @@ def vdcnn(embedding_size,
     predictions = Dense(6, activation='sigmoid')(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
+
+
+def clstm(embedding_matrix, embedding_size,
+          maxlen, max_features,
+          filter_nr, kernel_size, repeat_block, dropout_convo,
+          dense_size, repeat_dense, dropout_dense,
+          l2_reg, use_prelu, trainable_embedding, use_batch_norm):
+    """
+    Implementation of https://arxiv.org/pdf/1511.08630.pdf
+    """
+    return NotImplementedError

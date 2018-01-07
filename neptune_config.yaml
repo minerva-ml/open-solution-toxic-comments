@@ -74,7 +74,7 @@ parameters:
   patience: 10
   # Regularization
   use_batch_norm: True
-  l2_reg_convo: 0.0002
+  l2_reg_convo: 0.0001
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
   dropout_convo: 0.2
