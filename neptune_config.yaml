@@ -11,7 +11,7 @@ parameters:
   overwrite: false
   num_workers: -2
   # Preprocessing
-  max_features_char: 100
+  max_features_char: 100 #100 for neural networks, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 64
@@ -54,11 +54,16 @@ parameters:
   char_cnn_repeat_dense: 2
   # LSTM Architecture
   lstm_unit_nr: 64
+    #value: [64, 256,]
   lstm_repeat_block: 3
+    #value: [1, 2, 3]
   lstm_dense_nr: 2
+    #value: [1, 2, 3]
   lstm_dense_size: 256
+    #value: [256, 1024]
   lstm_repeat_dense: 2
   global_pooling: False
+    #value: [True, False]
   # General Architecture
   use_prelu: True
   trainable_embedding: True

@@ -3,6 +3,7 @@ Todo:
 Try Adagrad and Adadelta
 Implement cnn+lstm
 Implement FastText embedding + models
+Research/implement Region embeddings from http://proceedings.mlr.press/v48/johnson16.pdf
 """
 
 from keras import regularizers
