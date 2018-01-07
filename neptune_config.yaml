@@ -19,10 +19,30 @@ parameters:
   word_embedding_size: 300
   char_ngram_max: 4
   # Deep Pyramid Architecture
-  kernel_size: 3
-  filter_nr: 300
-  repeat_block: 2
+  dpcnn_filter_nr: 64
+  dpcnn_kernel_size: 3
+  dpcnn_repeat_block: 3
+  dpcnn_dense_size: 256
+  dpcnn_repeat_dense: 2
+  # Shallow CNN Architecture
+  scnn_filter_nr: 64 # [100...600]
+  scnn_kernel_size: 3 # [1..10]
+  scnn_dense_size: 256
+  scnn_repeat_dense: 2
+  # Char CNN Architecture
+  char_cnn_filter_nr: 64
+  char_cnn_kernel_size: 3
+  char_cnn_dense_size: 256
+  char_cnn_repeat_dense: 2
+  # LSTM Architecture
+  lstm_unit_nr: 64
+  lstm_repeat_block: 3
+  lstm_dense_nr: 2
+  lstm_dense_size: 256
+  lstm_repeat_dense: 2
+  # General Architecture
   use_prelu: True
+  trainable_embedding: True
   # Log Reg Params
   log_reg_c: 4.0
   # Training schedule
@@ -32,9 +52,13 @@ parameters:
   lr: 0.01
   momentum: 0.9
   gamma: 0.97
-  patience: 10
+  patience: 20
   # Regularization
-  l2_reg: 0.0
+  l2_reg_convo: 0.0002
+  l2_reg_dense: 0.0
+  dropout_lstm: 0.2
+  dropout_convo: 0.5
+  dropout_dense: 0.2
   
 
 exclude:
