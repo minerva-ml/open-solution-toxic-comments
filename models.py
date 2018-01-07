@@ -4,6 +4,7 @@ Try Adagrad and Adadelta
 Implement cnn+lstm
 Implement FastText embedding + models
 Research/implement Region embeddings from http://proceedings.mlr.press/v48/johnson16.pdf
+Experiment with Attention and Dilated Convolutions
 """
 
 from keras import regularizers

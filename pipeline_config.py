@@ -55,7 +55,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'repeat_dense': neptune_context.params.dpcnn_repeat_dense,
                                                  'l2_reg': neptune_context.params.l2_reg_convo,
                                                  'use_prelu': neptune_context.params.use_prelu,
-                                                 'use_batch_norm':neptune_context.params.use_batch_norm,
+                                                 'use_batch_norm': neptune_context.params.use_batch_norm,
                                                  'dropout_convo': neptune_context.params.dropout_convo,
                                                  'dropout_dense': neptune_context.params.dropout_dense
                                                  },
@@ -281,6 +281,11 @@ SOLUTION_CONFIG = AttrDict({
                                        'solver': 'sag',
                                        'n_jobs': neptune_context.params.num_workers,
                                        },
+    'linear_reg_ensemble': {'label_nr': 6,
+                            'C': neptune_context.params.log_reg_c,
+                            'solver': 'sag',
+                            'n_jobs': neptune_context.params.num_workers,
+                            },
     'prediction_average': {'weights': None
                            }
 })
