@@ -6,6 +6,8 @@ Here, at [Neptune](https://neptune.ml/ 'machine learning lab') we enjoy particip
 ## The idea
 We are contributing starter code that is easy to use and extend. We did it before with [Cdiscount’s Image Classification Challenge](https://github.com/deepsense-ai/cdiscount-starter) and we believe that it is correct way to open data science to the wider community and encourage more people to participate in Challenges.
 
+Now we want to go one step further and invite you to participate in the development of this analysis pipeline. At the later stage of the competition (early February) we will invite top contributors to join our team on Kaggle.
+
 
 ## How to run?
 This starter is ready-to-use end-to-end solution. Since all computations are organized in separate steps, it is also easy to extend this solution.
