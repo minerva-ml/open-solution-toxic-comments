@@ -15,7 +15,7 @@ parameters:
   max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 64
-  char_embedding_size: 300
+  char_embedding_size: 16
   word_embedding_size: 300
   char_ngram_max: 4
   # Deep Pyramid Architecture
@@ -40,9 +40,12 @@ parameters:
     value: [1, 2]
   # Char VDCNN Architecture
   char_vdcnn_filter_nr: 64
+    #value: [16, 32, 64]
   char_vdcnn_kernel_size: 3
   char_vdcnn_repeat_block: 2
+    #value: [2, 3, 4]
   char_vdcnn_dense_size: 256
+    #value: [256, 1024]
   char_vdcnn_repeat_dense: 2
   # Char CNN Architecture
   char_cnn_filter_nr: 64
