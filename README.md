@@ -1,11 +1,16 @@
-# starter code: Kaggle [Toxic Comment Classification Challenge](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge 'Kaggle competition')
+# Starter code: Kaggle [Toxic Comment Classification Challenge](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge 'Kaggle competition')
 
-Here, at [Neptune](https://neptune.ml/ 'machine learning lab') we enjoy participating in the Kaggle competitions. [Toxic Comment Classification Challenge](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge 'Kaggle competition') is especially interesting because it touches important issue of the online harassment.
-
-We are contributing extensible starter code that will let you run your experiment straightaway.
+Here, at [Neptune](https://neptune.ml/ 'machine learning lab') we enjoy participating in the Kaggle competitions. [Toxic Comment Classification Challenge](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge 'Kaggle competition') is especially interesting because it touches important issue of online harassment.
 
 
-# How to run?
+## The idea
+We are contributing starter code that is easy to use and extend. We did it before with [Cdiscount’s Image Classification Challenge](https://github.com/deepsense-ai/cdiscount-starter) and we believe that it is correct way to open data science to the wider community and encourage more people to participate in Challenges.
+
+
+## How to run?
+This starter is ready-to-use end-to-end solution. Since all computations are organized in separate steps, it is also easy to extend this solution.
+
+### Installation
 This project assumes python 3.5.
 1. Clone this repo
 
@@ -17,19 +22,23 @@ $ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
 ```bash
 $ pip3 install -r requirements.txt
 ```
-Note that [neptune](https://neptune.ml/ 'machine learning lab') is included in the requirements file.
+Note that [neptune](https://neptune.ml/ 'machine learning lab') (experiment monitoring and management system) is included in the requirements file.
+
+4. run experiment in the Neptune cloud
+```bash
+$ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune_config.yaml -- train-pipeline --pipeline_name ensemble_train_pipeline
+```
 
 
 # Solution visualization
+Below end-to-end pipeline is visualized. You can run exactly this one!
 ![pipeline_001](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/pipelines_visualizations/pipeline_001.png 'our initial pipeline')
 
 
-# Code overview
-ToDo
-
 # Contributing
-You are welcome to extend this pipeline and contribute your own models or procedures. We want this starter to be developed colabboratively. Therefore, at the later stage of the competition we will invite contributors to join our team on Kaggle.
+You are welcome to extend this pipeline and contribute your own models or procedures. Please refer to the [CONTRIBUTING](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/CONTRIBUTING.md) for more details.
 
 # User support
+There are two ways to reach us:
 1. Kaggle [discussion](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/discussion) is our primary way of communication.
-2. You can submit an [issue](https://github.com/neptune-ml/kaggle-toxic-starter/issues)
+2. You can submit an [issue](https://github.com/neptune-ml/kaggle-toxic-starter/issues) directly in this repo.
