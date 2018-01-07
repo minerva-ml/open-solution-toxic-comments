@@ -1,12 +1,11 @@
+from models import CharCNN, CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
 from steps.base import Step, Dummy, stack_inputs, sparse_hstack_inputs
-from steps.preprocessing import XYSplit, FillNA, TfidfVectorizer
+from steps.keras.loaders import Tokenizer
+from steps.keras.models import GloveEmbeddingsMatrix
 from steps.postprocessing import PredictionAverage
-from steps.models.keras.loaders import Tokenizer
-from steps.models.keras.models import GloveEmbeddingsMatrix
-from steps.models.sklearn.models import LogisticRegressionMultilabel
-
+from steps.preprocessing import XYSplit, FillNA, TfidfVectorizer
+from steps.sklearn.models import LogisticRegressionMultilabel
 from utils import fetch_x_train, fetch_x_valid, join_valid
-from models import CharCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
 
 
 def train_preprocessing(config):
@@ -61,6 +60,7 @@ def char_cnn_train(config):
                           cache_dirpath=config.env.cache_dirpath)
     network = Step(name='char_cnn',
                    transformer=CharCNN(**config.char_cnn_network),
+                   overwrite_transformer=True,
                    input_steps=[char_tokenizer, preprocessed_input],
                    adapter={'X': ([('char_tokenizer', 'X')]),
                             'y': ([('xy_split', 'y')]),
@@ -102,6 +102,60 @@ def char_cnn_inference(config):
     return char_output
 
 
+def char_vdcnn_train(config):
+    preprocessed_input = train_preprocessing(config)
+    char_tokenizer = Step(name='char_tokenizer',
+                          transformer=Tokenizer(**config.char_tokenizer),
+                          input_steps=[preprocessed_input],
+                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
+                                   'X_valid': ([('xy_split', 'validation_data')], fetch_x_valid),
+                                   'train_mode': ([('xy_split', 'train_mode')])
+                                   },
+                          cache_dirpath=config.env.cache_dirpath)
+    network = Step(name='char_vdcnn',
+                   transformer=CharVDCNN(**config.char_vdcnn_network),
+                   overwrite_transformer=True,
+                   input_steps=[char_tokenizer, preprocessed_input],
+                   adapter={'X': ([('char_tokenizer', 'X')]),
+                            'y': ([('xy_split', 'y')]),
+                            'validation_data': (
+                                [('char_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
+                            },
+                   cache_dirpath=config.env.cache_dirpath)
+    char_output = Step(name='char_output',
+                       transformer=Dummy(),
+                       input_steps=[network],
+                       adapter={'y_pred': ([('char_vdcnn', 'prediction_probability')]),
+                                },
+                       cache_dirpath=config.env.cache_dirpath)
+    return char_output
+
+
+def char_vdcnn_inference(config):
+    preprocessed_input = inference_preprocessing(config)
+    char_tokenizer = Step(name='char_tokenizer',
+                          transformer=Tokenizer(**config.char_tokenizer),
+                          input_steps=[preprocessed_input],
+                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
+                                   'train_mode': ([('xy_split', 'train_mode')])
+                                   },
+                          cache_dirpath=config.env.cache_dirpath)
+    network = Step(name='char_vdcnn',
+                   transformer=CharVDCNN(**config.char_vdcnn_network),
+                   input_steps=[char_tokenizer, preprocessed_input],
+                   adapter={'X': ([('char_tokenizer', 'X')]),
+                            'y': ([('xy_split', 'y')]),
+                            },
+                   cache_dirpath=config.env.cache_dirpath)
+    char_output = Step(name='char_output',
+                       transformer=Dummy(),
+                       input_steps=[network],
+                       adapter={'y_pred': ([('char_vdcnn', 'prediction_probability')]),
+                                },
+                       cache_dirpath=config.env.cache_dirpath)
+    return char_output
+
+
 def word_lstm_train(config):
     preprocessed_input = train_preprocessing(config)
     word_tokenizer = Step(name='word_tokenizer',
@@ -114,6 +168,7 @@ def word_lstm_train(config):
                           cache_dirpath=config.env.cache_dirpath)
     word_lstm = Step(name='word_lstm',
                      transformer=WordLSTM(**config.word_lstm_network),
+                     overwrite_transformer=True,
                      input_steps=[word_tokenizer, preprocessed_input],
                      adapter={'X': ([('word_tokenizer', 'X')]),
                               'y': ([('xy_split', 'y')]),
@@ -195,6 +250,7 @@ def glove_lstm_train(config):
     word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
     glove_lstm = Step(name='glove_lstm',
                       transformer=GloveLSTM(**config.glove_lstm_network),
+                      overwrite_transformer=True,
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
                                'y': ([('xy_split', 'y')]),
@@ -237,6 +293,7 @@ def glove_scnn_train(config):
     word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
     glove_scnn = Step(name='glove_cnn',
                       transformer=GloveSCNN(**config.glove_scnn_network),
+                      overwrite_transformer=True,
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
                                'y': ([('xy_split', 'y')]),
@@ -487,6 +544,8 @@ def ensemble_inference(config):
 
 PIPELINES = {'char_cnn': {'train': char_cnn_train,
                           'inference': char_cnn_inference},
+             'char_vdcnn': {'train': char_vdcnn_train,
+                            'inference': char_vdcnn_inference},
              'word_trainable_lstm': {'train': word_lstm_train,
                                      'inference': word_lstm_inference},
              'glove_lstm': {'train': glove_lstm_train,

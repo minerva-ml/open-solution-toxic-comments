@@ -1,5 +1,5 @@
-from sklearn.externals import joblib
 from keras.preprocessing import text, sequence
+from sklearn.externals import joblib
 
 from steps.base import BaseTransformer
 

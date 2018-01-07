@@ -2,15 +2,15 @@ import os
 import shutil
 from datetime import datetime, timedelta
 
-import names
 import matplotlib.pyplot as plt
+import names
 import numpy as np
 from PIL import Image
 from deepsense import neptune
 from torch.optim.lr_scheduler import ExponentialLR
 
-from .validation import score_model, predict_on_batch_multi_output
 from .utils import get_logger, Averager, save_model
+from .validation import score_model, predict_on_batch_multi_output
 
 logger = get_logger()
 

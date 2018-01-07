@@ -1,16 +1,15 @@
-import numpy as np
-from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D, LSTM, Bidirectional, Dense, Dropout, \
-    BatchNormalization, LeakyReLU, PReLU, concatenate
-from keras.layers.merge import add
-from keras.models import Model
-from keras.callbacks import ModelCheckpoint, EarlyStopping
-from keras.optimizers import Adam, SGD
-from keras.initializers import RandomNormal
 from keras import regularizers
 from keras.activations import relu
+from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.initializers import RandomNormal
+from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D, LSTM, Bidirectional, Dense, Dropout, \
+    PReLU
+from keras.layers.merge import add
+from keras.models import Model
+from keras.optimizers import Adam, SGD
 
-from steps.models.keras.callbacks import NeptuneMonitor, ReduceLR
-from steps.models.keras.models import ClassifierXY
+from steps.keras.callbacks import NeptuneMonitor, ReduceLR
+from steps.keras.models import ClassifierXY
 from steps.utils import create_filepath
 
 
@@ -46,6 +45,19 @@ class CharCNN(CharacterClassifier):
         predictions = Dense(6, activation='sigmoid')(x)
         model = Model(inputs=input_text, outputs=predictions)
         return model
+
+
+class CharVDCNN(CharacterClassifier):
+    def _build_model(self, embedding_size,
+                     maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block, dropout_convo,
+                     dense_size, repeat_dense, dropout_dense,
+                     l2_reg, use_prelu):
+        return vdcnn(embedding_size,
+                     maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block, dropout_convo,
+                     dense_size, repeat_dense, dropout_dense,
+                     l2_reg, use_prelu)
 
 
 class WordLSTM(CharacterClassifier):
@@ -113,12 +125,12 @@ class GloveLSTM(GloveBasic):
 
 class GloveSCNN(GloveBasic):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return SGD(**kwargs)
 
     def _build_model(self, embedding_matrix, embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, dropout_convo,
-                     dense_nr, dense_size, repeat_dense, dropout_dense,
+                     dense_size, repeat_dense, dropout_dense,
                      l2_reg, use_prelu, trainable_embedding):
         return scnn(embedding_matrix, embedding_size,
                     maxlen, max_features,
@@ -281,5 +293,25 @@ def lstm(embedding_matrix, embedding_size,
     for _ in range(repeat_dense):
         x = _dense_block(x)
     predictions = Dense(6, activation="sigmoid")(x)
+    model = Model(inputs=input_text, outputs=predictions)
+    return model
+
+
+def vdcnn(embedding_size,
+          maxlen, max_features,
+          filter_nr, kernel_size, repeat_block, dropout_convo,
+          dense_size, repeat_dense, dropout_dense,
+          l2_reg, use_prelu):
+    input_text = Input(shape=(maxlen,))
+
+    x = Embedding(input_dim=max_features, output_dim=embedding_size)(input_text)
+    x = Conv1D(64, kernel_size=6, activation='relu')(x)
+    x = Conv1D(128, kernel_size=3, activation='relu')(x)
+    x = Conv1D(128, kernel_size=3, activation='relu')(x)
+    x = GlobalMaxPool1D()(x)
+    x = Dense(256, activation="relu")(x)
+    x = Dropout(0.5)(x)
+
+    predictions = Dense(6, activation='sigmoid')(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model

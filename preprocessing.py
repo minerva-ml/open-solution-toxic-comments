@@ -1,12 +1,8 @@
 import os
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.externals import joblib
 
-from steps.base import BaseTransformer
 from utils import get_logger
 
 logger = get_logger()

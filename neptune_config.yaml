@@ -1,12 +1,12 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, dpcnn, sgd]
+tags: [glove, scnn, sgd]
 
 parameters:
   # Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/glove_dpcnn
+  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/glove_scnn
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: false
   num_workers: -2
@@ -20,15 +20,24 @@ parameters:
   char_ngram_max: 4
   # Deep Pyramid Architecture
   dpcnn_filter_nr: 64
+    #value: [64, 300]
   dpcnn_kernel_size: 6
-  dpcnn_repeat_block: 3
+    #value: [3, 6]
+  dpcnn_repeat_block: 2
+    #value: [1, 2]
   dpcnn_dense_size: 256
-  dpcnn_repeat_dense: 2
+    #value: [64, 512]
+  dpcnn_repeat_dense:
+    #value: [1, 2]
   # Shallow CNN Architecture
-  scnn_filter_nr: 64 # [100...600]
-  scnn_kernel_size: 3 # [1..10]
-  scnn_dense_size: 256
-  scnn_repeat_dense: 2
+  scnn_filter_nr:
+    value: [64, 256]
+  scnn_kernel_size:
+    value: [3, 6]
+  scnn_dense_size:
+    value: [64, 256]
+  scnn_repeat_dense:
+    value: [1, 2]
   # Char CNN Architecture
   char_cnn_filter_nr: 64
   char_cnn_kernel_size: 3
@@ -53,14 +62,17 @@ parameters:
   lr: 0.01
   momentum: 0.9
   gamma: 0.97
-  patience: 20
+  patience: 10
   # Regularization
   l2_reg_convo: 0.0002
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
-  dropout_convo: 0.5
-  dropout_dense: 0.2
-  
+  dropout_convo: 0.2
+  dropout_dense: 0.5
+
+metric:
+  channel: 'Final Validation Score'
+  goal: minimize
 
 exclude:
   - output

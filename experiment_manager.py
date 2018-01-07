@@ -1,13 +1,13 @@
 import os
 import shutil
-import click
 
+import click
 from deepsense import neptune
 
-from utils import init_logger, get_logger, read_yaml, read_data, multi_log_loss, create_submission
-from preprocessing import split_train_data
+from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS
 from pipelines import PIPELINES
-from pipeline_config import SOLUTION_CONFIG, X_COLUMNS, Y_COLUMNS
+from preprocessing import split_train_data
+from utils import init_logger, get_logger, read_yaml, read_data, multi_log_loss, create_submission
 
 logger = get_logger()
 ctx = neptune.Context()
@@ -122,6 +122,15 @@ def train_evaluate_predict_pipeline(pipeline_name):
     _evaluate_pipeline(pipeline_name)
     logger.info('predicting')
     _predict_pipeline(pipeline_name)
+
+
+@action.command()
+@click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
+def train_evaluate_pipeline(pipeline_name):
+    logger.info('training')
+    _train_pipeline(pipeline_name)
+    logger.info('evaluating')
+    _evaluate_pipeline(pipeline_name)
 
 
 @action.command()

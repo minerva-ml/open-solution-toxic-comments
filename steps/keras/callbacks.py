@@ -1,6 +1,6 @@
 from deepsense import neptune
 from keras import backend as K
-from keras.callbacks import Callback, ModelCheckpoint
+from keras.callbacks import Callback
 
 
 class NeptuneMonitor(Callback):

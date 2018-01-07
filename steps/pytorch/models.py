@@ -6,8 +6,8 @@ import torch.nn as nn
 from torch.autograd import Variable
 from tqdm import tqdm
 
-from steps.utils import get_logger
 from steps.base import BaseTransformer
+from steps.utils import get_logger
 from .validation import torch_acc_score_multi_output, torch_acc_score
 
 logger = get_logger()
