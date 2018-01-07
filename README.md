@@ -26,7 +26,7 @@ $ pip3 install -r requirements.txt
 ```
 Note that [neptune](https://neptune.ml/ 'machine learning lab') (experiment monitoring and management system) is included in the requirements file.
 
-### run experiment
+### Run experiment
 To run an experiment in the Neptune cloud use this command
 ```bash
 $ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune_config.yaml -- train-pipeline --pipeline_name ensemble_train_pipeline
