@@ -20,7 +20,7 @@ parameters:
   char_ngram_max: 4
   # Deep Pyramid Architecture
   dpcnn_filter_nr: 64
-  dpcnn_kernel_size: 3
+  dpcnn_kernel_size: 6
   dpcnn_repeat_block: 3
   dpcnn_dense_size: 256
   dpcnn_repeat_dense: 2
@@ -40,6 +40,7 @@ parameters:
   lstm_dense_nr: 2
   lstm_dense_size: 256
   lstm_repeat_dense: 2
+  global_pooling: False
   # General Architecture
   use_prelu: True
   trainable_embedding: True

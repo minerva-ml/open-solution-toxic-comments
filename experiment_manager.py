@@ -2,12 +2,15 @@ import os
 import shutil
 import click
 
+from deepsense import neptune
+
 from utils import init_logger, get_logger, read_yaml, read_data, multi_log_loss, create_submission
 from preprocessing import split_train_data
 from pipelines import PIPELINES
 from pipeline_config import SOLUTION_CONFIG, X_COLUMNS, Y_COLUMNS
 
 logger = get_logger()
+ctx = neptune.Context()
 
 
 @click.group()
@@ -79,6 +82,7 @@ def _evaluate_pipeline(pipeline_name):
     y_pred = output['y_pred']
     score = multi_log_loss(y_true, y_pred)
     logger.info('Score on validation is {}'.format(score))
+    ctx.channel_send('Final Validation Score', 0, score)
 
 
 @action.command()
@@ -119,6 +123,7 @@ def train_evaluate_predict_pipeline(pipeline_name):
     logger.info('predicting')
     _predict_pipeline(pipeline_name)
 
+
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 def evaluate_predict_pipeline(pipeline_name):
@@ -126,6 +131,7 @@ def evaluate_predict_pipeline(pipeline_name):
     _evaluate_pipeline(pipeline_name)
     logger.info('predicting')
     _predict_pipeline(pipeline_name)
+
 
 @action.command()
 @click.argument('pipeline_names', nargs=-1)

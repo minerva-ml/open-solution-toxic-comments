@@ -6,7 +6,7 @@ from steps.models.keras.models import GloveEmbeddingsMatrix
 from steps.models.sklearn.models import LogisticRegressionMultilabel
 
 from utils import fetch_x_train, fetch_x_valid, join_valid
-from models import CharCNN, WordLSTM, GloveLSTM, GloveCNN, GloveDPCNN
+from models import CharCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
 
 
 def train_preprocessing(config):
@@ -194,7 +194,7 @@ def glove_lstm_train(config):
     preprocessed_input = train_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
     glove_lstm = Step(name='glove_lstm',
-                      transformer=GloveLSTM(**config.word_glove_lstm_network),
+                      transformer=GloveLSTM(**config.glove_lstm_network),
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
                                'y': ([('xy_split', 'y')]),
@@ -216,7 +216,7 @@ def glove_lstm_inference(config):
     preprocessed_input = inference_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_inference(config, preprocessed_input)
     glove_lstm = Step(name='glove_lstm',
-                      transformer=GloveLSTM(**config.word_glove_lstm_network),
+                      transformer=GloveLSTM(**config.glove_lstm_network),
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
                                'y': ([('xy_split', 'y')]),
@@ -232,11 +232,11 @@ def glove_lstm_inference(config):
     return glove_output
 
 
-def glove_cnn_train(config):
+def glove_scnn_train(config):
     preprocessed_input = train_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
-    glove_cnn = Step(name='glove_cnn',
-                     transformer=GloveCNN(**config.word_glove_cnn_network),
+    glove_scnn = Step(name='glove_cnn',
+                     transformer=GloveSCNN(**config.glove_scnn_network),
                      input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                      adapter={'X': ([('word_tokenizer', 'X')]),
                               'y': ([('xy_split', 'y')]),
@@ -247,18 +247,18 @@ def glove_cnn_train(config):
                      cache_dirpath=config.env.cache_dirpath)
     glove_output = Step(name='output_glove',
                         transformer=Dummy(),
-                        input_steps=[glove_cnn],
-                        adapter={'y_pred': ([('glove_cnn', 'prediction_probability')]),
+                        input_steps=[glove_scnn],
+                        adapter={'y_pred': ([('glove_scnn', 'prediction_probability')]),
                                  },
                         cache_dirpath=config.env.cache_dirpath)
     return glove_output
 
 
-def glove_cnn_inference(config):
+def glove_scnn_inference(config):
     preprocessed_input = inference_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_inference(config, preprocessed_input)
-    glove_cnn = Step(name='glove_cnn',
-                     transformer=GloveCNN(**config.word_glove_cnn_network),
+    glove_scnn = Step(name='glove_cnn',
+                     transformer=GloveSCNN(**config.glove_scnn_network),
                      input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                      adapter={'X': ([('word_tokenizer', 'X')]),
                               'y': ([('xy_split', 'y')]),
@@ -267,8 +267,8 @@ def glove_cnn_inference(config):
                      cache_dirpath=config.env.cache_dirpath)
     glove_output = Step(name='output_glove',
                         transformer=Dummy(),
-                        input_steps=[glove_cnn],
-                        adapter={'y_pred': ([('glove_cnn', 'prediction_probability')]),
+                        input_steps=[glove_scnn],
+                        adapter={'y_pred': ([('glove_scnn', 'prediction_probability')]),
                                  },
                         cache_dirpath=config.env.cache_dirpath)
     return glove_output
@@ -278,7 +278,7 @@ def glove_dpcnn_train(config):
     preprocessed_input = train_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
     glove_dpcnn = Step(name='glove_dpcnn',
-                       transformer=GloveDPCNN(**config.word_glove_dpcnn_network),
+                       transformer=GloveDPCNN(**config.glove_dpcnn_network),
                        input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                        adapter={'X': ([('word_tokenizer', 'X')]),
                                 'y': ([('xy_split', 'y')]),
@@ -300,7 +300,7 @@ def glove_dpcnn_inference(config):
     preprocessed_input = inference_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_inference(config, preprocessed_input)
     glove_dpcnn = Step(name='glove_dpcnn',
-                       transformer=GloveDPCNN(**config.word_glove_dpcnn_network),
+                       transformer=GloveDPCNN(**config.glove_dpcnn_network),
                        input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                        adapter={'X': ([('word_tokenizer', 'X')]),
                                 'y': ([('xy_split', 'y')]),
@@ -436,7 +436,7 @@ def ensemble_train(config):
                      cache_dirpath=config.env.cache_dirpath,
                      cache_output=True)
     glove_lstm = Step(name='glove_lstm',
-                      transformer=GloveLSTM(**config.word_glove_lstm_network),
+                      transformer=GloveLSTM(**config.glove_lstm_network),
                       input_steps=[word_tokenizer, xy_split, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
                                'y': ([('xy_split', 'y')]),
@@ -444,8 +444,8 @@ def ensemble_train(config):
                                },
                       cache_dirpath=config.env.cache_dirpath,
                       cache_output=True)
-    glove_cnn = Step(name='glove_cnn',
-                     transformer=GloveCNN(**config.word_glove_cnn_network),
+    glove_scnn = Step(name='glove_cnn',
+                     transformer=GloveSCNN(**config.glove_cnn_network),
                      input_steps=[word_tokenizer, xy_split, glove_embeddings],
                      adapter={'X': ([('word_tokenizer', 'X')]),
                               'y': ([('xy_split', 'y')]),
@@ -456,12 +456,12 @@ def ensemble_train(config):
 
     prediction_average = Step(name='prediction_average',
                               transformer=PredictionAverage(**config.prediction_average),
-                              input_steps=[char_cnn, word_lstm, glove_lstm, glove_cnn, log_reg_multi],
+                              input_steps=[char_cnn, word_lstm, glove_lstm, glove_scnn, log_reg_multi],
                               adapter={'prediction_proba_list': (
                                   [('char_cnn', 'prediction_probability'),
                                    ('log_reg_multi', 'prediction_probability'),
                                    ('word_lstm', 'prediction_probability'),
-                                   ('glove_cnn', 'prediction_probability'),
+                                   ('glove_scnn', 'prediction_probability'),
                                    ('glove_lstm', 'prediction_probability')], stack_inputs)},
                               cache_dirpath=config.env.cache_dirpath)
 
@@ -476,7 +476,7 @@ def ensemble_train(config):
 def ensemble_inference(config):
     average_ensemble_output = ensemble_train(config)
 
-    cached_output_steps = ['char_cnn', 'log_reg_multi', 'word_lstm', 'glove_cnn', 'glove_lstm']
+    cached_output_steps = ['char_cnn', 'log_reg_multi', 'word_lstm', 'glove_scnn', 'glove_lstm']
     for step_name in cached_output_steps:
         step = average_ensemble_output.get_step(step_name)
         step.cache_output = False
@@ -490,8 +490,8 @@ PIPELINES = {'char_cnn': {'train': char_cnn_train,
                                      'inference': word_lstm_inference},
              'glove_lstm': {'train': glove_lstm_train,
                             'inference': glove_lstm_inference},
-             'glove_cnn': {'train': glove_cnn_train,
-                           'inference': glove_cnn_inference},
+             'glove_scnn': {'train': glove_scnn_train,
+                           'inference': glove_scnn_inference},
              'glove_dpcnn': {'train': glove_dpcnn_train,
                              'inference': glove_dpcnn_inference},
              'tfidf_logreg': {'train': tfidf_logreg_train,

@@ -53,12 +53,12 @@ class WordLSTM(CharacterClassifier):
                      maxlen, max_features,
                      unit_nr, repeat_block, dropout_lstm,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding):
+                     l2_reg, use_prelu, trainable_embedding, global_pooling):
         return lstm(embedding_matrix, embedding_size,
                     maxlen, max_features,
                     unit_nr, repeat_block, dropout_lstm,
                     dense_size, repeat_dense, dropout_dense,
-                    l2_reg, use_prelu, trainable_embedding)
+                    l2_reg, use_prelu, trainable_embedding, global_pooling)
 
 
 class WordDPCNN(CharacterClassifier):
@@ -103,12 +103,12 @@ class GloveLSTM(GloveBasic):
                      maxlen, max_features,
                      unit_nr, repeat_block, dropout_lstm,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding):
+                     l2_reg, use_prelu, trainable_embedding, global_pooling):
         return lstm(embedding_matrix, embedding_size,
                     maxlen, max_features,
                     unit_nr, repeat_block, dropout_lstm,
                     dense_size, repeat_dense, dropout_dense,
-                    l2_reg, use_prelu, trainable_embedding)
+                    l2_reg, use_prelu, trainable_embedding, global_pooling)
 
 
 class GloveSCNN(GloveBasic):
@@ -251,7 +251,7 @@ def lstm(embedding_matrix, embedding_size,
          maxlen, max_features,
          unit_nr, repeat_block, dropout_lstm,
          dense_size, repeat_dense, dropout_dense,
-         l2_reg, use_prelu, trainable_embedding):
+         l2_reg, use_prelu, trainable_embedding, global_pooling):
     def _lstm_block(x):
         x = Bidirectional(
             LSTM(unit_nr, return_sequences=True, dropout=dropout_lstm, recurrent_dropout=dropout_lstm))(x)
@@ -271,8 +271,13 @@ def lstm(embedding_matrix, embedding_size,
         input_text)
     for _ in range(repeat_block - 1):
         x = _lstm_block(x)
-    x = Bidirectional(
-        LSTM(unit_nr, return_sequences=False, dropout=dropout_lstm, recurrent_dropout=dropout_lstm))(x)
+    if global_pooling:
+        x = Bidirectional(
+            LSTM(unit_nr, return_sequences=True, dropout=dropout_lstm, recurrent_dropout=dropout_lstm))(x)
+        x = GlobalMaxPool1D()(x)
+    else:
+        x = Bidirectional(
+            LSTM(unit_nr, return_sequences=False, dropout=dropout_lstm, recurrent_dropout=dropout_lstm))(x)
     for _ in range(repeat_dense):
         x = _dense_block(x)
     predictions = Dense(6, activation="sigmoid")(x)
