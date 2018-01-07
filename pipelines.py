@@ -3,12 +3,12 @@ Implement trainable ensemble: XGBoost, random forest, Linear Regression
 """
 
 from models import CharCNN, CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
-from steps.base import Step, Dummy, stack_inputs, sparse_hstack_inputs
+from steps.base import Step, Dummy, stack_inputs, hstack_inputs, sparse_hstack_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix
 from steps.postprocessing import PredictionAverage
 from steps.preprocessing import XYSplit, FillNA, TfidfVectorizer
-from steps.sklearn.models import LogisticRegressionMultilabel, LinearRegressionMultilabel
+from steps.sklearn.models import LogisticRegressionMultilabel
 from utils import fetch_x_train, fetch_x_valid, join_valid
 
 
@@ -507,7 +507,7 @@ def ensemble_extraction(config):
                       cache_dirpath=config.env.cache_dirpath,
                       cache_output=True)
     glove_scnn = Step(name='glove_cnn',
-                      transformer=GloveSCNN(**config.glove_cnn_network),
+                      transformer=GloveSCNN(**config.glove_scnn_network),
                       input_steps=[word_tokenizer, xy_split, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
                                'y': ([('xy_split', 'y')]),
@@ -532,7 +532,7 @@ def weighted_average_ensemble_train(config):
     average_ensemble_output = Step(name='average_ensemble_output',
                                    transformer=Dummy(),
                                    input_steps=[prediction_average],
-                                   adapter={'y_pred': ([('prediction_average', 'prediction_probability')]), },
+                                   adapter={'y_pred': ([('prediction_average', 'prediction_probability')])},
                                    cache_dirpath=config.env.cache_dirpath)
     return average_ensemble_output
 
@@ -546,28 +546,33 @@ def weighted_average_ensemble_inference(config):
     return weighted_average_ensemble
 
 
-def linear_regression_ensemble_train(config):
+def logistic_regression_ensemble_train(config):
     model_outputs = ensemble_extraction(config)
     output_mappings = [(output_step.name, 'prediction_probability') for output_step in model_outputs]
 
-    prediction_average = Step(name='linear_reg_ensemble',
-                              transformer=LinearRegressionMultilabel(**config.linear_reg_ensemble),
-                              input_steps=model_outputs,
-                              adapter={'prediction_proba_list': (output_mappings, stack_inputs)},
-                              cache_dirpath=config.env.cache_dirpath)
+    label = model_outputs[0].get_step('xy_split')
 
-    average_ensemble_output = Step(name='average_ensemble_output',
+    input_steps = model_outputs + [label]
+
+    log_reg = Step(name='log_reg_ensemble',
+                   transformer=LogisticRegressionMultilabel(**config.logistic_regression_ensemble),
+                   input_steps=input_steps,
+                   adapter={'X': (output_mappings, hstack_inputs),
+                            'y': ([('xy_split', 'y')])},
+                   cache_dirpath=config.env.cache_dirpath)
+
+    log_reg_ensemble_output = Step(name='log_reg_ensemble_output',
                                    transformer=Dummy(),
-                                   input_steps=[prediction_average],
-                                   adapter={'y_pred': ([('linear_reg_ensemble', 'prediction_probability')]), },
+                                   input_steps=[log_reg],
+                                   adapter={'y_pred': ([('log_reg_ensemble', 'prediction_probability')]), },
                                    cache_dirpath=config.env.cache_dirpath)
-    return average_ensemble_output
+    return log_reg_ensemble_output
 
 
-def linear_regression_ensemble_inference(config):
-    linear_regression_ensemble = linear_regression_ensemble_train(config)
+def logistic_regression_ensemble_inference(config):
+    linear_regression_ensemble = logistic_regression_ensemble_train(config)
 
-    for step in linear_regression_ensemble.get_steps('linear_reg_ensemble').input_steps:
+    for step in linear_regression_ensemble.get_step('log_reg_ensemble').input_steps:
         step.cache_output = False
 
     return linear_regression_ensemble
@@ -589,6 +594,6 @@ PIPELINES = {'char_cnn': {'train': char_cnn_train,
                               'inference': tfidf_logreg_inference},
              'weighted_average': {'train': weighted_average_ensemble_train,
                                   'inference': weighted_average_ensemble_inference},
-             'lr_ensemble': {'train': linear_regression_ensemble_train,
-                             'inference': linear_regression_ensemble_inference},
+             'lr_ensemble': {'train': logistic_regression_ensemble_train,
+                             'inference': logistic_regression_ensemble_inference},
              }

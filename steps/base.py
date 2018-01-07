@@ -58,7 +58,7 @@ class Step:
         return os.path.exists(self.save_filepath_step_output)
 
     def fit_transform(self, data):
-        if self.output_is_cached and self.cache_output and not self.over:
+        if self.output_is_cached and self.cache_output and not self.overwrite_transformer:
             logger.info('step {} loading output...'.format(self.name))
             step_output_data = self._load_output()
         else:

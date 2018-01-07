@@ -281,11 +281,10 @@ SOLUTION_CONFIG = AttrDict({
                                        'solver': 'sag',
                                        'n_jobs': neptune_context.params.num_workers,
                                        },
-    'linear_reg_ensemble': {'label_nr': 6,
-                            'C': neptune_context.params.log_reg_c,
-                            'solver': 'sag',
-                            'n_jobs': neptune_context.params.num_workers,
-                            },
+    'logistic_regression_ensemble': {'label_nr': 6,
+                                     'C': neptune_context.params.ensemble_log_reg_c,
+                                     'n_jobs': neptune_context.params.num_workers,
+                                     },
     'prediction_average': {'weights': None
                            }
 })
