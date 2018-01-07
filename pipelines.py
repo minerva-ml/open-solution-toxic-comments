@@ -236,15 +236,15 @@ def glove_scnn_train(config):
     preprocessed_input = train_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
     glove_scnn = Step(name='glove_cnn',
-                     transformer=GloveSCNN(**config.glove_scnn_network),
-                     input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
-                     adapter={'X': ([('word_tokenizer', 'X')]),
-                              'y': ([('xy_split', 'y')]),
-                              'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
-                              'validation_data': (
-                                  [('word_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
-                              },
-                     cache_dirpath=config.env.cache_dirpath)
+                      transformer=GloveSCNN(**config.glove_scnn_network),
+                      input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
+                      adapter={'X': ([('word_tokenizer', 'X')]),
+                               'y': ([('xy_split', 'y')]),
+                               'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
+                               'validation_data': (
+                                   [('word_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
+                               },
+                      cache_dirpath=config.env.cache_dirpath)
     glove_output = Step(name='output_glove',
                         transformer=Dummy(),
                         input_steps=[glove_scnn],
@@ -258,13 +258,13 @@ def glove_scnn_inference(config):
     preprocessed_input = inference_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_inference(config, preprocessed_input)
     glove_scnn = Step(name='glove_cnn',
-                     transformer=GloveSCNN(**config.glove_scnn_network),
-                     input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
-                     adapter={'X': ([('word_tokenizer', 'X')]),
-                              'y': ([('xy_split', 'y')]),
-                              'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
-                              },
-                     cache_dirpath=config.env.cache_dirpath)
+                      transformer=GloveSCNN(**config.glove_scnn_network),
+                      input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
+                      adapter={'X': ([('word_tokenizer', 'X')]),
+                               'y': ([('xy_split', 'y')]),
+                               'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
+                               },
+                      cache_dirpath=config.env.cache_dirpath)
     glove_output = Step(name='output_glove',
                         transformer=Dummy(),
                         input_steps=[glove_scnn],
@@ -279,6 +279,7 @@ def glove_dpcnn_train(config):
     word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
     glove_dpcnn = Step(name='glove_dpcnn',
                        transformer=GloveDPCNN(**config.glove_dpcnn_network),
+                       overwrite_transformer=True,
                        input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                        adapter={'X': ([('word_tokenizer', 'X')]),
                                 'y': ([('xy_split', 'y')]),
@@ -445,14 +446,14 @@ def ensemble_train(config):
                       cache_dirpath=config.env.cache_dirpath,
                       cache_output=True)
     glove_scnn = Step(name='glove_cnn',
-                     transformer=GloveSCNN(**config.glove_cnn_network),
-                     input_steps=[word_tokenizer, xy_split, glove_embeddings],
-                     adapter={'X': ([('word_tokenizer', 'X')]),
-                              'y': ([('xy_split', 'y')]),
-                              'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
-                              },
-                     cache_dirpath=config.env.cache_dirpath,
-                     cache_output=True)
+                      transformer=GloveSCNN(**config.glove_cnn_network),
+                      input_steps=[word_tokenizer, xy_split, glove_embeddings],
+                      adapter={'X': ([('word_tokenizer', 'X')]),
+                               'y': ([('xy_split', 'y')]),
+                               'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
+                               },
+                      cache_dirpath=config.env.cache_dirpath,
+                      cache_output=True)
 
     prediction_average = Step(name='prediction_average',
                               transformer=PredictionAverage(**config.prediction_average),
@@ -491,7 +492,7 @@ PIPELINES = {'char_cnn': {'train': char_cnn_train,
              'glove_lstm': {'train': glove_lstm_train,
                             'inference': glove_lstm_inference},
              'glove_scnn': {'train': glove_scnn_train,
-                           'inference': glove_scnn_inference},
+                            'inference': glove_scnn_inference},
              'glove_dpcnn': {'train': glove_dpcnn_train,
                              'inference': glove_dpcnn_inference},
              'tfidf_logreg': {'train': tfidf_logreg_train,
