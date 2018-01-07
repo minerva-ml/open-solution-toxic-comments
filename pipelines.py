@@ -291,7 +291,7 @@ def glove_lstm_inference(config):
 def glove_scnn_train(config):
     preprocessed_input = train_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
-    glove_scnn = Step(name='glove_cnn',
+    glove_scnn = Step(name='glove_scnn',
                       transformer=GloveSCNN(**config.glove_scnn_network),
                       overwrite_transformer=True,
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
@@ -314,7 +314,7 @@ def glove_scnn_train(config):
 def glove_scnn_inference(config):
     preprocessed_input = inference_preprocessing(config)
     word_tokenizer, glove_embeddings = glove_preprocessing_inference(config, preprocessed_input)
-    glove_scnn = Step(name='glove_cnn',
+    glove_scnn = Step(name='glove_scnn',
                       transformer=GloveSCNN(**config.glove_scnn_network),
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),

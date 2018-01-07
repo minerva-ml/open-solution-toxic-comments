@@ -11,7 +11,7 @@ parameters:
   overwrite: false
   num_workers: -2
   # Preprocessing
-  max_features_char: 2000
+  max_features_char: 100
   max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 64
@@ -38,6 +38,12 @@ parameters:
     value: [64, 256]
   scnn_repeat_dense:
     value: [1, 2]
+  # Char VDCNN Architecture
+  char_vdcnn_filter_nr: 64
+  char_vdcnn_kernel_size: 3
+  char_vdcnn_repeat_block: 2
+  char_vdcnn_dense_size: 256
+  char_vdcnn_repeat_dense: 2
   # Char CNN Architecture
   char_cnn_filter_nr: 64
   char_cnn_kernel_size: 3
@@ -64,6 +70,7 @@ parameters:
   gamma: 0.97
   patience: 10
   # Regularization
+  use_batch_norm: True
   l2_reg_convo: 0.0002
   l2_reg_dense: 0.0
   dropout_lstm: 0.2

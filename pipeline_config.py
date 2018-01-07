@@ -55,6 +55,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'repeat_dense': neptune_context.params.dpcnn_repeat_dense,
                                                  'l2_reg': neptune_context.params.l2_reg_convo,
                                                  'use_prelu': neptune_context.params.use_prelu,
+                                                 'use_batch_norm':neptune_context.params.use_batch_norm,
                                                  'dropout_convo': neptune_context.params.dropout_convo,
                                                  'dropout_dense': neptune_context.params.dropout_dense
                                                  },
@@ -89,6 +90,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'repeat_dense': neptune_context.params.scnn_repeat_dense,
                                                  'l2_reg': neptune_context.params.l2_reg_convo,
                                                  'use_prelu': neptune_context.params.use_prelu,
+                                                 'use_batch_norm': neptune_context.params.use_batch_norm,
                                                  'dropout_convo': neptune_context.params.dropout_convo,
                                                  'dropout_dense': neptune_context.params.dropout_dense
                                                  },
@@ -187,6 +189,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'repeat_dense': neptune_context.params.dpcnn_repeat_dense,
                                                  'l2_reg': neptune_context.params.l2_reg_convo,
                                                  'use_prelu': neptune_context.params.use_prelu,
+                                                 'use_batch_norm': neptune_context.params.use_batch_norm,
                                                  'dropout_convo': neptune_context.params.dropout_convo,
                                                  'dropout_dense': neptune_context.params.dropout_dense
                                                  },
@@ -220,6 +223,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'repeat_dense': neptune_context.params.char_cnn_repeat_dense,
                                                  'l2_reg': neptune_context.params.l2_reg_convo,
                                                  'use_prelu': neptune_context.params.use_prelu,
+                                                 'use_batch_norm': neptune_context.params.use_batch_norm,
                                                  'dropout_convo': neptune_context.params.dropout_convo,
                                                  'dropout_dense': neptune_context.params.dropout_dense
                                                  },
@@ -245,11 +249,13 @@ SOLUTION_CONFIG = AttrDict({
                                                  'maxlen': neptune_context.params.maxlen_char,
                                                  'embedding_size': neptune_context.params.char_embedding_size,
                                                  'filter_nr': neptune_context.params.char_cnn_filter_nr,
-                                                 'kernel_size': neptune_context.params.char_cnn_kernel_size,
-                                                 'dense_size': neptune_context.params.char_cnn_dense_size,
-                                                 'repeat_dense': neptune_context.params.char_cnn_repeat_dense,
+                                                 'kernel_size': neptune_context.params.char_vdcnn_kernel_size,
+                                                 'repeat_block': neptune_context.params.char_vdcnn_repeat_block,
+                                                 'dense_size': neptune_context.params.char_vdcnn_dense_size,
+                                                 'repeat_dense': neptune_context.params.char_vdcnn_repeat_dense,
                                                  'l2_reg': neptune_context.params.l2_reg_convo,
                                                  'use_prelu': neptune_context.params.use_prelu,
+                                                 'use_batch_norm': neptune_context.params.use_batch_norm,
                                                  'dropout_convo': neptune_context.params.dropout_convo,
                                                  'dropout_dense': neptune_context.params.dropout_dense
                                                  },

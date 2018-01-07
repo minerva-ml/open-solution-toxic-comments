@@ -3,7 +3,7 @@ from keras.activations import relu
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.initializers import RandomNormal
 from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D, LSTM, Bidirectional, Dense, Dropout, \
-    PReLU
+    PReLU, BatchNormalization
 from keras.layers.merge import add
 from keras.models import Model
 from keras.optimizers import Adam, SGD
@@ -52,12 +52,12 @@ class CharVDCNN(CharacterClassifier):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu):
+                     l2_reg, use_prelu, use_batch_norm):
         return vdcnn(embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu)
+                     l2_reg, use_prelu, use_batch_norm)
 
 
 class WordLSTM(CharacterClassifier):
@@ -78,7 +78,7 @@ class WordDPCNN(CharacterClassifier):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding):
+                     l2_reg, use_prelu, trainable_embedding, use_batch_norm):
         """
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
@@ -86,7 +86,7 @@ class WordDPCNN(CharacterClassifier):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding)
+                     l2_reg, use_prelu, trainable_embedding, use_batch_norm)
 
 
 class GloveBasic(CharacterClassifier):
@@ -131,12 +131,12 @@ class GloveSCNN(GloveBasic):
                      maxlen, max_features,
                      filter_nr, kernel_size, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding):
+                     l2_reg, use_prelu, trainable_embedding, use_batch_norm):
         return scnn(embedding_matrix, embedding_size,
                     maxlen, max_features,
                     filter_nr, kernel_size, dropout_convo,
                     dense_size, repeat_dense, dropout_dense,
-                    l2_reg, use_prelu, trainable_embedding)
+                    l2_reg, use_prelu, trainable_embedding, use_batch_norm)
 
 
 class GloveDPCNN(GloveBasic):
@@ -147,7 +147,7 @@ class GloveDPCNN(GloveBasic):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding):
+                     l2_reg, use_prelu, trainable_embedding, use_batch_norm):
         """
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
@@ -155,22 +155,27 @@ class GloveDPCNN(GloveBasic):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding)
+                     l2_reg, use_prelu, trainable_embedding, use_batch_norm)
 
 
 def dpcnn(embedding_matrix, embedding_size,
           maxlen, max_features,
           filter_nr, kernel_size, repeat_block, dropout_convo,
           dense_size, repeat_dense, dropout_dense,
-          l2_reg, use_prelu, trainable_embedding):
+          l2_reg, use_prelu,
+          trainable_embedding, use_batch_norm):
     """
-    Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
+    Note:
+        Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
+        post activation is used instead of pre-activation, could be worth exploring
     """
 
     def _base_layer(x):
         x = Conv1D(filter_nr, kernel_size=kernel_size, padding='same', activation='linear',
                    kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
                    kernel_regularizer=regularizers.l2(l2_reg))(x)
+        if use_batch_norm:
+            x = BatchNormalization()(x)
         if use_prelu:
             x = PReLU()(x)
         else:
@@ -198,6 +203,8 @@ def dpcnn(embedding_matrix, embedding_size,
 
     def _dense_block(x):
         x = Dense(dense_size, activation='linear')(x)
+        if use_batch_norm:
+            x = BatchNormalization()(x)
         if use_prelu:
             x = PReLU()(x)
         else:
@@ -230,9 +237,11 @@ def scnn(embedding_matrix, embedding_size,
          maxlen, max_features,
          filter_nr, kernel_size, dropout_convo,
          dense_size, repeat_dense, dropout_dense,
-         l2_reg, use_prelu, trainable_embedding):
+         l2_reg, use_prelu, trainable_embedding, use_batch_norm):
     def _dense_block(x):
         x = Dense(dense_size, activation='linear')(x)
+        if use_batch_norm:
+            x = BatchNormalization()(x)
         if use_prelu:
             x = PReLU()(x)
         else:
@@ -246,6 +255,8 @@ def scnn(embedding_matrix, embedding_size,
     x = Conv1D(filter_nr, kernel_size=kernel_size, padding='same', activation='linear',
                kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
                kernel_regularizer=regularizers.l2(l2_reg))(x)
+    if use_batch_norm:
+        x = BatchNormalization()(x)
     if use_prelu:
         x = PReLU()(x)
     else:
@@ -301,17 +312,58 @@ def vdcnn(embedding_size,
           maxlen, max_features,
           filter_nr, kernel_size, repeat_block, dropout_convo,
           dense_size, repeat_dense, dropout_dense,
-          l2_reg, use_prelu):
+          l2_reg, use_prelu, use_batch_norm):
+    """
+    Note:
+        Implementation of http://www.aclweb.org/anthology/E17-1104
+        We didn't use k-max pooling but GlobalMaxPool1D at the end and didn't explore it in the
+        intermediate layers.
+    """
+
+    def _convolutional_block(x, filter_nr):
+        x = Conv1D(filter_nr, kernel_size=kernel_size, padding='same', activation='linear',
+                   kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
+                   kernel_regularizer=regularizers.l2(l2_reg))(x)
+        if use_batch_norm:
+            x = BatchNormalization()(x)
+        if use_prelu:
+            x = PReLU()(x)
+        else:
+            x = relu(x)
+        x = Dropout(dropout_convo)(x)
+        return x
+
+    def _dense_block(x):
+        x = Dense(dense_size, activation='linear')(x)
+        if use_batch_norm:
+            x = BatchNormalization()(x)
+        if use_prelu:
+            x = PReLU()(x)
+        else:
+            x = relu(x)
+        x = Dropout(dropout_dense)(x)
+        return x
+
     input_text = Input(shape=(maxlen,))
-
     x = Embedding(input_dim=max_features, output_dim=embedding_size)(input_text)
-    x = Conv1D(64, kernel_size=6, activation='relu')(x)
-    x = Conv1D(128, kernel_size=3, activation='relu')(x)
-    x = Conv1D(128, kernel_size=3, activation='relu')(x)
+    x = Conv1D(filter_nr, kernel_size=kernel_size, padding='same', activation='linear',
+               kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
+               kernel_regularizer=regularizers.l2(l2_reg))(x)
+    if use_batch_norm:
+        x = BatchNormalization()(x)
+    if use_prelu:
+        x = PReLU()(x)
+    else:
+        x = relu(x)
+    x = Dropout(dropout_convo)(x)
+    for _ in range(2):
+        for i in range(repeat_block):
+            main = _convolutional_block(x, i * filter_nr)(x)
+            x = add([x, main])
+        x = MaxPooling1D(pool_size=3, stride=2)(x)
     x = GlobalMaxPool1D()(x)
-    x = Dense(256, activation="relu")(x)
-    x = Dropout(0.5)(x)
-
+    for i in range(repeat_dense):
+        x = _dense_block(x)
     predictions = Dense(6, activation='sigmoid')(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
