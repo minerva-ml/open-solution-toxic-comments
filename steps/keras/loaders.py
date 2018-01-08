@@ -1,15 +1,16 @@
-from sklearn.externals import joblib
 from keras.preprocessing import text, sequence
+from sklearn.externals import joblib
 
 from steps.base import BaseTransformer
 
 
 class Tokenizer(BaseTransformer):
-    def __init__(self, char_level, maxlen):
+    def __init__(self, char_level, maxlen, num_words):
         self.char_level = char_level
         self.maxlen = maxlen
+        self.num_words = num_words
 
-        self.tokenizer = text.Tokenizer(char_level=self.char_level)
+        self.tokenizer = text.Tokenizer(char_level=self.char_level, num_words=self.num_words)
 
     def fit(self, X, X_valid=None, train_mode=True):
         self.tokenizer.fit_on_texts(X)
@@ -35,11 +36,20 @@ class Tokenizer(BaseTransformer):
         object_pickle = joblib.load(filepath)
         self.char_level = object_pickle['char_level']
         self.maxlen = object_pickle['maxlen']
+        self.num_words = object_pickle['num_words']
         self.tokenizer = object_pickle['tokenizer']
         return self
 
     def save(self, filepath):
         object_pickle = {'char_level': self.char_level,
                          'maxlen': self.maxlen,
+                         'num_words': self.num_words,
                          'tokenizer': self.tokenizer}
         joblib.dump(object_pickle, filepath)
+
+
+class TextAugmenter(BaseTransformer):
+    pass
+    """
+    Augmentations by Thesaurus synonim substitution or typos
+    """

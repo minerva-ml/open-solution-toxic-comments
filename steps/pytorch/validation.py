@@ -1,8 +1,8 @@
 import numpy as np
-from sklearn.metrics import accuracy_score
 import torch
-from torch.autograd import Variable
 import torch.nn.functional as F
+from sklearn.metrics import accuracy_score
+from torch.autograd import Variable
 
 
 def cross_entropy(output, target, squeeze=False):

@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 
 import pydot_ng as pydot
 from IPython.display import Image, display

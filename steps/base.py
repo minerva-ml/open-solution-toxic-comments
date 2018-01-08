@@ -13,7 +13,7 @@ logger = get_logger()
 
 class Step:
     def __init__(self, name, transformer, input_steps=[], input_data=[], adapter=None, cache_dirpath=None,
-                 cache_output=False, save_graph=False):
+                 cache_output=False, overwrite_transformer=False, save_graph=False):
         self.name = name
         self.transformer = transformer
 
@@ -21,6 +21,7 @@ class Step:
         self.input_data = input_data
         self.adapter = adapter
 
+        self.overwrite_transformer = overwrite_transformer
         self.cache_output = cache_output
 
         self.cache_dirpath = cache_dirpath
@@ -57,7 +58,7 @@ class Step:
         return os.path.exists(self.save_filepath_step_output)
 
     def fit_transform(self, data):
-        if self.output_is_cached and self.cache_output:
+        if self.output_is_cached and self.cache_output and not self.overwrite_transformer:
             logger.info('step {} loading output...'.format(self.name))
             step_output_data = self._load_output()
         else:
@@ -77,8 +78,7 @@ class Step:
         return step_output_data
 
     def _cached_fit_transform(self, step_inputs):
-        if self.transformer_is_cached:
-
+        if self.transformer_is_cached and not self.overwrite_transformer:
             logger.info('step {} loading transformer...'.format(self.name))
             self.transformer.load(self.cache_filepath_step_transformer)
             logger.info('step {} transforming...'.format(self.name))
@@ -91,8 +91,9 @@ class Step:
             step_output_data = self.transformer.fit_transform(**step_inputs)
             logger.info('step {} saving transformer...'.format(self.name))
             self.transformer.save(self.cache_filepath_step_transformer)
-            logger.info('step {} saving outputs...'.format(self.name))
-            self._save_output(step_output_data)
+            if self.cache_output:
+                logger.info('step {} saving outputs...'.format(self.name))
+                self._save_output(step_output_data)
         return step_output_data
 
     def _load_output(self):
