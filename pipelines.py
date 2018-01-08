@@ -1,12 +1,11 @@
+from models import CharCNN, WordTrainableLSTM, GloveLSTM, GloveCNN
 from steps.base import Step, Dummy, stack_inputs, sparse_hstack_inputs
-from steps.preprocessing import XYSplit, FillNA, TfidfVectorizer
-from steps.postprocessing import PredictionAverage
 from steps.models.keras.loaders import Tokenizer
 from steps.models.keras.models import GloveEmbeddingsMatrix
-from steps.models.sklearn.models import LogisticRegressionMultilabel
-
+from steps.postprocessing import PredictionAverage
+from steps.preprocessing import XYSplit, FillNA, TfidfVectorizer
+from steps.sklearn.models import LogisticRegressionMultilabel
 from utils import fetch_x_train, fetch_x_valid, join_valid
-from models import CharCNN, WordTrainableLSTM, GloveLSTM, GloveCNN
 
 
 def char_cnn_train_pipeline(config):
