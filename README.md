@@ -19,7 +19,13 @@ This project assumes python 3.5.
 ```bash
 $ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
 ```
-2. Install requirements
+2. Install tensorflow and keras for your system or if you are planning on using cloud option just proceed to step 3 
+```bash
+$ pip3 install tensorflow-gpu
+$ pip3 install Keras
+```
+
+3. Install other requirements
 ```bash
 $ pip3 install -r requirements.txt
 ```
