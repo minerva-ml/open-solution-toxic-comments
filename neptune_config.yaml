@@ -3,11 +3,31 @@ project-key: TOX
 name: toxic
 tags: [glove, vdcnn, adagrad]
 
+
+metric:
+  channel: 'Final Validation Score'
+  goal: minimize
+
+# commend out if not in Cloud Environment
+pip-requirements-file: requirements.txt
+
+exclude:
+  - output
+  - neptune.log
+  - offline_job.log
+  - .git
+  - .idea
+  - .ipynb_checkpoints
+
 parameters:
-  # Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/test_experiments/log_reg_ensemble
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+  # Cloud Environment
+  data_dir: /public/toxic_comments
+  experiment_dir: /output/experiments/glove_lstm
+  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+  # Local Environment
+  #data_dir: /mnt/ml-team/minerva/toxic/data
+  #experiment_dir: /mnt/ml-team/minerva/toxic/test_experiments/glove_lstm
+  #embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: 0
   num_workers: -2
   # Preprocessing
@@ -55,15 +75,13 @@ parameters:
   char_cnn_repeat_dense: 2
   # LSTM Architecture
   lstm_unit_nr:
-    value: 64 #[64, 256]
+    value: [64, 256]
   lstm_repeat_block:
-    value: 1 #[1, 2, 3]
-  lstm_dense_nr:
-    value: 2 #[1, 2, 3]
+    value: [1, 2, 3]
   lstm_dense_size:
-    value: 256 #[256, 1024]
+    value: [256, 1024]
   lstm_repeat_dense:
-    value: 2 #[1, 2, 3]
+    value: [1, 2]
   global_pooling: 1
   # General Architecture
   use_prelu: 1
@@ -88,14 +106,3 @@ parameters:
   dropout_convo: 0.2
   dropout_dense: 0.5
 
-metric:
-  channel: 'Final Validation Score'
-  goal: minimize
-
-exclude:
-  - output
-  - neptune.log
-  - offline_job.log
-  - .git
-  - .idea
-  - .ipynb_checkpoints
