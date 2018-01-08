@@ -21,7 +21,7 @@ def action():
 @action.command()
 @click.option('-v', '--validation_size', help='percentage of training used for validation', default=0.2, required=False)
 def train_valid_split(validation_size):
-    params = parse_params()
+    params = ctx.params
     logger.info('preprocessing training data')
     split_train_data(data_dir=params.data_dir, validation_size=validation_size)
 
@@ -33,9 +33,9 @@ def train_pipeline(pipeline_name):
 
 
 def _train_pipeline(pipeline_name):
-    params = parse_params()
+    params = ctx.params
 
-    if params.overwrite and os.path.isdir(params.experiment_dir):
+    if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
 
     train = read_data(data_dir=params.data_dir, filename='train_split.csv')
@@ -62,7 +62,7 @@ def evaluate_pipeline(pipeline_name):
 
 
 def _evaluate_pipeline(pipeline_name):
-    params = parse_params()
+    params = ctx.params
 
     valid = read_data(data_dir=params.data_dir, filename='valid_split.csv')
 
@@ -92,7 +92,7 @@ def predict_pipeline(pipeline_name):
 
 
 def _predict_pipeline(pipeline_name):
-    params = parse_params()
+    params = ctx.params
 
     test = read_data(data_dir=params.data_dir, filename='test.csv')
 
@@ -146,7 +146,7 @@ def evaluate_predict_pipeline(pipeline_name):
 @click.argument('pipeline_names', nargs=-1)
 @click.option('-bn', '--blended_name', help='name of the new blended pipeline', required=True)
 def blend_pipelines(pipeline_names, blended_name):
-    params = parse_params()
+    params = ctx.params
 
     new_pipeline_dir = os.path.join(params.experiment_dir, blended_name, 'transformers')
     os.makedirs(new_pipeline_dir)
@@ -158,11 +158,6 @@ def blend_pipelines(pipeline_names, blended_name):
                 destination_filepath = os.path.join(new_pipeline_dir, transformer_name)
                 logger.info('copying transformer from {} to {}'.format(source_filepath, destination_filepath))
                 shutil.copy(source_filepath, destination_filepath)
-
-
-def parse_params():
-    config = read_yaml('neptune_config.yaml')
-    return config.parameters
 
 
 if __name__ == "__main__":

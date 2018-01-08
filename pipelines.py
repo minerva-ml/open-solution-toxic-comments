@@ -2,7 +2,7 @@
 Implement trainable ensemble: XGBoost, random forest, Linear Regression
 """
 
-from models import CharCNN, CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
+from models import CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
 from steps.base import Step, Dummy, stack_inputs, hstack_inputs, sparse_hstack_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix
@@ -50,60 +50,6 @@ def inference_preprocessing(config):
                              },
                     cache_dirpath=config.env.cache_dirpath)
     return xy_split
-
-
-def char_cnn_train(config):
-    preprocessed_input = train_preprocessing(config)
-    char_tokenizer = Step(name='char_tokenizer',
-                          transformer=Tokenizer(**config.char_tokenizer),
-                          input_steps=[preprocessed_input],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'X_valid': ([('xy_split', 'validation_data')], fetch_x_valid),
-                                   'train_mode': ([('xy_split', 'train_mode')])
-                                   },
-                          cache_dirpath=config.env.cache_dirpath)
-    network = Step(name='char_cnn',
-                   transformer=CharCNN(**config.char_cnn_network),
-                   overwrite_transformer=True,
-                   input_steps=[char_tokenizer, preprocessed_input],
-                   adapter={'X': ([('char_tokenizer', 'X')]),
-                            'y': ([('xy_split', 'y')]),
-                            'validation_data': (
-                                [('char_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
-                            },
-                   cache_dirpath=config.env.cache_dirpath)
-    char_output = Step(name='char_output',
-                       transformer=Dummy(),
-                       input_steps=[network],
-                       adapter={'y_pred': ([('char_cnn', 'prediction_probability')]),
-                                },
-                       cache_dirpath=config.env.cache_dirpath)
-    return char_output
-
-
-def char_cnn_inference(config):
-    preprocessed_input = inference_preprocessing(config)
-    char_tokenizer = Step(name='char_tokenizer',
-                          transformer=Tokenizer(**config.char_tokenizer),
-                          input_steps=[preprocessed_input],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'train_mode': ([('xy_split', 'train_mode')])
-                                   },
-                          cache_dirpath=config.env.cache_dirpath)
-    network = Step(name='char_cnn',
-                   transformer=CharCNN(**config.char_cnn_network),
-                   input_steps=[char_tokenizer, preprocessed_input],
-                   adapter={'X': ([('char_tokenizer', 'X')]),
-                            'y': ([('xy_split', 'y')]),
-                            },
-                   cache_dirpath=config.env.cache_dirpath)
-    char_output = Step(name='char_output',
-                       transformer=Dummy(),
-                       input_steps=[network],
-                       adapter={'y_pred': ([('char_cnn', 'prediction_probability')]),
-                                },
-                       cache_dirpath=config.env.cache_dirpath)
-    return char_output
 
 
 def char_vdcnn_train(config):
@@ -481,14 +427,14 @@ def ensemble_extraction(config):
                          cache_dirpath=config.env.cache_dirpath,
                          cache_output=True)
 
-    char_cnn = Step(name='char_cnn',
-                    transformer=CharCNN(**config.char_cnn_network),
-                    input_steps=[char_tokenizer, xy_split],
-                    adapter={'X': ([('char_tokenizer', 'X')]),
-                             'y': ([('xy_split', 'y')]),
-                             },
-                    cache_dirpath=config.env.cache_dirpath,
-                    cache_output=True)
+    char_vdcnn = Step(name='char_vdcnn',
+                      transformer=CharVDCNN(**config.char_vdcnn_network),
+                      input_steps=[char_tokenizer, xy_split],
+                      adapter={'X': ([('char_tokenizer', 'X')]),
+                               'y': ([('xy_split', 'y')]),
+                               },
+                      cache_dirpath=config.env.cache_dirpath,
+                      cache_output=True)
     word_lstm = Step(name='word_lstm',
                      transformer=WordLSTM(**config.word_lstm_network),
                      input_steps=[word_tokenizer, xy_split],
@@ -506,7 +452,7 @@ def ensemble_extraction(config):
                                },
                       cache_dirpath=config.env.cache_dirpath,
                       cache_output=True)
-    glove_scnn = Step(name='glove_cnn',
+    glove_scnn = Step(name='glove_scnn',
                       transformer=GloveSCNN(**config.glove_scnn_network),
                       input_steps=[word_tokenizer, xy_split, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
@@ -516,7 +462,17 @@ def ensemble_extraction(config):
                       cache_dirpath=config.env.cache_dirpath,
                       cache_output=True)
 
-    return [log_reg_multi, char_cnn, word_lstm, glove_lstm, glove_scnn]
+    glove_dpcnn = Step(name='glove_dpcnn',
+                       transformer=GloveDPCNN(**config.glove_dpcnn_network),
+                       input_steps=[word_tokenizer, xy_split, glove_embeddings],
+                       adapter={'X': ([('word_tokenizer', 'X')]),
+                                'y': ([('xy_split', 'y')]),
+                                'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
+                                },
+                       cache_dirpath=config.env.cache_dirpath,
+                       cache_output=True)
+
+    return [log_reg_multi, char_vdcnn, word_lstm, glove_lstm, glove_scnn, glove_dpcnn]
 
 
 def weighted_average_ensemble_train(config):
@@ -540,7 +496,7 @@ def weighted_average_ensemble_train(config):
 def weighted_average_ensemble_inference(config):
     weighted_average_ensemble = weighted_average_ensemble_train(config)
 
-    for step in weighted_average_ensemble.get_steps('prediction_average').input_steps:
+    for step in weighted_average_ensemble.get_step('prediction_average').input_steps:
         step.cache_output = False
 
     return weighted_average_ensemble
@@ -556,6 +512,7 @@ def logistic_regression_ensemble_train(config):
 
     log_reg = Step(name='log_reg_ensemble',
                    transformer=LogisticRegressionMultilabel(**config.logistic_regression_ensemble),
+                   overwrite_transformer=True,
                    input_steps=input_steps,
                    adapter={'X': (output_mappings, hstack_inputs),
                             'y': ([('xy_split', 'y')])},
@@ -564,26 +521,23 @@ def logistic_regression_ensemble_train(config):
     log_reg_ensemble_output = Step(name='log_reg_ensemble_output',
                                    transformer=Dummy(),
                                    input_steps=[log_reg],
-                                   adapter={'y_pred': ([('log_reg_ensemble', 'prediction_probability')]), },
+                                   adapter={'y_pred': ([('log_reg_ensemble', 'prediction_probability')])},
                                    cache_dirpath=config.env.cache_dirpath)
     return log_reg_ensemble_output
 
 
 def logistic_regression_ensemble_inference(config):
     linear_regression_ensemble = logistic_regression_ensemble_train(config)
-
+    linear_regression_ensemble.get_step('log_reg_ensemble').overwrite_transformer = False
     for step in linear_regression_ensemble.get_step('log_reg_ensemble').input_steps:
         step.cache_output = False
-
     return linear_regression_ensemble
 
 
-PIPELINES = {'char_cnn': {'train': char_cnn_train,
-                          'inference': char_cnn_inference},
-             'char_vdcnn': {'train': char_vdcnn_train,
+PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
                             'inference': char_vdcnn_inference},
-             'word_trainable_lstm': {'train': word_lstm_train,
-                                     'inference': word_lstm_inference},
+             'word_lstm': {'train': word_lstm_train,
+                           'inference': word_lstm_inference},
              'glove_lstm': {'train': glove_lstm_train,
                             'inference': glove_lstm_inference},
              'glove_scnn': {'train': glove_scnn_train,
@@ -592,8 +546,8 @@ PIPELINES = {'char_cnn': {'train': char_cnn_train,
                              'inference': glove_dpcnn_inference},
              'tfidf_logreg': {'train': tfidf_logreg_train,
                               'inference': tfidf_logreg_inference},
-             'weighted_average': {'train': weighted_average_ensemble_train,
-                                  'inference': weighted_average_ensemble_inference},
-             'lr_ensemble': {'train': logistic_regression_ensemble_train,
-                             'inference': logistic_regression_ensemble_inference},
+             'weighted_average_ensemble': {'train': weighted_average_ensemble_train,
+                                           'inference': weighted_average_ensemble_inference},
+             'log_reg_ensemble': {'train': logistic_regression_ensemble_train,
+                                  'inference': logistic_regression_ensemble_inference},
              }

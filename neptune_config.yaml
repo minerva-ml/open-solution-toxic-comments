@@ -1,17 +1,17 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, scnn, sgd]
+tags: [glove, vdcnn, adagrad]
 
 parameters:
   # Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/glove_scnn
+  experiment_dir: /mnt/ml-team/minerva/toxic/test_experiments/log_reg_ensemble
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
-  overwrite: false
+  overwrite: 0
   num_workers: -2
   # Preprocessing
-  max_features_char: 100 #100 for neural networks, for tfidf something like 20000 should be used
+  max_features_char: 100 #100 for vdcnnneural networks, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 64
@@ -19,16 +19,17 @@ parameters:
   word_embedding_size: 300
   char_ngram_max: 4
   # Deep Pyramid Architecture
-  dpcnn_filter_nr: 64
-    #value: [64, 300]
-  dpcnn_kernel_size: 6
-    #value: [3, 6]
-  dpcnn_repeat_block: 2
-    #value: [1, 2]
-  dpcnn_dense_size: 256
-    #value: [64, 512]
+  dpcnn_filter_nr:
+    value: 64 #[64, 300]
+  dpcnn_kernel_size:
+    value: 3 #[3, 6]
+  dpcnn_repeat_block:
+    value: 2 #[1, 2]
+  dpcnn_dense_size:
+    value: 64 #[64, 512]
   dpcnn_repeat_dense:
-    #value: [1, 2]
+    value: 1 #[1, 2]
+    #type: int
   # Shallow CNN Architecture
   scnn_filter_nr: 64
     #value: [64, 256]
@@ -53,26 +54,26 @@ parameters:
   char_cnn_dense_size: 256
   char_cnn_repeat_dense: 2
   # LSTM Architecture
-  lstm_unit_nr: 64
-    #value: [64, 256]
-  lstm_repeat_block: 3
-    #value: [1, 2, 3]
-  lstm_dense_nr: 2
-    #value: [1, 2, 3]
-  lstm_dense_size: 256
-    #value: [256, 1024]
-  lstm_repeat_dense: 2
-  global_pooling: False
-    #value: [True, False]
+  lstm_unit_nr:
+    value: 64 #[64, 256]
+  lstm_repeat_block:
+    value: 1 #[1, 2, 3]
+  lstm_dense_nr:
+    value: 2 #[1, 2, 3]
+  lstm_dense_size:
+    value: 256 #[256, 1024]
+  lstm_repeat_dense:
+    value: 2 #[1, 2, 3]
+  global_pooling: 1
   # General Architecture
-  use_prelu: True
-  trainable_embedding: True
+  use_prelu: 1
+  trainable_embedding: 1
   # Log Reg Params
   log_reg_c: 4.0
   # Ensemble Log Reg
   ensemble_log_reg_c: 1.0
   # Training schedule
-  epochs_nr: 1000
+  epochs_nr: 1
   batch_size_train: 128
   batch_size_inference: 128
   lr: 0.01
@@ -80,7 +81,7 @@ parameters:
   gamma: 0.97
   patience: 10
   # Regularization
-  use_batch_norm: True
+  use_batch_norm: 1
   l2_reg_convo: 0.0001
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
