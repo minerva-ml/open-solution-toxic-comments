@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, vdcnn, adagrad]
+tags: [vdcnn, adagrad]
 
 parameters:
   # Environment
@@ -40,13 +40,13 @@ parameters:
   scnn_repeat_dense: 1
     #value: [1, 2]
   # Char VDCNN Architecture
-  char_vdcnn_filter_nr: 64
-    #value: [16, 32, 64]
+  char_vdcnn_filter_nr:
+    value: [16, 32, 64]
   char_vdcnn_kernel_size: 3
-  char_vdcnn_repeat_block: 2
-    #value: [2, 3, 4]
-  char_vdcnn_dense_size: 256
-    #value: [256, 1024]
+  char_vdcnn_repeat_block:
+    value: [2, 3, 4]
+  char_vdcnn_dense_size:
+    value: [256, 1024]
   char_vdcnn_repeat_dense: 2
   # Char CNN Architecture
   char_cnn_filter_nr: 64
@@ -73,7 +73,7 @@ parameters:
   # Ensemble Log Reg
   ensemble_log_reg_c: 1.0
   # Training schedule
-  epochs_nr: 1
+  epochs_nr: 1000
   batch_size_train: 128
   batch_size_inference: 128
   lr: 0.01
