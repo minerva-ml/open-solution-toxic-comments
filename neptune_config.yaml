@@ -6,7 +6,7 @@ tags: [glove, scnn, sgd]
 parameters:
   # Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/lr_ensemble
+  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/glove_scnn
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: false
   num_workers: -2
@@ -54,7 +54,7 @@ parameters:
   char_cnn_repeat_dense: 2
   # LSTM Architecture
   lstm_unit_nr: 64
-    #value: [64, 256,]
+    #value: [64, 256]
   lstm_repeat_block: 3
     #value: [1, 2, 3]
   lstm_dense_nr: 2
