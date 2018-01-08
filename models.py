@@ -70,7 +70,7 @@ class WordLSTM(CharacterClassifier):
 
 
 class WordDPCNN(CharacterClassifier):
-    def _build_model(self, embedding_matrix, embedding_size,
+    def _build_model(self, embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
@@ -78,7 +78,7 @@ class WordDPCNN(CharacterClassifier):
         """
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
-        return dpcnn(embedding_matrix, embedding_size,
+        return dpcnn(None, embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
@@ -86,7 +86,7 @@ class WordDPCNN(CharacterClassifier):
 
 
 class GloveBasic(CharacterClassifier):
-    def fit(self, embedding_matrix, X, y, validation_data, ):
+    def fit(self, embedding_matrix, X, y, validation_data):
         self.callbacks = self._create_callbacks(**self.callbacks_config)
         self.architecture_config['model_params']['embedding_matrix'] = embedding_matrix
         self.model = self._compile_model(**self.architecture_config)
@@ -202,8 +202,11 @@ def dpcnn(embedding_matrix, embedding_size,
     """
 
     input_text = Input(shape=(maxlen,))
-    embedding = Embedding(max_features, embedding_size, weights=[embedding_matrix],
-                          trainable=trainable_embedding)(input_text)
+    if embedding_matrix is not None:
+        embedding = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
+            input_text)
+    else:
+        embedding = Embedding(max_features, embedding_size)(input_text)
     x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg)(embedding)
     x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg)(x)
     if embedding_size == filter_nr:
@@ -229,7 +232,7 @@ def lstm(embedding_matrix, embedding_size,
          dense_size, repeat_dense, dropout_dense,
          l2_reg, use_prelu, use_batch_norm, trainable_embedding, global_pooling):
     input_text = Input(shape=(maxlen,))
-    if embedding_matrix:
+    if embedding_matrix is not None:
         x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
             input_text)
     else:
