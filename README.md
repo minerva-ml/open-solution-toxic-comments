@@ -19,8 +19,7 @@ This project assumes python 3.5.
 ```bash
 $ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
 ```
-2. Install [PyTorch](http://pytorch.org/)
-3. Install remaining requirements
+2. Install requirements
 ```bash
 $ pip3 install -r requirements.txt
 ```
