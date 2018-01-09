@@ -1,18 +1,19 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, vdcnn, adagrad]
+tags: [tfidf, logreg, starter]
 
 
 metric:
   channel: 'Final Validation Score'
   goal: minimize
 
-# commend out if not in Cloud Environment
-pip-requirements-file: requirements.txt
+#Comment out if not in Cloud Environment
+#pip-requirements-file: requirements.txt
 
 exclude:
   - output
+  - pipelines_visualizations
   - neptune.log
   - offline_job.log
   - .git
@@ -21,83 +22,98 @@ exclude:
 
 parameters:
   # Cloud Environment
-  data_dir: /public/toxic_comments
-  experiment_dir: /output/experiments/glove_lstm
-  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+#  data_dir: /public/toxic_comments
+#  experiment_dir: /output/experiments/word_lstm
+#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+
   # Local Environment
-  #data_dir: /mnt/ml-team/minerva/toxic/data
-  #experiment_dir: /mnt/ml-team/minerva/toxic/test_experiments/glove_lstm
-  #embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+  data_dir: /mnt/ml-team/minerva/toxic/data
+  experiment_dir: /mnt/ml-team/minerva/toxic/starter_experiments/log_reg_ensemble
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: 0
   num_workers: -2
+
   # Preprocessing
-  max_features_char: 100 #100 for vdcnnneural networks, for tfidf something like 20000 should be used
+  max_features_char: 100000 #100 for vdcnnneural networks, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
-  maxlen_words: 64
-  char_embedding_size: 16
-  word_embedding_size: 300
+  maxlen_words: 100
   char_ngram_max: 4
-  # Deep Pyramid Architecture
-  dpcnn_filter_nr:
-    value: 64 #[64, 300]
-  dpcnn_kernel_size:
-    value: 3 #[3, 6]
-  dpcnn_repeat_block:
-    value: 2 #[1, 2]
-  dpcnn_dense_size:
-    value: 64 #[64, 512]
-  dpcnn_repeat_dense:
-    value: 1 #[1, 2]
-    #type: int
-  # Shallow CNN Architecture
-  scnn_filter_nr: 64
-    #value: [64, 256]
-  scnn_kernel_size: 3
-    #value: [3, 6]
-  scnn_dense_size: 64
-    #value: [64, 256]
-  scnn_repeat_dense: 1
-    #value: [1, 2]
+
+  # Glove Deep Pyramid Architecture
+  #filter_nr: 64
+  #kernel_size: 3
+  #repeat_block: 2
+  #dense_size: 256
+  #repeat_dense: 2
+  #trainable_embedding: 0
+  #word_embedding_size: 300
+  #char_embedding_size: None
+  #global_pooling: 1
+
+  # Glove Shallow CNN Architecture
+#  filter_nr: 256
+#  kernel_size: 6
+#  repeat_block: None
+#  dense_size: 256
+#  repeat_dense: 2
+#  trainable_embedding: 0
+#  word_embedding_size: 300
+#  char_embedding_size: None
+#  global_pooling: 1
+
   # Char VDCNN Architecture
-  char_vdcnn_filter_nr: 64
-    #value: [16, 32, 64]
-  char_vdcnn_kernel_size: 3
-  char_vdcnn_repeat_block: 2
-    #value: [2, 3, 4]
-  char_vdcnn_dense_size: 256
-    #value: [256, 1024]
-  char_vdcnn_repeat_dense: 2
-  # Char CNN Architecture
-  char_cnn_filter_nr: 64
-  char_cnn_kernel_size: 3
-  char_cnn_dense_size: 256
-  char_cnn_repeat_dense: 2
-  # LSTM Architecture
-  lstm_unit_nr:
-    value: [64, 256]
-  lstm_repeat_block:
-    value: [1, 2, 3]
-  lstm_dense_size:
-    value: [256, 1024]
-  lstm_repeat_dense:
-    value: [1, 2]
+  filter_nr: 32
+  kernel_size: 3
+  repeat_block: 2
   global_pooling: 1
+  trainable_embedding: 1
+  dense_size: 256
+  repeat_dense: 2
+  char_embedding_size: 32
+  word_embedding_size: None
+
+
+  # Glove LSTM Architecture
+#  filter_nr: 64
+#  kernel_size: None
+#  repeat_block: 2
+#  dense_size: 256
+#  repeat_dense: 2
+#  global_pooling: 1
+#  trainable_embedding: 0
+#  word_embedding_size: 300
+#  char_embedding_size: None
+
+  # Word LSTM Architecture
+#  filter_nr: 64
+#  kernel_size: None
+#  repeat_block: 2
+#  dense_size: 256
+#  repeat_dense: 2
+#  global_pooling: 1
+#  trainable_embedding: 1
+#  word_embedding_size: 64
+#  char_embedding_size: None
+
   # General Architecture
   use_prelu: 1
-  trainable_embedding: 1
+
   # Log Reg Params
   log_reg_c: 4.0
+
   # Ensemble Log Reg
   ensemble_log_reg_c: 1.0
+
   # Training schedule
-  epochs_nr: 1
+  epochs_nr: 1000
   batch_size_train: 128
   batch_size_inference: 128
   lr: 0.01
   momentum: 0.9
   gamma: 0.97
   patience: 10
+
   # Regularization
   use_batch_norm: 1
   l2_reg_convo: 0.0001

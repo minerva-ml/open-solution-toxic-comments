@@ -42,7 +42,7 @@ class CharacterClassifier(ClassifierXY):
 
 class CharVDCNN(CharacterClassifier):
     def _build_optimizer(self, **kwargs):
-        return Adagrad(**kwargs)
+        return Adam(**kwargs)
 
     def _build_model(self, embedding_size,
                      maxlen, max_features,
@@ -57,19 +57,25 @@ class CharVDCNN(CharacterClassifier):
 
 
 class WordLSTM(CharacterClassifier):
+    def _build_optimizer(self, **kwargs):
+        return Adam(**kwargs)
+
     def _build_model(self, embedding_size,
                      maxlen, max_features,
                      unit_nr, repeat_block, dropout_lstm,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, use_batch_norm, trainable_embedding, global_pooling):
+                     l2_reg, use_prelu, use_batch_norm, global_pooling):
         return lstm(None, embedding_size,
                     maxlen, max_features,
                     unit_nr, repeat_block, dropout_lstm,
                     dense_size, repeat_dense, dropout_dense,
-                    l2_reg, use_prelu, use_batch_norm, trainable_embedding, global_pooling)
+                    l2_reg, use_prelu, use_batch_norm, False, global_pooling)
 
 
 class WordDPCNN(CharacterClassifier):
+    def _build_optimizer(self, **kwargs):
+        return Adam(**kwargs)
+
     def _build_model(self, embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
