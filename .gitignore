@@ -9,7 +9,7 @@ __pycache__/
 .cache/
 
 # Jupyter Notebook
-.ipynb_checkpoints/
+#.ipynb_checkpoints/
 
 # Neptune
 output
