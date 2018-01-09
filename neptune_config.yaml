@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [ensemble, weighted_average]
+tags: [glove, adam, lstm]
 
 
 metric:
@@ -22,13 +22,13 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir: /public/toxic_comments
-#  experiment_dir: /output/experiments/glove_lstm
-#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+  data_dir: /public/toxic_comments
+  experiment_dir: /output/experiments/glove_lstm
+  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/starter_experiments/weighted_average_ensemble
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+#  data_dir: my/path/to/toxic/data
+#  experiment_dir: my/path/to/experiments/glove_lstm
+#  embedding_filepath: my/path/to//glove.840B.300d.txt
   overwrite: 0
   num_workers: -2
 
