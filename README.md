@@ -72,6 +72,7 @@ Below end-to-end pipeline is visualized. You can run exactly this one!
 ![pipeline_001](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/imgs/log_reg_ensemble.png 'complex-ensemble')
 
 We have also prepared something simpler to just get started
+
 ![pipeline_002](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/imgs/glove_lstm_pipeline.png 'simple GLOVE LSTM')
 
 
