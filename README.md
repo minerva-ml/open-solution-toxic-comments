@@ -77,6 +77,7 @@ We have also prepared something simpler to just get you started:
 
 
 # User support
-There are two ways to reach us:
-1. Kaggle [discussion](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/discussion) is our primary way of communication.
-2. You can submit an [issue](https://github.com/neptune-ml/kaggle-toxic-starter/issues) directly in this repo.
+There are several ways to seek help:
+1. Read project's [Wiki](https://github.com/neptune-ml/kaggle-toxic-starter/wiki), where we publish descriptions about the code, pipelines and neptune.
+2. Kaggle [discussion](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/discussion) is our primary way of communication.
+3. You can submit an [issue](https://github.com/neptune-ml/kaggle-toxic-starter/issues) directly in this repo.
