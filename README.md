@@ -25,8 +25,10 @@ $ pip3 install neptune-cli
 4. log in to [neptune cloud](https://neptune.ml/ 'machine learning lab') via command line
 ```bash
 $ neptune login
-```
-5. run first experiment
+
+5. Create new project named `toxic` it will generate project-key TOX for you
+
+6. run first experiment
 ```bash
 $ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune_config.yaml -- train_evaluate_predict_pipeline --pipeline_name glove_lstm
 ```
@@ -61,8 +63,10 @@ $ pip3 install -r requirements.txt
 5. log in to [neptune](https://neptune.ml/ 'machine learning lab') via command line
 ```bash
 $ neptune login
+
+6. Create new project named `toxic` it will generate project-key TOX for you
 ```
-6. run first experiment
+7. run first experiment
 ```bash
 $ neptune run experiment_manager.py -- train_evaluate_predict_pipeline --pipeline_name glove_lstm
 ```
