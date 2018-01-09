@@ -265,6 +265,6 @@ SOLUTION_CONFIG = AttrDict({
                                      'C': params.ensemble_log_reg_c,
                                      'n_jobs': params.num_workers,
                                      },
-    'prediction_average': {'weights': None
+    'prediction_average': {'weights': params.weights
                            }
 })

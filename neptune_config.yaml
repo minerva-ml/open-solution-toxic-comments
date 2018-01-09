@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, lstm, adam]
+tags: [ensemble, weighted_average]
 
 
 metric:
@@ -22,13 +22,13 @@ exclude:
 
 parameters:
   # Cloud Environment
-  data_dir: /public/toxic_comments
-  experiment_dir: /output/experiments/glove_lstm
-  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+#  data_dir: /public/toxic_comments
+#  experiment_dir: /output/experiments/glove_lstm
+#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
-#  data_dir: /mnt/ml-team/minerva/toxic/data
-#  experiment_dir: /mnt/ml-team/minerva/toxic/starter_experiments/log_reg_ensemble
-#  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+  data_dir: /mnt/ml-team/minerva/toxic/data
+  experiment_dir: /mnt/ml-team/minerva/toxic/starter_experiments/weighted_average_ensemble
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: 0
   num_workers: -2
 
@@ -103,6 +103,7 @@ parameters:
 
   # Ensemble Log Reg
   ensemble_log_reg_c: 1.0
+  weights: None
 
   # Training schedule
   epochs_nr: 1000
