@@ -13,16 +13,20 @@ You are welcome to extend this pipeline and contribute your own models or proced
 # Installation
 ### option 1: Neptune cloud (fastest)
 [Neptune cloud](https://neptune.ml/ 'machine learning lab') is the easiest way to start experimenting. Environment is already prepared, hence you care only about experiments.
-1. register on the [neptune site](https://neptune.ml/ 'machine learning lab') to receive $100 in GPU time.
-2. install neptune-cli
+1. clone this repo
+```bash
+$ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
+```
+2. register on the [neptune site](https://neptune.ml/ 'machine learning lab') to receive $100 in GPU time.
+3. install neptune-cli
 ```bash
 $ pip3 install neptune-cli
 ```
-3. log in to [neptune cloud](https://neptune.ml/ 'machine learning lab') via command line
+4. log in to [neptune cloud](https://neptune.ml/ 'machine learning lab') via command line
 ```bash
 $ neptune login
 ```
-3. run first experiment
+5. run first experiment
 ```bash
 $ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune_config.yaml -- train_evaluate_predict_pipeline --pipeline_name glove_lstm
 ```
@@ -34,12 +38,11 @@ Check [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) for mor
 
 ### option 2: local install
 This project assumes python 3.5.
-1. register on the [neptune site](https://neptune.ml/ 'machine learning lab') to receive $100 in GPU time.
-2. clone this repo
+1. clone this repo
 ```bash
 $ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
 ```
-3. install TensorFlow and Keras.
+2. install TensorFlow and Keras.
     - in case you **have GPU**
     ```bash
     $ pip3 install tensorflow-gpu==1.1.0
@@ -50,10 +53,11 @@ $ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
     $ pip3 install tensorflow==1.1.0
     $ pip3 install Keras==2.0.8
     ```
-4. install remaining requirements
+3. install remaining requirements
 ```bash
 $ pip3 install -r requirements.txt
 ```
+4. register on the [neptune site](https://neptune.ml/ 'machine learning lab') to receive $100 in GPU time.
 5. log in to [neptune](https://neptune.ml/ 'machine learning lab') via command line
 ```bash
 $ neptune login
