@@ -34,7 +34,7 @@ Note that [neptune](https://neptune.ml/ 'machine learning lab') (experiment moni
 ### Run experiment
 To run an experiment in the Neptune cloud use this command
 ```bash
-$ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune_config.yaml -- train-pipeline --pipeline_name ensemble_train_pipeline
+$ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune_config.yaml -- train_evaluate_predict_pipeline --pipeline_name glove_lstm
 ```
 
 Check [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) for more options.
@@ -42,7 +42,7 @@ Check [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) for mor
 
 # Solution visualization
 Below end-to-end pipeline is visualized. You can run exactly this one!
-![pipeline_001](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/pipelines_visualizations/pipeline_001.png 'our initial pipeline')
+![pipeline_001](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/imgs/log_reg_ensemble.png 'our initial pipeline')
 
 
 # Contributing
