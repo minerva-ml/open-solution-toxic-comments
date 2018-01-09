@@ -10,7 +10,7 @@ Now we want to go one step further and invite you to participate in the developm
 ## Contributing
 You are welcome to extend this pipeline and contribute your own models or procedures. Please refer to the [CONTRIBUTING](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/CONTRIBUTING.md) for more details.
 
-## Installation
+# Installation
 ### option 1: Neptune cloud (fastest)
 [Neptune cloud](https://neptune.ml/ 'machine learning lab') is the easiest way to start experimenting. Environment is already prepared, hence you care only about experiments.
 1. register on the [neptune site](https://neptune.ml/ 'machine learning lab') to receive $100 in GPU time.
