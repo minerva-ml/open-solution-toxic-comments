@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [tfidf, logreg, starter]
+tags: [ensembling, log_reg]
 
 
 metric:
