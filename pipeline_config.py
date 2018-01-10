@@ -6,11 +6,9 @@ from deepsense import neptune
 from utils import read_yaml
 
 ctx = neptune.Context()
+params = ctx.params
 
-try:
-    params = ctx.params
-    param_names = params.keys()
-except AttributeError:
+if params.__class__.__name__ == 'OfflineContextParams':
     neptune_config = read_yaml('neptune_config.yaml')
     params = neptune_config.parameters
 

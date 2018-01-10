@@ -200,6 +200,7 @@ def dpcnn(embedding_matrix, embedding_size,
           dense_size, repeat_dense, dropout_dense,
           l2_reg_convo, l2_reg_dense, use_prelu,
           trainable_embedding, use_batch_norm):
+
     """
     Note:
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf

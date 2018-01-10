@@ -40,15 +40,15 @@ parameters:
   char_ngram_max: 4
 
   # Glove Deep Pyramid Architecture
-#  filter_nr: 64
-#  kernel_size: 3
-#  repeat_block: 2
-#  dense_size: 256
-#  repeat_dense: 2
-#  trainable_embedding: 0
-#  word_embedding_size: 300
-#  char_embedding_size: None
-#  global_pooling: 1
+  filter_nr: 64
+  kernel_size: 3
+  repeat_block: 2
+  dense_size: 256
+  repeat_dense: 2
+  trainable_embedding: 0
+  word_embedding_size: 300
+  char_embedding_size: None
+  global_pooling: 1
 
   # Glove Shallow CNN Architecture
 #  filter_nr: 256
@@ -74,15 +74,15 @@ parameters:
 
 
   # Glove LSTM Architecture
-  filter_nr: 64
-  kernel_size: None
-  repeat_block: 2
-  dense_size: 256
-  repeat_dense: 2
-  global_pooling: 1
-  trainable_embedding: 0
-  word_embedding_size: 300
-  char_embedding_size: None
+#  filter_nr: 64
+#  kernel_size: None
+#  repeat_block: 2
+#  dense_size: 256
+#  repeat_dense: 2
+#  global_pooling: 1
+#  trainable_embedding: 0
+#  word_embedding_size: 300
+#  char_embedding_size: None
 
   # Word LSTM Architecture
 #  filter_nr: 64
