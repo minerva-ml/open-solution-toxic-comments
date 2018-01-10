@@ -48,12 +48,12 @@ class CharVDCNN(CharacterClassifier):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, use_batch_norm):
+                     l2_reg_convo, l2_reg_dense, use_prelu, use_batch_norm):
         return vdcnn(embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, use_batch_norm)
+                     l2_reg_convo, l2_reg_dense, use_prelu, use_batch_norm)
 
 
 class WordLSTM(CharacterClassifier):
@@ -64,12 +64,12 @@ class WordLSTM(CharacterClassifier):
                      maxlen, max_features,
                      unit_nr, repeat_block, dropout_lstm,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, use_batch_norm, global_pooling):
+                     l2_reg_dense, use_prelu, use_batch_norm, global_pooling):
         return lstm(None, embedding_size,
                     maxlen, max_features,
                     unit_nr, repeat_block, dropout_lstm,
                     dense_size, repeat_dense, dropout_dense,
-                    l2_reg, use_prelu, use_batch_norm, False, global_pooling)
+                    l2_reg_dense, use_prelu, use_batch_norm, False, global_pooling)
 
 
 class WordDPCNN(CharacterClassifier):
@@ -80,7 +80,7 @@ class WordDPCNN(CharacterClassifier):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding, use_batch_norm):
+                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm):
         """
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
@@ -88,7 +88,7 @@ class WordDPCNN(CharacterClassifier):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding, use_batch_norm)
+                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm)
 
 
 class GloveBasic(CharacterClassifier):
@@ -117,12 +117,12 @@ class GloveLSTM(GloveBasic):
                      maxlen, max_features,
                      unit_nr, repeat_block, dropout_lstm,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, use_batch_norm, trainable_embedding, global_pooling):
+                     l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling):
         return lstm(embedding_matrix, embedding_size,
                     maxlen, max_features,
                     unit_nr, repeat_block, dropout_lstm,
                     dense_size, repeat_dense, dropout_dense,
-                    l2_reg, use_prelu, use_batch_norm, trainable_embedding, global_pooling)
+                    l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling)
 
 
 class GloveSCNN(GloveBasic):
@@ -133,12 +133,12 @@ class GloveSCNN(GloveBasic):
                      maxlen, max_features,
                      filter_nr, kernel_size, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding, use_batch_norm):
+                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm):
         return scnn(embedding_matrix, embedding_size,
                     maxlen, max_features,
                     filter_nr, kernel_size, dropout_convo,
                     dense_size, repeat_dense, dropout_dense,
-                    l2_reg, use_prelu, trainable_embedding, use_batch_norm)
+                    l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm)
 
 
 class GloveDPCNN(GloveBasic):
@@ -149,7 +149,7 @@ class GloveDPCNN(GloveBasic):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding, use_batch_norm):
+                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm):
         """
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
@@ -157,7 +157,7 @@ class GloveDPCNN(GloveBasic):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding, use_batch_norm)
+                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm)
 
 
 class GloveCLSTM(GloveBasic):
@@ -168,27 +168,27 @@ class GloveCLSTM(GloveBasic):
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding, use_batch_norm):
+                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm):
         return clstm(embedding_matrix, embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
-                     l2_reg, use_prelu, trainable_embedding, use_batch_norm)
+                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm)
 
 
 def scnn(embedding_matrix, embedding_size,
          maxlen, max_features,
          filter_nr, kernel_size, dropout_convo,
          dense_size, repeat_dense, dropout_dense,
-         l2_reg, use_prelu, trainable_embedding, use_batch_norm):
+         l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm):
     input_text = Input(shape=(maxlen,))
     x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
         input_text)
-    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg)(x)
+    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(x)
 
     x = GlobalMaxPool1D()(x)
     for _ in range(repeat_dense):
-        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense)(x)
+        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
     predictions = Dense(6, activation="sigmoid")(x)
 
     model = Model(inputs=input_text, outputs=predictions)
@@ -199,7 +199,7 @@ def dpcnn(embedding_matrix, embedding_size,
           maxlen, max_features,
           filter_nr, kernel_size, repeat_block, dropout_convo,
           dense_size, repeat_dense, dropout_dense,
-          l2_reg, use_prelu,
+          l2_reg_convo, l2_reg_dense, use_prelu,
           trainable_embedding, use_batch_norm):
     """
     Note:
@@ -213,19 +213,19 @@ def dpcnn(embedding_matrix, embedding_size,
             input_text)
     else:
         embedding = Embedding(max_features, embedding_size)(input_text)
-    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg)(embedding)
-    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg)(x)
+    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(embedding)
+    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(x)
     if embedding_size == filter_nr:
         x = add([embedding, x])
     else:
-        embedding_resized = _shape_matching_layer(filter_nr, l2_reg, use_prelu, dropout_convo)(embedding)
+        embedding_resized = _shape_matching_layer(filter_nr, use_prelu, dropout_convo, l2_reg_convo)(embedding)
         x = add([embedding_resized, x])
     for _ in range(repeat_block):
-        x = _dpcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg)(x)
+        x = _dpcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(x)
 
     x = GlobalMaxPool1D()(x)
     for _ in range(repeat_dense):
-        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense)(x)
+        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
     predictions = Dense(6, activation="sigmoid")(x)
 
     model = Model(inputs=input_text, outputs=predictions)
@@ -236,7 +236,7 @@ def lstm(embedding_matrix, embedding_size,
          maxlen, max_features,
          unit_nr, repeat_block, dropout_lstm,
          dense_size, repeat_dense, dropout_dense,
-         l2_reg, use_prelu, use_batch_norm, trainable_embedding, global_pooling):
+         l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling):
     input_text = Input(shape=(maxlen,))
     if embedding_matrix is not None:
         x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
@@ -251,7 +251,7 @@ def lstm(embedding_matrix, embedding_size,
     else:
         x = _lstm_block(unit_nr, return_sequences=False, dropout_lstm=dropout_lstm)(x)
     for _ in range(repeat_dense):
-        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense)(x)
+        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
     predictions = Dense(6, activation="sigmoid")(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
@@ -261,7 +261,7 @@ def vdcnn(embedding_size,
           maxlen, max_features,
           filter_nr, kernel_size, repeat_block, dropout_convo,
           dense_size, repeat_dense, dropout_dense,
-          l2_reg, use_prelu, use_batch_norm):
+          l2_reg_convo, l2_reg_dense, use_prelu, use_batch_norm):
     """
     Note:
         Implementation of http://www.aclweb.org/anthology/E17-1104
@@ -271,19 +271,19 @@ def vdcnn(embedding_size,
 
     input_text = Input(shape=(maxlen,))
     x = Embedding(input_dim=max_features, output_dim=embedding_size)(input_text)
-    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg)(x)
+    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(x)
 
     for i in range(repeat_block):
         if i + 1 != repeat_block:
-            x = _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg,
+            x = _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo,
                              last_block=False)(x)
         else:
-            x = _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg,
+            x = _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo,
                              last_block=True)(x)
 
     x = GlobalMaxPool1D()(x)
     for i in range(repeat_dense):
-        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense)(x)
+        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
     predictions = Dense(6, activation='sigmoid')(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
@@ -293,7 +293,7 @@ def clstm(embedding_matrix, embedding_size,
           maxlen, max_features,
           filter_nr, kernel_size, repeat_block, dropout_convo,
           dense_size, repeat_dense, dropout_dense,
-          l2_reg, use_prelu, trainable_embedding, use_batch_norm):
+          l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm):
     """
     Implementation of https://arxiv.org/pdf/1511.08630.pdf
     """
@@ -325,7 +325,7 @@ def _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, drop
     return f
 
 
-def _shape_matching_layer(filter_nr, l2_reg, use_prelu, dropout):
+def _shape_matching_layer(filter_nr, use_prelu, dropout, l2_reg):
     def f(x):
         x = Conv1D(filter_nr, kernel_size=1, padding='same', activation='linear',
                    kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
@@ -358,9 +358,10 @@ def _lstm_block(unit_nr, return_sequences, dropout_lstm, bidirectional=True):
     return f
 
 
-def _dense_block(dense_size, use_batch_norm, use_prelu, dropout):
+def _dense_block(dense_size, use_batch_norm, use_prelu, dropout, l2_reg):
     def f(x):
-        x = Dense(dense_size, activation='linear')(x)
+        x = Dense(dense_size, activation='linear',
+                  kernel_regularizer=regularizers.l2(l2_reg))(x)
         x = _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout)(x)
         return x
 
