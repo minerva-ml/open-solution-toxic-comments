@@ -26,12 +26,12 @@ $ neptune login
 ```bash
 $ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune_config.yaml -- train_evaluate_predict_pipeline --pipeline_name glove_lstm
 ```
-Check Neptune dashboard for experiment progress. **Happy Training :)**
+**Happy Training :)**
 
 Refer to [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) and [Getting started with the Neptune Cloud(]https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Getting-started-with-the-Neptune-Cloud) for more.
 
 ### option 2: local install
-please refer to the [Local install Wiki page](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Local-install) for installation procedure.
+Please refer to the [Local install Wiki page](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Local-install) for installation procedure.
 
 # Solution visualization
 Below end-to-end pipeline is visualized. You can run exactly this one!
