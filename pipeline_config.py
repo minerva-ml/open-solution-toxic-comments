@@ -11,7 +11,7 @@ try:
     params = ctx.params
     param_names = params.keys()
 except AttributeError:
-    neptune_config = read_yaml('neptune_config.yaml')
+    neptune_config = read_yaml('config.yaml')
     params = neptune_config.parameters
 
 X_COLUMNS = ['comment_text']
