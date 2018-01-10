@@ -13,9 +13,9 @@ You are welcome to extend this pipeline and contribute your own models or proced
 # Installation
 ### option 1: Neptune cloud
 on the [neptune](https://neptune.ml/ 'machine learning lab') site
-    * register to receive $100 in GPU time
-    * log in
-    * create new project named `toxic`: Follow the link `Projects` (top bar, left side), then click `New project` button. This action will generate project-key `TOX`, which is already listed in the `neptune_config.yaml`.
+* register to receive $100 in GPU time
+* log in
+* create new project named `toxic`: Follow the link `Projects` (top bar, left side), then click `New project` button. This action will generate project-key `TOX`, which is already listed in the `neptune_config.yaml`.
 run setup commands
 ```bash
 $ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
