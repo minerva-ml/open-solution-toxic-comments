@@ -26,7 +26,10 @@ $ pip3 install neptune-cli
 ```bash
 $ neptune login
 ```
-5. Create new project named `toxic` it will generate project-key TOX for you
+
+5. create neptune project
+    * go to the [neptune](https://neptune.ml/ 'machine learning lab') site and log in
+    * create new project named `toxic`. To do it follow the link `Projects` (top bar, left side), then click `New project` button. This action will generate project-key `TOX`, which is already listed in the `neptune_config.yaml`.
 
 6. run first experiment
 ```bash
@@ -39,37 +42,7 @@ Check [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) for mor
 **Happy Training :)**
 
 ### option 2: local install
-This project assumes python 3.5.
-1. clone this repo
-```bash
-$ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
-```
-2. install TensorFlow and Keras.
-    - in case you **have GPU**
-    ```bash
-    $ pip3 install tensorflow-gpu==1.1.0
-    $ pip3 install Keras==2.0.8
-    ```
-    - in case you **do not have GPU**
-    ```bash
-    $ pip3 install tensorflow==1.1.0
-    $ pip3 install Keras==2.0.8
-    ```
-3. install remaining requirements
-```bash
-$ pip3 install -r requirements.txt
-```
-4. register on the [neptune site](https://neptune.ml/ 'machine learning lab') to receive $100 in GPU time.
-5. log in to [neptune](https://neptune.ml/ 'machine learning lab') via command line
-```bash
-$ neptune login
-```
-6. Create new project named `toxic` it will generate project-key TOX for you
-
-7. run first experiment
-```bash
-$ neptune run experiment_manager.py -- train_evaluate_predict_pipeline --pipeline_name glove_lstm
-```
+please refer to the [Local install Wiki page](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Local-install) for installation procedure.
 
 # Solution visualization
 Below end-to-end pipeline is visualized. You can run exactly this one!
