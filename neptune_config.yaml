@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, adam, lstm]
+tags: [glove, sgd, dpcnn]
 
 
 metric:
@@ -9,7 +9,7 @@ metric:
   goal: minimize
 
 #Comment out if not in Cloud Environment
-pip-requirements-file: requirements.txt
+#pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,13 +22,13 @@ exclude:
 
 parameters:
   # Cloud Environment
-  data_dir: /public/toxic_comments
-  experiment_dir: /output/experiments/glove_lstm
-  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+#  data_dir: /public/toxic_comments
+#  experiment_dir: /output/experiments/glove_lstm
+#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
-#  data_dir: my/path/to/toxic/data
-#  experiment_dir: my/path/to/experiments/glove_lstm
-#  embedding_filepath: my/path/to/glove.840B.300d.txt
+  data_dir: /mnt/ml-team/minerva/toxic/data
+  experiment_dir: /mnt/ml-team/minerva/starter_experiments/glove_dpcnn
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: 0
   num_workers: -2
 
@@ -96,7 +96,8 @@ parameters:
 #  char_embedding_size: None
 
   # General Architecture
-  use_prelu: 1
+  use_prelu:
+    value: [1,0]
 
   # Log Reg Params
   log_reg_c: 4.0
@@ -107,7 +108,8 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 128
+  batch_size_train:
+    value: [32, 128]
   batch_size_inference: 128
   lr: 0.01
   momentum: 0.9
@@ -115,10 +117,13 @@ parameters:
   patience: 10
 
   # Regularization
-  use_batch_norm: 1
-  l2_reg_convo: 0.0001
-  l2_reg_dense: 0.0
+  use_batch_norm:
+    value: [1, 0]
+  l2_reg_convo: 0.0
+  l2_reg_dense: 0.00
   dropout_lstm: 0.2
-  dropout_convo: 0.2
-  dropout_dense: 0.5
+  dropout_convo:
+    value: [0.2, 0.0]
+  dropout_dense:
+    value: [0.5, 0.0]
 
