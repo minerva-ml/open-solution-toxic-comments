@@ -16,12 +16,14 @@ on the [neptune](https://neptune.ml/ 'machine learning lab') site
 * register to receive $100 in GPU time
 * log in
 * create new project named `toxic`: Follow the link `Projects` (top bar, left side), then click `New project` button. This action will generate project-key `TOX`, which is already listed in the `neptune_config.yaml`.
+
 run setup commands
 ```bash
 $ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
 $ pip3 install neptune-cli
 $ neptune login
 ```
+
 start experiment
 ```bash
 $ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune_config.yaml -- train_evaluate_predict_pipeline --pipeline_name glove_lstm
