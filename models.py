@@ -7,7 +7,6 @@ Research/implement Region embeddings from http://proceedings.mlr.press/v48/johns
 Experiment with Attention and Dilated Convolutions
 """
 
-from keras import backend as K
 from keras import regularizers
 from keras.activations import relu
 from keras.callbacks import ModelCheckpoint, EarlyStopping

@@ -28,7 +28,7 @@ parameters:
   # Local Environment
 #  data_dir: my/path/to/toxic/data
 #  experiment_dir: my/path/to/experiments/glove_lstm
-#  embedding_filepath: my/path/to//glove.840B.300d.txt
+#  embedding_filepath: my/path/to/glove.840B.300d.txt
   overwrite: 0
   num_workers: -2
 
@@ -40,15 +40,15 @@ parameters:
   char_ngram_max: 4
 
   # Glove Deep Pyramid Architecture
-  #filter_nr: 64
-  #kernel_size: 3
-  #repeat_block: 2
-  #dense_size: 256
-  #repeat_dense: 2
-  #trainable_embedding: 0
-  #word_embedding_size: 300
-  #char_embedding_size: None
-  #global_pooling: 1
+#  filter_nr: 64
+#  kernel_size: 3
+#  repeat_block: 2
+#  dense_size: 256
+#  repeat_dense: 2
+#  trainable_embedding: 0
+#  word_embedding_size: 300
+#  char_embedding_size: None
+#  global_pooling: 1
 
   # Glove Shallow CNN Architecture
 #  filter_nr: 256
