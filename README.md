@@ -12,32 +12,19 @@ You are welcome to extend this pipeline and contribute your own models or proced
 
 # Installation
 ### option 1: Neptune cloud (fastest)
-[Neptune cloud](https://neptune.ml/ 'machine learning lab') is the easiest way to start experimenting. Environment is already prepared, hence you care only about experiments.
-1. clone this repo
+[Neptune cloud](https://neptune.ml/ 'machine learning lab') is the easiest way to start experimenting. Environment is already prepared, hence you care only about experiments. Follow these steps to get started
+1. register on the [neptune site](https://neptune.ml/ 'machine learning lab') to receive $100 in GPU time.
+2. create project in neptune
+    * log in on the [neptune](https://neptune.ml/ 'machine learning lab') site
+    * create new project named `toxic`: Follow the link `Projects` (top bar, left side), then click `New project` button. This action will generate project-key `TOX`, which is already listed in the `neptune_config.yaml`.
+3. run setup commands
 ```bash
 $ git clone https://github.com/neptune-ml/kaggle-toxic-starter.git
-```
-2. register on the [neptune site](https://neptune.ml/ 'machine learning lab') to receive $100 in GPU time.
-3. install neptune-cli
-```bash
 $ pip3 install neptune-cli
-```
-4. log in to [neptune cloud](https://neptune.ml/ 'machine learning lab') via command line
-```bash
 $ neptune login
-```
-
-5. create neptune project
-    * go to the [neptune](https://neptune.ml/ 'machine learning lab') site and log in
-    * create new project named `toxic`. To do it follow the link `Projects` (top bar, left side), then click `New project` button. This action will generate project-key `TOX`, which is already listed in the `neptune_config.yaml`.
-
-6. run first experiment
-```bash
 $ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune_config.yaml -- train_evaluate_predict_pipeline --pipeline_name glove_lstm
 ```
-Now you can observe the progress of your experiment on Neptune dashboard. When its done, you can collect output from the _Browse Files_ (left bar in the Neptune dashboard).
-
-Check [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) for more options and our [Wiki](https://github.com/neptune-ml/kaggle-toxic-starter/wiki) for detailed explanation of this starter code.
+Check Neptune dashboard for experiment progress. Refer to [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) and [Getting started with the Neptune Cloud(]https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Getting-started-with-the-Neptune-Cloud) for more.
 
 **Happy Training :)**
 
