@@ -11,7 +11,7 @@ Now we want to go one step further and invite you to participate in the developm
 You are welcome to extend this pipeline and contribute your own models or procedures. Please refer to the [CONTRIBUTING](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/CONTRIBUTING.md) for more details.
 
 # Installation
-### option 1: Neptune cloud (fastest)
+### option 1: Neptune cloud
 1. on the [neptune](https://neptune.ml/ 'machine learning lab') site
     * register to receive $100 in GPU time
     * log in
@@ -28,7 +28,7 @@ $ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gc
 ```
 **Happy Training :)**
 
-Refer to [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) and [Getting started with the Neptune Cloud(]https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Getting-started-with-the-Neptune-Cloud) for more.
+Refer to [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) and [Getting started with the Neptune Cloud](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Getting-started-with-the-Neptune-Cloud) for more.
 
 ### option 2: local install
 Please refer to the [Local install Wiki page](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Local-install) for installation procedure.
