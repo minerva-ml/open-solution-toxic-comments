@@ -12,7 +12,7 @@ from keras.activations import relu
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.initializers import RandomNormal
 from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D, LSTM, Bidirectional, Dense, Dropout, \
-    PReLU, BatchNormalization
+    PReLU, BatchNormalization, Lambda
 from keras.layers.merge import add
 from keras.models import Model
 from keras.optimizers import Adam, SGD, Adagrad, Adadelta
@@ -306,7 +306,7 @@ def _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout):
         if use_prelu:
             x = PReLU()(x)
         else:
-            x = relu(x)
+            x = Lambda(relu)(x)
         x = Dropout(dropout)(x)
         return x
 
@@ -332,7 +332,7 @@ def _shape_matching_layer(filter_nr, use_prelu, dropout, l2_reg):
         if use_prelu:
             x = PReLU()(x)
         else:
-            x = relu(x)
+            x = Lambda(relu)(x)
         x = Dropout(dropout)(x)
         return x
 
