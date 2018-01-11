@@ -30,10 +30,10 @@ $ neptune send experiment_manager.py --environment keras-2.0-gpu-py3 --worker gc
 ```
 **Happy Training :)**
 
-Refer to [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) and [Getting started with the Neptune Cloud](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Getting-started-with-the-Neptune-Cloud) for more.
+Refer to [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) and [Getting started: Neptune Cloud](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Getting-started:-Neptune-Cloud) for more.
 
 ### option 2: local install
-Please refer to the [Local install Wiki page](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Local-install) for installation procedure.
+Please refer to the [Getting started: local instance](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Getting-started:-local-instance) for installation procedure.
 
 # Solution visualization
 Below end-to-end pipeline is visualized. You can run exactly this one!
