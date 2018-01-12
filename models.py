@@ -96,7 +96,6 @@ class GloveBasic(CharacterClassifier):
         self.callbacks = self._create_callbacks(**self.callbacks_config)
         self.architecture_config['model_params']['embedding_matrix'] = embedding_matrix
         self.model = self._compile_model(**self.architecture_config)
-
         self.model.fit(X, y,
                        validation_data=[X_valid, y_valid],
                        callbacks=self.callbacks,

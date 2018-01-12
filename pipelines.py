@@ -29,7 +29,7 @@ def train_preprocessing(config):
     xy_valid = Step(name='xy_valid',
                     transformer=XYSplit(**config.xy_splitter),
                     input_data=['input'],
-                    adapter={'meta': ([('input', 'meta')]),
+                    adapter={'meta': ([('input', 'meta_valid')]),
                              'train_mode': ([('input', 'train_mode')])
                              },
                     cache_dirpath=config.env.cache_dirpath)
@@ -48,7 +48,7 @@ def train_preprocessing(config):
                                     'y': ([('xy_train', 'y')]),
                                     'train_mode': ([('input', 'train_mode')]),
                                     'X_valid': ([('text_cleaner_valid', 'X')]),
-                                    'y_valid': ([('xy_train', 'y')]),
+                                    'y_valid': ([('xy_valid', 'y')]),
                                     },
                            cache_dirpath=config.env.cache_dirpath)
     return cleaning_output
