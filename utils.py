@@ -51,25 +51,6 @@ def create_submission(experiments_dir, meta, predictions, columns, logger):
     logger.info('submission saved to {}'.format(submission_filepath))
 
 
-def flat_x(inputs):
-    return list(inputs[:, 0])
-
-
-def fetch_x_train(inputs):
-    return flat_x(inputs[0])
-
-
-def fetch_x_valid(inputs):
-    x, y = inputs[0]
-    return flat_x(x)
-
-
-def join_valid(inputs):
-    x = inputs[0]
-    y = inputs[1][1]
-    return [x, y]
-
-
 def multi_log_loss(y_true, y_pred):
     assert y_true.shape == y_pred.shape
     columns = y_true.shape[1]

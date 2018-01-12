@@ -3,53 +3,82 @@ Implement trainable ensemble: XGBoost, random forest, Linear Regression
 """
 
 from models import CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
-from steps.base import Step, Dummy, stack_inputs, hstack_inputs, sparse_hstack_inputs
+from steps.base import Step, Dummy, stack_inputs, hstack_inputs, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix
 from steps.postprocessing import PredictionAverage
-from steps.preprocessing import XYSplit, FillNA, TfidfVectorizer
+from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer
 from steps.sklearn.models import LogisticRegressionMultilabel
-from utils import fetch_x_train, fetch_x_valid, join_valid
 
 
 def train_preprocessing(config):
-    fill_na_x = Step(name='fill_na_x',
-                     transformer=FillNA(**config.fill_na),
-                     input_data=['input'],
-                     adapter={'X': ([('input', 'meta')])},
-                     cache_dirpath=config.env.cache_dirpath)
-    fill_na_x_valid = Step(name='fill_na_x_valid',
-                           transformer=FillNA(**config.fill_na),
-                           input_data=['input'],
-                           adapter={'X': ([('input', 'meta_valid')])},
-                           cache_dirpath=config.env.cache_dirpath)
-    xy_split = Step(name='xy_split',
-                    transformer=XYSplit(**config.xy_split),
+    xy_train = Step(name='xy_train',
+                    transformer=XYSplit(**config.xy_splitter),
                     input_data=['input'],
-                    input_steps=[fill_na_x, fill_na_x_valid],
-                    adapter={'meta': ([('fill_na_x', 'X')]),
-                             'meta_valid': ([('fill_na_x_valid', 'X')]),
+                    adapter={'meta': ([('input', 'meta')]),
                              'train_mode': ([('input', 'train_mode')])
                              },
                     cache_dirpath=config.env.cache_dirpath)
-    return xy_split
+
+    text_cleaner_train = Step(name='text_cleaner_train',
+                              transformer=TextCleaner(**config.text_cleaner),
+                              input_steps=[xy_train],
+                              adapter={'X': ([('xy_train', 'X')])},
+                              cache_dirpath=config.env.cache_dirpath)
+
+    xy_valid = Step(name='xy_valid',
+                    transformer=XYSplit(**config.xy_splitter),
+                    input_data=['input'],
+                    adapter={'meta': ([('input', 'meta')]),
+                             'train_mode': ([('input', 'train_mode')])
+                             },
+                    cache_dirpath=config.env.cache_dirpath)
+
+    text_cleaner_valid = Step(name='text_cleaner_valid',
+                              transformer=TextCleaner(**config.text_cleaner),
+                              input_steps=[xy_valid],
+                              adapter={'X': ([('xy_valid', 'X')])},
+                              cache_dirpath=config.env.cache_dirpath)
+
+    cleaning_output = Step(name='cleaning_output',
+                           transformer=Dummy(),
+                           input_data=['input'],
+                           input_steps=[xy_train, text_cleaner_train, xy_valid, text_cleaner_valid],
+                           adapter={'X': ([('text_cleaner_train', 'X')]),
+                                    'y': ([('xy_train', 'y')]),
+                                    'train_mode': ([('input', 'train_mode')]),
+                                    'X_valid': ([('text_cleaner_valid', 'X')]),
+                                    'y_valid': ([('xy_train', 'y')]),
+                                    },
+                           cache_dirpath=config.env.cache_dirpath)
+    return cleaning_output
 
 
 def inference_preprocessing(config):
-    fill_na_x = Step(name='fill_na_x',
-                     transformer=FillNA(**config.fill_na),
-                     input_data=['input'],
-                     adapter={'X': ([('input', 'meta')])},
-                     cache_dirpath=config.env.cache_dirpath)
-    xy_split = Step(name='xy_split',
-                    transformer=XYSplit(**config.xy_split),
+    xy_train = Step(name='xy_train',
+                    transformer=XYSplit(**config.xy_splitter),
                     input_data=['input'],
-                    input_steps=[fill_na_x],
-                    adapter={'meta': ([('fill_na_x', 'X')]),
+                    adapter={'meta': ([('input', 'meta')]),
                              'train_mode': ([('input', 'train_mode')])
                              },
                     cache_dirpath=config.env.cache_dirpath)
-    return xy_split
+
+    text_cleaner_train = Step(name='text_cleaner_train',
+                              transformer=TextCleaner(**config.text_cleaner),
+                              input_steps=[xy_train],
+                              adapter={'X': ([('xy_train', 'X')])},
+                              cache_dirpath=config.env.cache_dirpath)
+
+    cleaning_output = Step(name='cleaning_output',
+                           transformer=Dummy(),
+                           input_data=['input'],
+                           input_steps=[xy_train, text_cleaner_train],
+                           adapter={'X': ([('text_cleaner_train', 'X')]),
+                                    'y': ([('xy_train', 'y')]),
+                                    'train_mode': ([('input', 'train_mode')]),
+                                    },
+                           cache_dirpath=config.env.cache_dirpath)
+    return cleaning_output
 
 
 def char_vdcnn_train(config):
@@ -57,9 +86,9 @@ def char_vdcnn_train(config):
     char_tokenizer = Step(name='char_tokenizer',
                           transformer=Tokenizer(**config.char_tokenizer),
                           input_steps=[preprocessed_input],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'X_valid': ([('xy_split', 'validation_data')], fetch_x_valid),
-                                   'train_mode': ([('xy_split', 'train_mode')])
+                          adapter={'X': ([('cleaning_output', 'X')]),
+                                   'X_valid': ([('cleaning_output', 'X_valid')]),
+                                   'train_mode': ([('cleaning_output', 'train_mode')])
                                    },
                           cache_dirpath=config.env.cache_dirpath)
     network = Step(name='char_vdcnn',
@@ -67,9 +96,9 @@ def char_vdcnn_train(config):
                    overwrite_transformer=True,
                    input_steps=[char_tokenizer, preprocessed_input],
                    adapter={'X': ([('char_tokenizer', 'X')]),
-                            'y': ([('xy_split', 'y')]),
+                            'y': ([('cleaning_output', 'y')]),
                             'validation_data': (
-                                [('char_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
+                                [('char_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')], to_tuple_inputs),
                             },
                    cache_dirpath=config.env.cache_dirpath)
     char_output = Step(name='char_output',
@@ -86,15 +115,15 @@ def char_vdcnn_inference(config):
     char_tokenizer = Step(name='char_tokenizer',
                           transformer=Tokenizer(**config.char_tokenizer),
                           input_steps=[preprocessed_input],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'train_mode': ([('xy_split', 'train_mode')])
+                          adapter={'X': ([('cleaning_output', 'X')]),
+                                   'train_mode': ([('cleaning_output', 'train_mode')])
                                    },
                           cache_dirpath=config.env.cache_dirpath)
     network = Step(name='char_vdcnn',
                    transformer=CharVDCNN(**config.char_vdcnn_network),
                    input_steps=[char_tokenizer, preprocessed_input],
                    adapter={'X': ([('char_tokenizer', 'X')]),
-                            'y': ([('xy_split', 'y')]),
+                            'y': ([('cleaning_output', 'y')]),
                             },
                    cache_dirpath=config.env.cache_dirpath)
     char_output = Step(name='char_output',
@@ -111,19 +140,20 @@ def word_lstm_train(config):
     word_tokenizer = Step(name='word_tokenizer',
                           transformer=Tokenizer(**config.word_tokenizer),
                           input_steps=[preprocessed_input],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'X_valid': ([('xy_split', 'validation_data')], fetch_x_valid),
-                                   'train_mode': ([('xy_split', 'train_mode')])
+                          adapter={'X': ([('cleaning_output', 'X')]),
+                                   'X_valid': ([('cleaning_output', 'X_valid')]),
+                                   'train_mode': ([('cleaning_output', 'train_mode')])
                                    },
-                          cache_dirpath=config.env.cache_dirpath)
+                          cache_dirpath=config.env.cacyhe_dirpath)
+
     word_lstm = Step(name='word_lstm',
                      transformer=WordLSTM(**config.word_lstm_network),
                      overwrite_transformer=True,
                      input_steps=[word_tokenizer, preprocessed_input],
                      adapter={'X': ([('word_tokenizer', 'X')]),
-                              'y': ([('xy_split', 'y')]),
+                              'y': ([('cleaning_output', 'y')]),
                               'validation_data': (
-                                  [('word_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
+                                  [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')], to_tuple_inputs),
                               },
                      cache_dirpath=config.env.cache_dirpath)
     word_output = Step(name='word_output',
@@ -140,15 +170,15 @@ def word_lstm_inference(config):
     word_tokenizer = Step(name='word_tokenizer',
                           transformer=Tokenizer(**config.word_tokenizer),
                           input_steps=[preprocessed_input],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'train_mode': ([('xy_split', 'train_mode')])
+                          adapter={'X': ([('cleaning_output', 'X')]),
+                                   'train_mode': ([('cleaning_output', 'train_mode')])
                                    },
                           cache_dirpath=config.env.cache_dirpath)
     word_lstm = Step(name='word_lstm',
                      transformer=WordLSTM(**config.word_lstm_network),
                      input_steps=[word_tokenizer, preprocessed_input],
                      adapter={'X': ([('word_tokenizer', 'X')]),
-                              'y': ([('xy_split', 'y')]),
+                              'y': ([('cleaning_output', 'y')]),
                               },
                      cache_dirpath=config.env.cache_dirpath)
     word_output = Step(name='word_output',
@@ -164,9 +194,9 @@ def glove_preprocessing_train(config, preprocessed_input):
     word_tokenizer = Step(name='word_tokenizer',
                           transformer=Tokenizer(**config.word_tokenizer),
                           input_steps=[preprocessed_input],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'X_valid': ([('xy_split', 'validation_data')], fetch_x_valid),
-                                   'train_mode': ([('xy_split', 'train_mode')])
+                          adapter={'X': ([('cleaning_output', 'X')]),
+                                   'train_mode': ([('cleaning_output', 'train_mode')]),
+                                   'X_valid': ([('cleaning_output', 'X_valid')])
                                    },
                           cache_dirpath=config.env.cache_dirpath)
     glove_embeddings = Step(name='glove_embeddings',
@@ -182,8 +212,8 @@ def glove_preprocessing_inference(config, preprocessed_input):
     word_tokenizer = Step(name='word_tokenizer',
                           transformer=Tokenizer(**config.word_tokenizer),
                           input_steps=[preprocessed_input],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'train_mode': ([('xy_split', 'train_mode')])
+                          adapter={'X': ([('cleaning_output', 'X')]),
+                                   'train_mode': ([('cleaning_output', 'train_mode')])
                                    },
                           cache_dirpath=config.env.cache_dirpath)
     glove_embeddings = Step(name='glove_embeddings',
@@ -203,10 +233,10 @@ def glove_lstm_train(config):
                       overwrite_transformer=True,
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
-                               'y': ([('xy_split', 'y')]),
+                               'y': ([('cleaning_output', 'y')]),
                                'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                'validation_data': (
-                                   [('word_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
+                                   [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')], to_tuple_inputs),
                                },
                       cache_dirpath=config.env.cache_dirpath)
     glove_output = Step(name='output_glove',
@@ -225,7 +255,7 @@ def glove_lstm_inference(config):
                       transformer=GloveLSTM(**config.glove_lstm_network),
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
-                               'y': ([('xy_split', 'y')]),
+                               'y': ([('cleaning_output', 'y')]),
                                'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                },
                       cache_dirpath=config.env.cache_dirpath)
@@ -246,10 +276,10 @@ def glove_scnn_train(config):
                       overwrite_transformer=True,
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
-                               'y': ([('xy_split', 'y')]),
+                               'y': ([('cleaning_output', 'y')]),
                                'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                'validation_data': (
-                                   [('word_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
+                                   [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')], to_tuple_inputs),
                                },
                       cache_dirpath=config.env.cache_dirpath)
     glove_output = Step(name='output_glove',
@@ -268,7 +298,7 @@ def glove_scnn_inference(config):
                       transformer=GloveSCNN(**config.glove_scnn_network),
                       input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
-                               'y': ([('xy_split', 'y')]),
+                               'y': ([('cleaning_output', 'y')]),
                                'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                },
                       cache_dirpath=config.env.cache_dirpath)
@@ -289,10 +319,10 @@ def glove_dpcnn_train(config):
                        overwrite_transformer=True,
                        input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                        adapter={'X': ([('word_tokenizer', 'X')]),
-                                'y': ([('xy_split', 'y')]),
+                                'y': ([('cleaning_output', 'y')]),
                                 'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                 'validation_data': (
-                                    [('word_tokenizer', 'X_valid'), ('xy_split', 'validation_data')], join_valid),
+                                    [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')], to_tuple_inputs),
                                 },
                        cache_dirpath=config.env.cache_dirpath)
     glove_output = Step(name='output_glove',
@@ -311,7 +341,7 @@ def glove_dpcnn_inference(config):
                        transformer=GloveDPCNN(**config.glove_dpcnn_network),
                        input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                        adapter={'X': ([('word_tokenizer', 'X')]),
-                                'y': ([('xy_split', 'y')]),
+                                'y': ([('cleaning_output', 'y')]),
                                 'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                 },
                        cache_dirpath=config.env.cache_dirpath)
@@ -328,13 +358,13 @@ def tfidf_log_reg(preprocessed_input, config):
     tfidf_char_vectorizer = Step(name='tfidf_char_vectorizer',
                                  transformer=TfidfVectorizer(**config.tfidf_char_vectorizer),
                                  input_steps=[preprocessed_input],
-                                 adapter={'text': ([('xy_split', 'X')], fetch_x_train),
+                                 adapter={'text': ([('cleaning_output', 'X')]),
                                           },
                                  cache_dirpath=config.env.cache_dirpath)
     tfidf_word_vectorizer = Step(name='tfidf_word_vectorizer',
                                  transformer=TfidfVectorizer(**config.tfidf_word_vectorizer),
                                  input_steps=[preprocessed_input],
-                                 adapter={'text': ([('xy_split', 'X')], fetch_x_train),
+                                 adapter={'text': ([('cleaning_output', 'X')]),
                                           },
                                  cache_dirpath=config.env.cache_dirpath)
     log_reg_multi = Step(name='log_reg_multi',
@@ -342,7 +372,7 @@ def tfidf_log_reg(preprocessed_input, config):
                          input_steps=[preprocessed_input, tfidf_char_vectorizer, tfidf_word_vectorizer],
                          adapter={'X': ([('tfidf_char_vectorizer', 'features'),
                                          ('tfidf_word_vectorizer', 'features')], sparse_hstack_inputs),
-                                  'y': ([('xy_split', 'y')]),
+                                  'y': ([('cleaning_output', 'y')]),
                                   },
                          cache_dirpath=config.env.cache_dirpath)
     log_reg_output = Step(name='log_reg_output',
@@ -367,46 +397,56 @@ def tfidf_logreg_inference(config):
 
 
 def ensemble_extraction(config):
-    fill_na_x = Step(name='fill_na_x',
-                     transformer=FillNA(**config.fill_na),
-                     input_data=['input_ensemble'],
-                     adapter={'X': ([('input_ensemble', 'meta')])},
-                     cache_dirpath=config.env.cache_dirpath)
-    xy_split = Step(name='xy_split',
-                    transformer=XYSplit(**config.xy_split),
+    xy_train = Step(name='xy_train',
+                    transformer=XYSplit(**config.xy_splitter),
                     input_data=['input_ensemble'],
-                    input_steps=[fill_na_x],
-                    adapter={'meta': ([('fill_na_x', 'X')]),
+                    adapter={'meta': ([('input_ensemble', 'meta')]),
                              'train_mode': ([('input_ensemble', 'train_mode')])
                              },
                     cache_dirpath=config.env.cache_dirpath)
 
+    text_cleaner_train = Step(name='text_cleaner_train',
+                              transformer=TextCleaner(**config.text_cleaner),
+                              input_steps=[xy_train],
+                              adapter={'X': ([('xy_train', 'X')])},
+                              cache_dirpath=config.env.cache_dirpath)
+
+    cleaning_output = Step(name='cleaning_output',
+                           transformer=Dummy(),
+                           input_data=['input_ensemble'],
+                           input_steps=[xy_train, text_cleaner_train],
+                           adapter={'X': ([('text_cleaner_train', 'X')]),
+                                    'y': ([('xy_train', 'y')]),
+                                    'train_mode': ([('input', 'train_mode')]),
+                                    },
+                           cache_dirpath=config.env.cache_dirpath)
+
     char_tokenizer = Step(name='char_tokenizer',
                           transformer=Tokenizer(**config.char_tokenizer),
-                          input_steps=[xy_split],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'train_mode': ([('xy_split', 'train_mode')])
+                          input_steps=[cleaning_output],
+                          adapter={'X': ([('cleaning_output', 'X')]),
+                                   'train_mode': ([('cleaning_output', 'train_mode')])
                                    },
                           cache_dirpath=config.env.cache_dirpath)
 
     word_tokenizer = Step(name='word_tokenizer',
                           transformer=Tokenizer(**config.word_tokenizer),
-                          input_steps=[xy_split],
-                          adapter={'X': ([('xy_split', 'X')], fetch_x_train),
-                                   'train_mode': ([('xy_split', 'train_mode')])
+                          input_steps=[cleaning_output],
+                          adapter={'X': ([('cleaning_output', 'X')]),
+                                   'train_mode': ([('cleaning_output', 'train_mode')])
                                    },
                           cache_dirpath=config.env.cache_dirpath)
 
     tfidf_char_vectorizer = Step(name='tfidf_char_vectorizer',
                                  transformer=TfidfVectorizer(**config.tfidf_char_vectorizer),
-                                 input_steps=[xy_split],
-                                 adapter={'text': ([('xy_split', 'X')], fetch_x_train),
+                                 input_steps=[cleaning_output],
+                                 adapter={'text': ([('cleaning_output', 'X')]),
                                           },
                                  cache_dirpath=config.env.cache_dirpath)
     tfidf_word_vectorizer = Step(name='tfidf_word_vectorizer',
                                  transformer=TfidfVectorizer(**config.tfidf_word_vectorizer),
-                                 input_steps=[xy_split],
-                                 adapter={'text': ([('xy_split', 'X')], fetch_x_train),
+                                 input_steps=[cleaning_output],
+                                 adapter={'text': ([('cleaning_output', 'X')]),
                                           },
                                  cache_dirpath=config.env.cache_dirpath)
 
@@ -419,44 +459,44 @@ def ensemble_extraction(config):
 
     log_reg_multi = Step(name='log_reg_multi',
                          transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
-                         input_steps=[xy_split, tfidf_char_vectorizer, tfidf_word_vectorizer],
+                         input_steps=[cleaning_output, tfidf_char_vectorizer, tfidf_word_vectorizer],
                          adapter={'X': ([('tfidf_char_vectorizer', 'features'),
                                          ('tfidf_word_vectorizer', 'features')], sparse_hstack_inputs),
-                                  'y': ([('xy_split', 'y')]),
+                                  'y': ([('cleaning_output', 'y')]),
                                   },
                          cache_dirpath=config.env.cache_dirpath,
                          cache_output=True)
 
     char_vdcnn = Step(name='char_vdcnn',
                       transformer=CharVDCNN(**config.char_vdcnn_network),
-                      input_steps=[char_tokenizer, xy_split],
+                      input_steps=[char_tokenizer, cleaning_output],
                       adapter={'X': ([('char_tokenizer', 'X')]),
-                               'y': ([('xy_split', 'y')]),
+                               'y': ([('cleaning_output', 'y')]),
                                },
                       cache_dirpath=config.env.cache_dirpath,
                       cache_output=True)
     word_lstm = Step(name='word_lstm',
                      transformer=WordLSTM(**config.word_lstm_network),
-                     input_steps=[word_tokenizer, xy_split],
+                     input_steps=[word_tokenizer, cleaning_output],
                      adapter={'X': ([('word_tokenizer', 'X')]),
-                              'y': ([('xy_split', 'y')]),
+                              'y': ([('cleaning_output', 'y')]),
                               },
                      cache_dirpath=config.env.cache_dirpath,
                      cache_output=True)
     glove_lstm = Step(name='glove_lstm',
                       transformer=GloveLSTM(**config.glove_lstm_network),
-                      input_steps=[word_tokenizer, xy_split, glove_embeddings],
+                      input_steps=[word_tokenizer, cleaning_output, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
-                               'y': ([('xy_split', 'y')]),
+                               'y': ([('cleaning_output', 'y')]),
                                'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                },
                       cache_dirpath=config.env.cache_dirpath,
                       cache_output=True)
     glove_scnn = Step(name='glove_scnn',
                       transformer=GloveSCNN(**config.glove_scnn_network),
-                      input_steps=[word_tokenizer, xy_split, glove_embeddings],
+                      input_steps=[word_tokenizer, cleaning_output, glove_embeddings],
                       adapter={'X': ([('word_tokenizer', 'X')]),
-                               'y': ([('xy_split', 'y')]),
+                               'y': ([('cleaning_output', 'y')]),
                                'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                },
                       cache_dirpath=config.env.cache_dirpath,
@@ -464,9 +504,9 @@ def ensemble_extraction(config):
 
     glove_dpcnn = Step(name='glove_dpcnn',
                        transformer=GloveDPCNN(**config.glove_dpcnn_network),
-                       input_steps=[word_tokenizer, xy_split, glove_embeddings],
+                       input_steps=[word_tokenizer, cleaning_output, glove_embeddings],
                        adapter={'X': ([('word_tokenizer', 'X')]),
-                                'y': ([('xy_split', 'y')]),
+                                'y': ([('cleaning_output', 'y')]),
                                 'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                 },
                        cache_dirpath=config.env.cache_dirpath,
@@ -506,7 +546,7 @@ def logistic_regression_ensemble_train(config):
     model_outputs = ensemble_extraction(config)
     output_mappings = [(output_step.name, 'prediction_probability') for output_step in model_outputs]
 
-    label = model_outputs[0].get_step('xy_split')
+    label = model_outputs[0].get_step('cleaning_output')
 
     input_steps = model_outputs + [label]
 
@@ -515,7 +555,7 @@ def logistic_regression_ensemble_train(config):
                    overwrite_transformer=True,
                    input_steps=input_steps,
                    adapter={'X': (output_mappings, hstack_inputs),
-                            'y': ([('xy_split', 'y')])},
+                            'y': ([('cleaning_output', 'y')])},
                    cache_dirpath=config.env.cache_dirpath)
 
     log_reg_ensemble_output = Step(name='log_reg_ensemble_output',
