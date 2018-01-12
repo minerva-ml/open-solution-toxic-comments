@@ -92,12 +92,13 @@ class WordDPCNN(CharacterClassifier):
 
 class GloveBasic(CharacterClassifier):
     def fit(self, embedding_matrix, X, y, validation_data):
+        X_valid, y_valid = validation_data
         self.callbacks = self._create_callbacks(**self.callbacks_config)
         self.architecture_config['model_params']['embedding_matrix'] = embedding_matrix
         self.model = self._compile_model(**self.architecture_config)
 
         self.model.fit(X, y,
-                       validation_data=validation_data,
+                       validation_data=[X_valid, y_valid],
                        callbacks=self.callbacks,
                        verbose=1,
                        **self.training_config)
@@ -370,7 +371,7 @@ def _dense_block(dense_size, use_batch_norm, use_prelu, dropout, l2_reg):
 
 def _dpcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg):
     def f(x):
-        x = MaxPooling1D(pool_size=3, stride=2)(x)
+        x = MaxPooling1D(pool_size=3, strides=2)(x)
         main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg)(x)
         main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg)(main)
         x = add([main, x])
@@ -386,7 +387,7 @@ def _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_
         main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg)(x)
         x = add([main, x])
         if not last_block:
-            x = MaxPooling1D(pool_size=3, stride=2)(x)
+            x = MaxPooling1D(pool_size=3, strides=2)(x)
         return x
 
     return f

@@ -25,7 +25,7 @@ class BasicClassifier(BaseTransformer):
         model = self._build_model(**model_params)
         optimizer = self._build_optimizer(**optimizer_params)
         loss = self._build_loss()
-        model.compile(optimizer=optimizer, loss=loss, metrics=['acc'])
+        model.compile(optimizer=optimizer, loss=loss, metrics=['acc', ])
         return model
 
     def _create_callbacks(self, **kwargs):
@@ -41,10 +41,11 @@ class BasicClassifier(BaseTransformer):
         return NotImplementedError
 
     def save(self, filepath):
-        try:
-            checkpoint_filepath = self.callbacks_config['model_checkpoint']['filepath']
+        checkpoint_callback = self.callbacks_config.get('model_checkpoint')
+        if checkpoint_callback:
+            checkpoint_filepath = checkpoint_callback['filepath']
             shutil.copyfile(checkpoint_filepath, filepath)
-        except Exception:
+        else:
             self.model.save(filepath)
 
     def load(self, filepath):

@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [glove, sgd, dpcnn]
+tags: [char, adam, vdcnn]
 
 
 metric:
@@ -27,7 +27,7 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/starter_experiments/glove_dpcnn
+  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/char_vdcnn_ml100_2
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: 0
   num_workers: -2
@@ -38,39 +38,46 @@ parameters:
   maxlen_char: 512
   maxlen_words: 100
   char_ngram_max: 4
+  drop_punctuation: 1
+  all_lower_case: 1
+
 
   # Glove Deep Pyramid Architecture
-  filter_nr: 64
-  kernel_size: 3
-  repeat_block: 2
-  dense_size: 256
-  repeat_dense: 2
-  trainable_embedding: 0
-  word_embedding_size: 300
-  char_embedding_size: None
-  global_pooling: 1
+#  filter_nr: 64
+#  kernel_size: 3
+#  repeat_block: 2
+#  dense_size: 256
+#  repeat_dense: 1
+#  trainable_embedding: 1
+#  word_embedding_size: 300
+#  char_embedding_size: None
+#  global_pooling: 1
 
   # Glove Shallow CNN Architecture
 #  filter_nr: 256
 #  kernel_size: 6
 #  repeat_block: None
 #  dense_size: 256
-#  repeat_dense: 2
-#  trainable_embedding: 0
+#  repeat_dense: 1
+#  trainable_embedding: 1
 #  word_embedding_size: 300
 #  char_embedding_size: None
 #  global_pooling: 1
 
   # Char VDCNN Architecture
-#  filter_nr: 32
-#  kernel_size: 3
-#  repeat_block: 2
-#  global_pooling: 1
-#  trainable_embedding: 1
-#  dense_size: 256
-#  repeat_dense: 2
-#  char_embedding_size: 32
-#  word_embedding_size: None
+  filter_nr: 64
+#      value: [64, 128]
+  kernel_size: 3
+  repeat_block: 3
+#      value: [2, 3, 4, 5]
+  global_pooling: 1
+  trainable_embedding: 1
+  dense_size: 256
+    #value: [256, 512, 1024]
+  repeat_dense: 1
+    #value: [1, 2]
+  char_embedding_size: 16
+  word_embedding_size: None
 
 
   # Glove LSTM Architecture
@@ -85,14 +92,17 @@ parameters:
 #  char_embedding_size: None
 
   # Word LSTM Architecture
-#  filter_nr: 64
+#  filter_nr:
+#    value: [16, 64, 128]
 #  kernel_size: None
-#  repeat_block: 2
+#  repeat_block:
+#    value: [1, 2, 3]
 #  dense_size: 256
 #  repeat_dense: 2
 #  global_pooling: 1
 #  trainable_embedding: 1
-#  word_embedding_size: 64
+#  word_embedding_size:
+#    value: [64, 128, 300]
 #  char_embedding_size: None
 
   # General Architecture
@@ -107,17 +117,18 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 32
+  batch_size_train: 128
   batch_size_inference: 128
-  lr: 0.01
+  lr: 0.001
   momentum: 0.9
   gamma: 0.97
-  patience: 10
+  patience: 5
 
   # Regularization
   use_batch_norm: 0
+    #value: [0,1]
   l2_reg_convo: 0.0001
-  l2_reg_dense: 0.01
+  l2_reg_dense: 0.0
   dropout_lstm: 0.2
   dropout_convo: 0.2
-  dropout_dense: 0.0
+  dropout_dense: 0.5

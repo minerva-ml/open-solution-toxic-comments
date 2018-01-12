@@ -17,10 +17,11 @@ Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_h
 
 SOLUTION_CONFIG = AttrDict({
     'env': {'cache_dirpath': params.experiment_dir},
-    'fill_na': {'na_columns': X_COLUMNS},
     'xy_split': {'x_columns': X_COLUMNS,
                  'y_columns': Y_COLUMNS
                  },
+    'text_cleaner': {'na_columns': X_COLUMNS
+                     },
     'char_tokenizer': {'char_level': True,
                        'maxlen': params.maxlen_char,
                        'num_words': params.max_features_char
