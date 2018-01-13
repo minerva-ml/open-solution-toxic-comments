@@ -24,18 +24,22 @@ class TextCleaner(BaseTransformer):
         x = self._lower(x)
         x = self._remove_punctuation(x)
         x = self._remove_newline(x)
+        x = self._substitute_multiple_spaces(x)
         return x
 
     def _lower(self, x):
         return x.lower()
 
     def _remove_punctuation(self, x):
-        return re.sub(r'[^\w\s]', '', x)
+        return re.sub(r'[^\w\s]', ' ', x)
 
     def _remove_newline(self, x):
-        x = x.replace('\n', '')
-        x = x.replace('\n\n', '')
+        x = x.replace('\n', ' ')
+        x = x.replace('\n\n', ' ')
         return x
+    
+    def _substitute_multiple_spaces(self, x):
+        return ' '.join(x.split())
 
     def load(self, filepath):
         params = joblib.load(filepath)

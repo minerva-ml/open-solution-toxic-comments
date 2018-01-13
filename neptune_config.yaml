@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [prepro, sgd, glove,  dpcnn]
+tags: [prepro, logreg, tfidf]
 
 
 metric:
@@ -27,13 +27,13 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/glove_dpcnn_ml100
+  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/tfidf_logreg_ml100 #char_vdcnn_ml100
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   overwrite: 0
   num_workers: -2
 
   # Preprocessing
-  max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_char: 100000 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 100
@@ -44,15 +44,15 @@ parameters:
 
 
   # Glove Deep Pyramid Architecture
-  filter_nr: 64
-  kernel_size: 3
-  repeat_block: 2
-  dense_size: 256
-  repeat_dense: 1
-  trainable_embedding: 1
-  word_embedding_size: 300
-  char_embedding_size: None
-  global_pooling: 1
+#  filter_nr: 64
+#  kernel_size: 3
+#  repeat_block: 2
+#  dense_size: 256
+#  repeat_dense: 1
+#  trainable_embedding: 1
+#  word_embedding_size: 300
+#  char_embedding_size: None
+#  global_pooling: 1
 
   # Glove Shallow CNN Architecture
 #  filter_nr: 256
@@ -66,19 +66,19 @@ parameters:
 #  global_pooling: 1
 
   # Char VDCNN Architecture
-#  filter_nr: 64
+  filter_nr: 64
 #      value: [64, 128]
-#  kernel_size: 3
-#  repeat_block: 3
+  kernel_size: 3
+  repeat_block: 3
 #      value: [2, 3, 4, 5]
-#  global_pooling: 1
-#  trainable_embedding: 1
-#  dense_size: 256
+  global_pooling: 1
+  trainable_embedding: 1
+  dense_size: 512
     #value: [256, 512, 1024]
-#  repeat_dense: 1
+  repeat_dense: 1
     #value: [1, 2]
-#  char_embedding_size: 16
-#  word_embedding_size: None
+  char_embedding_size: 16
+  word_embedding_size: None
 
 
   # Glove LSTM Architecture
@@ -118,9 +118,9 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 32
+  batch_size_train: 64
   batch_size_inference: 128
-  lr: 0.01
+  lr: 0.001
   momentum: 0.9
   gamma: 0.97
   patience: 5
@@ -131,5 +131,5 @@ parameters:
   l2_reg_convo: 0.0001
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
-  dropout_convo: 0.2
-  dropout_dense: 0.5
+  dropout_convo: 0.1
+  dropout_dense: 0.25
