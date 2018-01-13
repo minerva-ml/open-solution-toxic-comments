@@ -245,6 +245,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'dropout_dense': params.dropout_dense
                                                  },
                                 'optimizer_params': {'lr': params.lr,
+                                                     'momentum': params.momentum,
+                                                     'nesterov': True
                                                      },
                                 },
         'training_config': {'epochs': params.epochs_nr,

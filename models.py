@@ -41,7 +41,7 @@ class CharacterClassifier(ClassifierXY):
 
 class CharVDCNN(CharacterClassifier):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return SGD(**kwargs)
 
     def _build_model(self, embedding_size,
                      maxlen, max_features,
