@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [test, dpcnn]
+tags: [prepro, sgd, glove,  dpcnn]
 
 
 metric:
@@ -107,7 +107,7 @@ parameters:
 #  char_embedding_size: None
 
   # General Architecture
-  use_prelu: 0
+  use_prelu: 1
 
   # Log Reg Params
   log_reg_c: 4.0
@@ -117,10 +117,10 @@ parameters:
   weights: None
 
   # Training schedule
-  epochs_nr: 1
-  batch_size_train: 128
+  epochs_nr: 1000
+  batch_size_train: 32
   batch_size_inference: 128
-  lr: 0.001
+  lr: 0.01
   momentum: 0.9
   gamma: 0.97
   patience: 5
