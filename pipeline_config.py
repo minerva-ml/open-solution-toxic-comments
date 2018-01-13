@@ -264,6 +264,7 @@ SOLUTION_CONFIG = AttrDict({
     'logistic_regression_multilabel': {'label_nr': 6,
                                        'C': params.log_reg_c,
                                        'solver': 'sag',
+                                       'max_iter': params.max_iter, 
                                        'n_jobs': params.num_workers,
                                        },
     'logistic_regression_ensemble': {'label_nr': 6,
