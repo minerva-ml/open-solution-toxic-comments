@@ -39,6 +39,8 @@ parameters:
   maxlen_words: 100
   char_ngram_max: 4
   drop_punctuation: 1
+  drop_newline: 1
+  drop_multispaces: 1
   all_lower_case: 1
   fill_na_with: ' '
 
