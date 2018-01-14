@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [count_features, bad_words, svm]
+tags: [count_features, svm]
 
 
 metric:
@@ -27,7 +27,7 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/bad_word_count_features_svm_ml100
+  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/count_features_svm_best
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 1
@@ -40,8 +40,6 @@ parameters:
   maxlen_words: 100
   char_ngram_max: 4
   drop_punctuation: 1
-  drop_newline: 1
-  drop_multispaces: 1
   all_lower_case: 1
   fill_na_with: ' '
 
@@ -116,20 +114,9 @@ parameters:
   log_reg_c: 4.0
   max_iter: 1000
 
-  # SVM Params
-  svm_C:
-      value: [0.01, 0.1, 1, 10]
-  svm_gamma:
-    value: [0.001, 0.01, 0.1, 1]
-  
   # Ensemble Log Reg
   ensemble_log_reg_c: 1.0
-  
-  # Ensemble weighted average
   weights: None
-
-  # Ensemble Random Forest
-  rf_n_estimators: 500
 
   # Training schedule
   epochs_nr: 1000

@@ -40,22 +40,29 @@ class WordListFilter(BaseTransformer):
         
     
 class TextCleaner(BaseTransformer):
-    def __init__(self, drop_punctuation, all_lower_case, fill_na_with):
+    def __init__(self, drop_punctuation, drop_newline, drop_multispaces, all_lower_case, fill_na_with):
         self.drop_punctuation = drop_punctuation
+        self.drop_newline = drop_newline
+        self.drop_multispaces = drop_multispaces
         self.all_lower_case = all_lower_case
         self.fill_na_with = fill_na_with
 
     def transform(self, X):
         X = pd.DataFrame(X, columns=['text']).astype(str)
         X['text'] = X['text'].apply(self._transform)
-        X['text'] = X['text'].fillna(self.fill_na_with).values
+        if self.fill_na_with:
+            X['text'] = X['text'].fillna(self.fill_na_with).values
         return {'X': X['text'].values}
 
     def _transform(self, x):
-        x = self._lower(x)
-        x = self._remove_punctuation(x)
-        x = self._remove_newline(x)
-        x = self._substitute_multiple_spaces(x)
+        if self.all_lower_case:
+            x = self._lower(x)
+        if self.drop_punctuation:
+            x = self._remove_punctuation(x)
+        if self.drop_newline:
+            x = self._remove_newline(x)
+        if self.drop_multispaces:
+            x = self._substitute_multiple_spaces(x)
         return x
 
     def _lower(self, x):
@@ -149,6 +156,7 @@ class TextCounter(BaseTransformer):
         features['lower_case_count'] = lower_case_count(x)
         features['digit_count'] = digit_count(x)
         features['space_count'] = space_count(x)
+        features['newline_count'] = newline_count(x)
         return pd.Series(features)
 
     def load(self, filepath):
@@ -183,6 +191,9 @@ def char_count(x):
 
 def word_count(x):
     return len(x.split())
+
+def newline_count(x):
+    return x.count('\n')
 
 def upper_case_count(x):
     return sum(c.isupper() for c in x)

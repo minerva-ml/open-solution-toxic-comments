@@ -15,7 +15,7 @@ from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D
     PReLU, BatchNormalization, Lambda
 from keras.layers.merge import add
 from keras.models import Model
-from keras.optimizers import Adam, SGD, Adagrad, Adadelta
+from keras.optimizers import SGD, Adam, Adagrad, Adadelta
 
 from steps.keras.callbacks import NeptuneMonitor, ReduceLR
 from steps.keras.models import ClassifierXY
@@ -24,7 +24,7 @@ from steps.utils import create_filepath
 
 class CharacterClassifier(ClassifierXY):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return SGD(**kwargs)
 
     def _build_loss(self, **kwargs):
         return 'binary_crossentropy'
@@ -57,7 +57,7 @@ class CharVDCNN(CharacterClassifier):
 
 class WordLSTM(CharacterClassifier):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return SGD(**kwargs)
 
     def _build_model(self, embedding_size,
                      maxlen, max_features,
@@ -73,7 +73,7 @@ class WordLSTM(CharacterClassifier):
 
 class WordDPCNN(CharacterClassifier):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return SGD(**kwargs)
 
     def _build_model(self, embedding_size,
                      maxlen, max_features,
@@ -110,7 +110,7 @@ class GloveBasic(CharacterClassifier):
 
 class GloveLSTM(GloveBasic):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return SGD(**kwargs)
 
     def _build_model(self, embedding_matrix, embedding_size,
                      maxlen, max_features,
