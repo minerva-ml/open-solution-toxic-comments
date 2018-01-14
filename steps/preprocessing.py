@@ -4,54 +4,14 @@ import string
 import pandas as pd
 from sklearn.externals import joblib
 from sklearn.feature_extraction import text
+import sklearn.preprocessing as sk_prep
 
 from .base import BaseTransformer
 
 
-class BadWordCountVectorizer(BaseTransformer):
-    def __init__(self, bad_word_filepath):
-        self.bad_word_filepath = bad_word_filepath
-        self.bad_words = joblib.load(bad_word_filepath)
-        self.vectorizer = text.CountVectorizer()
-    
-    def fit(self, X):
-        X = self._prepare(X)
-        self.vectorizer.fit(X)
-        return self
-        
-    def transform(self, X):
-        X = self._prepare(X)
-        X = self.vectorizer.transform(X)
-        return {'X': X}
-    
-    def _prepare(self, X):
-        X = pd.DataFrame(X, columns=['text']).astype(str)
-        X['text'] = X['text'].apply(self._filter_words)
-        return X['text'].values
-    
-    def _filter_words(self, x):
-        x = x.lower()
-        x = ' '.join([w for w in x.split() if w in self.bad_words])
-        return x
-
-    
-    def load(self, filepath):
-        params = joblib.load(filepath)
-        self.bad_words = params['bad_words']
-        self.vectorizer = params['vectorizer']
-        return self
-
-    def save(self, filepath):
-        params = {'bad_words': self.bad_words,
-                  'vectorizer': self.vectorizer
-                  }
-        joblib.dump(params, filepath)
-    
-    
-class BadWordCounter(BaseTransformer):
-    def __init__(self, bad_word_filepath):
-        self.bad_word_filepath = bad_word_filepath
-        self.bad_words = joblib.load(bad_word_filepath)
+class WordListFilter(BaseTransformer):
+    def __init__(self, word_list_filepath):
+        self.word_set = self._read_data(word_list_filepath)
         
     def transform(self, X):
         X = self._transform(X)
@@ -59,19 +19,25 @@ class BadWordCounter(BaseTransformer):
     
     def _transform(self, X):
         X = pd.DataFrame(X, columns=['text']).astype(str)
-        X['text'] = X['text'].apply(self._count_bad_words)
+        X['text'] = X['text'].apply(self._filter_words)
         return X['text'].values
     
-    def _count_bad_words(self, x):
+    def _filter_words(self, x):
         x = x.lower()
-        x = [w for w in x.split() if w in self.bad_words]
-        return len(x)
+        x = ' '.join([w for w in x.split() if w in self.word_set])
+        return x
     
+    def _read_data(self, filepath):
+        with open(filepath, 'r+') as f:
+            data = f.read()
+        return set(data.split('\n'))
+
     def load(self, filepath):
         return self
 
     def save(self, filepath):
         joblib.dump({}, filepath)
+        
     
 class TextCleaner(BaseTransformer):
     def __init__(self, drop_punctuation, all_lower_case, fill_na_with):
@@ -190,6 +156,27 @@ class TextCounter(BaseTransformer):
 
     def save(self, filepath):
         joblib.dump({}, filepath)
+    
+    
+class Normalizer(BaseTransformer):   
+    def __init__(self):
+        self.normalizer = sk_prep.Normalizer()
+        
+    def fit(self, X):
+        self.normalizer.fit(X)
+        return self
+    
+    def transform(self, X):
+        X = self.normalizer.transform(X)
+        return {'X': X}
+
+    def load(self, filepath):
+        self.normalizer = joblib.load(filepath)
+        return self
+
+    def save(self, filepath):
+        joblib.dump(self.normalizer, filepath)
+    
     
 def char_count(x):
     return len(x)

@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [prepro, char, vdcnn, sgd]
+tags: [count_features, logreg]
 
 
 metric:
@@ -27,8 +27,9 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/char_vdcnn_ml100
+  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/count_features_logreg_ml100
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+  bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 0
   num_workers: -2
 

@@ -7,7 +7,7 @@ from steps.base import Step, Dummy, stack_inputs, hstack_inputs, sparse_hstack_i
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix
 from steps.postprocessing import PredictionAverage
-from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer
+from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter
 from steps.sklearn.models import LogisticRegressionMultilabel
 
 
@@ -396,6 +396,85 @@ def tfidf_logreg_inference(config):
     return logreg_output
 
 
+def bad_word_tfidf_log_reg(preprocessed_input, config):
+    bad_word_filter = Step(name='bad_word_filter',
+                                 transformer=WordListFilter(**config.bad_word_filter),
+                                 input_steps=[preprocessed_input],
+                                 adapter={'X': ([('cleaning_output', 'X')]),
+                                          },
+                                 cache_dirpath=config.env.cache_dirpath)
+        
+    tfidf_word_vectorizer = Step(name='tfidf_word_vectorizer',
+                                 transformer=TfidfVectorizer(**config.tfidf_word_vectorizer),
+                                 input_steps=[bad_word_filter],
+                                 adapter={'text': ([('bad_word_filter', 'X')]),
+                                          },
+                                 cache_dirpath=config.env.cache_dirpath)
+    log_reg_multi = Step(name='log_reg_multi',
+                         transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
+                         input_steps=[preprocessed_input, tfidf_word_vectorizer],
+                         adapter={'X': ([('tfidf_word_vectorizer', 'features')]),
+                                  'y': ([('cleaning_output', 'y')]),
+                                  },
+                         cache_dirpath=config.env.cache_dirpath)
+    log_reg_output = Step(name='log_reg_output',
+                          transformer=Dummy(),
+                          input_steps=[log_reg_multi],
+                          adapter={'y_pred': ([('log_reg_multi', 'prediction_probability')]),
+                                   },
+                          cache_dirpath=config.env.cache_dirpath)
+    return log_reg_output
+
+def bad_word_tfidf_logreg_train(config):
+    preprocessed_input = train_preprocessing(config)
+    logreg_output = bad_word_tfidf_log_reg(preprocessed_input, config)
+    return logreg_output
+
+
+def bad_word_tfidf_logreg_inference(config):
+    preprocessed_input = inference_preprocessing(config)
+    logreg_output = bad_word_tfidf_log_reg(preprocessed_input, config)
+    return logreg_output
+
+
+def count_features_log_reg(config):
+    xy_split = Step(name='xy_split',
+                    transformer=XYSplit(**config.xy_splitter),
+                    input_data=['input'],
+                    adapter={'meta': ([('input', 'meta')]),
+                             'train_mode': ([('input', 'train_mode')])
+                             },
+                    cache_dirpath=config.env.cache_dirpath)
+
+    text_counter = Step(name='text_counter',
+                              transformer=TextCounter(),
+                              input_steps=[xy_split],
+                              adapter={'X': ([('xy_split', 'X')])},
+                              cache_dirpath=config.env.cache_dirpath)
+
+    normalizer = Step(name='normalizer',
+                      transformer=Normalizer(),
+                      input_steps=[text_counter],
+                      adapter={'X': ([('text_counter', 'X')])},
+                      cache_dirpath=config.env.cache_dirpath)
+        
+    log_reg_multi = Step(name='log_reg_multi',
+                         transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
+                         input_steps=[xy_split, normalizer],
+                         adapter={'X': ([('normalizer', 'X')]),
+                                  'y': ([('xy_split', 'y')]),
+                                  },
+                         cache_dirpath=config.env.cache_dirpath)
+    
+    log_reg_output = Step(name='log_reg_output',
+                          transformer=Dummy(),
+                          input_steps=[log_reg_multi],
+                          adapter={'y_pred': ([('log_reg_multi', 'prediction_probability')]),
+                                   },
+                          cache_dirpath=config.env.cache_dirpath)
+    return log_reg_output
+
+
 def ensemble_extraction(config):
     xy_train = Step(name='xy_train',
                     transformer=XYSplit(**config.xy_splitter),
@@ -586,6 +665,10 @@ PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
                              'inference': glove_dpcnn_inference},
              'tfidf_logreg': {'train': tfidf_logreg_train,
                               'inference': tfidf_logreg_inference},
+             'bad_word_tfidf_logreg': {'train': bad_word_tfidf_logreg_train,
+                                       'inference': bad_word_tfidf_logreg_inference},
+             'count_features_logreg': {'train': count_features_log_reg,
+                                       'inference': count_features_log_reg},
              'weighted_average_ensemble': {'train': weighted_average_ensemble_train,
                                            'inference': weighted_average_ensemble_inference},
              'log_reg_ensemble': {'train': logistic_regression_ensemble_train,
