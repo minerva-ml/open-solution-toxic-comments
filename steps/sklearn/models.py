@@ -1,5 +1,6 @@
 import numpy as np
 import sklearn.linear_model as lr
+from sklearn import svm
 from sklearn.externals import joblib
 
 from steps.base import BaseTransformer
@@ -45,4 +46,42 @@ class LogisticRegressionMultilabel(BaseTransformer):
     def save(self, filepath):
         params = {'label_nr': self.label_nr,
                   'logistic_regressors': self.logistic_regressors}
+        joblib.dump(params, filepath)
+
+        
+class SVCMultilabel(BaseTransformer):
+    def __init__(self, label_nr, **kwargs):
+        self.label_nr = label_nr
+        self.svcs = self._get_svcs(**kwargs)
+
+    def _get_svcs(self, **kwargs):
+        svcs = []
+        for i in range(self.label_nr):
+            svcs.append((i, svm.SVC(**kwargs)))
+        return svcs
+
+    def fit(self, X, y):
+        for i, svc in self.svcs:
+            logger.info('fitting svm {}'.format(i))
+            svc.fit(X, y[:, i])
+        return self
+
+    def transform(self, X, y=None):
+        predictions = []
+        for i, svc in self.svcs:
+            prediction = svc.predict_proba(X)
+            predictions.append(prediction)
+        predictions = np.stack(predictions, axis=0)
+        predictions = predictions[:, :, 1].transpose()
+        return {'prediction_probability': predictions}
+
+    def load(self, filepath):
+        params = joblib.load(filepath)
+        self.label_nr = params['label_nr']
+        self.svcs = params['svcs']
+        return self
+
+    def save(self, filepath):
+        params = {'label_nr': self.label_nr,
+                  'svcs': self.svcs}
         joblib.dump(params, filepath)

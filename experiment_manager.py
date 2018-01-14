@@ -38,7 +38,7 @@ def _train_pipeline(pipeline_name):
     if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
 
-    train = read_data(data_dir=params.data_dir, filename='train_split.csv')
+    train = read_data(data_dir=params.data_dir, filename='train_split.csv')#.sample(1000)
     valid = read_data(data_dir=params.data_dir, filename='valid_split.csv')
 
     data = {'input': {'meta': train,

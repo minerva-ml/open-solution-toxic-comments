@@ -270,6 +270,8 @@ SOLUTION_CONFIG = AttrDict({
                                        'max_iter': params.max_iter, 
                                        'n_jobs': params.num_workers,
                                        },
+    'svc_multilabel':{'label_nr': 6,
+                      'probability':True},
     'logistic_regression_ensemble': {'label_nr': 6,
                                      'C': params.ensemble_log_reg_c,
                                      'n_jobs': params.num_workers,
