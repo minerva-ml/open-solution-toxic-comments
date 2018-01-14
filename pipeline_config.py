@@ -285,9 +285,9 @@ SOLUTION_CONFIG = AttrDict({
                                      'C': params.ensemble_log_reg_c,
                                      'n_jobs': params.num_workers,
                                      },
-    'random_forest': {'label_nr': 6,
-                      'n_estimator': params.rf_n_estimators,
-                      'n_jobs': params.num_workers,
+    'random_forest_ensemble': {'label_nr': 6,
+                               'n_estimator': params.rf_n_estimators,
+                               'n_jobs': params.num_workers,
                      },
     'prediction_average': {'weights': params.weights
                            }

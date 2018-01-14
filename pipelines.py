@@ -8,7 +8,7 @@ from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix
 from steps.postprocessing import PredictionAverage
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter
-from steps.sklearn.models import LogisticRegressionMultilabel, SVCMultilabel
+from steps.sklearn.models import LogisticRegressionMultilabel, SVCMultilabel, RandomForestMultilabel
 
 
 def train_preprocessing(config):
@@ -802,6 +802,35 @@ def logistic_regression_ensemble_inference(config):
         step.cache_output = False
     return linear_regression_ensemble
 
+def random_forest_ensemble_train(config):
+    model_outputs = ensemble_extraction(config)
+    output_mappings = [(output_step.name, 'prediction_probability') for output_step in model_outputs]
+
+    label = model_outputs[0].get_step('cleaning_output')
+
+    input_steps = model_outputs + [label]
+
+    random_forest_ensemble = Step(name='random_forest_ensemble',
+                   transformer=RandomForestMultilabel(**config.random_forest_ensemble),
+                   overwrite_transformer=True,
+                   input_steps=input_steps,
+                   adapter={'X': (output_mappings, hstack_inputs),
+                            'y': ([('cleaning_output', 'y')])},
+                   cache_dirpath=config.env.cache_dirpath)
+
+    random_forest_ensemble_output = Step(name='random_forest_ensemble_output',
+                                   transformer=Dummy(),
+                                   input_steps=[random_forest_ensemble],
+                                   adapter={'y_pred': ([('random_forest', 'prediction_probability')])},
+                                   cache_dirpath=config.env.cache_dirpath)
+    return random_forest_ensemble_output
+
+def random_forest_ensemble_inference(config):
+    linear_regression_ensemble = logistic_regression_ensemble_train(config)
+    linear_regression_ensemble.get_step('logreg_ensemble').overwrite_transformer = False
+    for step in linear_regression_ensemble.get_step('logreg_ensemble').input_steps:
+        step.cache_output = False
+    return linear_regression_ensemble
 
 PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
                             'inference': char_vdcnn_inference},
@@ -834,5 +863,7 @@ PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
              'weighted_average_ensemble': {'train': weighted_average_ensemble_train,
                                            'inference': weighted_average_ensemble_inference},
              'logreg_ensemble': {'train': logistic_regression_ensemble_train,
-                                  'inference': logistic_regression_ensemble_inference},
+                                 'inference': logistic_regression_ensemble_inference},
+             'random_forest_ensemble': {'train': random_forest_ensemble_train,
+                                        'inference': random_forest_ensemble_inference},
              }

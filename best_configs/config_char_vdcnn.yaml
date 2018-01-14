@@ -39,6 +39,8 @@ parameters:
   maxlen_words: 100
   char_ngram_max: 4
   drop_punctuation: 1
+  drop_newline: 1
+  drop_multispaces: 1
   all_lower_case: 1
   fill_na_with: ' '
 
@@ -113,9 +115,14 @@ parameters:
   log_reg_c: 4.0
   max_iter: 1000
 
+  # Ensemble weighted average
+  weights: None
+
   # Ensemble Log Reg
   ensemble_log_reg_c: 1.0
-  weights: None
+
+  # Ensemble Random Forest
+  rf_n_estimators: 1000
 
   # Training schedule
   epochs_nr: 1000

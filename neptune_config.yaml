@@ -122,14 +122,14 @@ parameters:
   svm_gamma:
     value: [0.001, 0.01, 0.1, 1]
   
-  # Ensemble Log Reg
-  ensemble_log_reg_c: 1.0
-  
   # Ensemble weighted average
   weights: None
 
+  # Ensemble Log Reg
+  ensemble_log_reg_c: 1.0
+
   # Ensemble Random Forest
-  rf_n_estimators: 500
+  rf_n_estimators: 1000
 
   # Training schedule
   epochs_nr: 1000
