@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [prepro, char, vdcnn]
+tags: [prepro, glove, lstm, adam]
 
 
 metric:
@@ -9,7 +9,7 @@ metric:
   goal: minimize
 
 #Comment out if not in Cloud Environment
-#pip-requirements-file: requirements.txt
+pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,13 +22,13 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir: /public/toxic_comments
-#  experiment_dir: /output/experiments/glove_lstm
-#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+  data_dir: /public/toxic_comments
+  experiment_dir: /output/experiments/glove_lstm
+  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/char_vdcnn_ml100
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+#  data_dir: my/path/to/toxic/data
+#  experiment_dir: my/path/to/experiments/glove_lstm
+#  embedding_filepath: my/path/to/glove.840B.300d.txt
   overwrite: 0
   num_workers: -2
 
