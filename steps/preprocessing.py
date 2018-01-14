@@ -1,24 +1,64 @@
+import re
+import string
+
+import pandas as pd
 from sklearn.externals import joblib
 from sklearn.feature_extraction import text
 
 from .base import BaseTransformer
 
 
-class FillNA(BaseTransformer):
-    def __init__(self, na_columns):
-        self.na_columns = na_columns
+class TextCleaner(BaseTransformer):
+    def __init__(self, drop_punctuation, drop_newline, drop_multispaces, all_lower_case, fill_na_with):
+        self.drop_punctuation = drop_punctuation
+        self.drop_newline = drop_newline
+        self.drop_multispaces = drop_multispaces
+        self.all_lower_case = all_lower_case
+        self.fill_na_with = fill_na_with
 
     def transform(self, X):
-        X[self.na_columns] = X[self.na_columns].fillna("unknown").values
-        return {'X': X}
+        X = pd.DataFrame(X, columns=['text']).astype(str)
+        X['text'] = X['text'].apply(self._transform)
+        if self.fill_na_with:
+            X['text'] = X['text'].fillna(self.fill_na_with).values
+        return {'X': X['text'].values}
+
+    def _transform(self, x):
+        if self.all_lower_case:
+            x = self._lower(x)
+        if self.drop_punctuation:
+            x = self._remove_punctuation(x)
+        if self.drop_newline:
+            x = self._remove_newline(x)
+        if self.drop_multispaces:
+            x = self._substitute_multiple_spaces(x)
+        return x
+
+    def _lower(self, x):
+        return x.lower()
+
+    def _remove_punctuation(self, x):
+        return re.sub(r'[^\w\s]', ' ', x)
+
+    def _remove_newline(self, x):
+        x = x.replace('\n', ' ')
+        x = x.replace('\n\n', ' ')
+        return x
+    
+    def _substitute_multiple_spaces(self, x):
+        return ' '.join(x.split())
 
     def load(self, filepath):
         params = joblib.load(filepath)
-        self.na_columns = params['na_columns']
+        self.drop_punctuation = params['drop_punctuation']
+        self.all_lower_case = params['all_lower_case']
+        self.fill_na_with = params['fill_na_with']
         return self
 
     def save(self, filepath):
-        params = {'na_columns': self.na_columns,
+        params = {'drop_punctuation': self.drop_punctuation,
+                  'all_lower_case': self.all_lower_case,
+                  'fill_na_with': self.fill_na_with,
                   }
         joblib.dump(params, filepath)
 
@@ -28,24 +68,15 @@ class XYSplit(BaseTransformer):
         self.x_columns = x_columns
         self.y_columns = y_columns
 
-    def transform(self, meta, meta_valid=None, train_mode=True):
+    def transform(self, meta, train_mode):
         X = meta[self.x_columns].values
         if train_mode:
             y = meta[self.y_columns].values
         else:
             y = None
 
-        if meta_valid is not None:
-            X_valid = meta_valid[self.x_columns].values
-            y_valid = meta_valid[self.y_columns].values
-            valid = X_valid, y_valid
-        else:
-            valid = None
-
         return {'X': X,
-                'y': y,
-                'validation_data': valid,
-                'train_mode': train_mode}
+                'y': y}
 
     def load(self, filepath):
         params = joblib.load(filepath)

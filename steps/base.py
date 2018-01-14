@@ -249,6 +249,10 @@ class Dummy(BaseTransformer):
         joblib.dump({}, filepath)
 
 
+def to_tuple_inputs(inputs):
+    return tuple(inputs)
+
+
 def identity_inputs(inputs):
     return inputs[0]
 

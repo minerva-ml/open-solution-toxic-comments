@@ -17,10 +17,15 @@ Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_h
 
 SOLUTION_CONFIG = AttrDict({
     'env': {'cache_dirpath': params.experiment_dir},
-    'fill_na': {'na_columns': X_COLUMNS},
-    'xy_split': {'x_columns': X_COLUMNS,
-                 'y_columns': Y_COLUMNS
-                 },
+    'xy_splitter': {'x_columns': X_COLUMNS,
+                    'y_columns': Y_COLUMNS
+                    },
+    'text_cleaner': {'drop_punctuation': bool(params.drop_punctuation),
+                     'drop_newline': bool(params.drop_newline),
+                     'drop_multispaces': bool(params.drop_multispaces),
+                     'all_lower_case': bool(params.all_lower_case),
+                     'fill_na_with': params.fill_na_with                     
+                     },
     'char_tokenizer': {'char_level': True,
                        'maxlen': params.maxlen_char,
                        'num_words': params.max_features_char
@@ -261,6 +266,7 @@ SOLUTION_CONFIG = AttrDict({
     'logistic_regression_multilabel': {'label_nr': 6,
                                        'C': params.log_reg_c,
                                        'solver': 'sag',
+                                       'max_iter': params.max_iter, 
                                        'n_jobs': params.num_workers,
                                        },
     'logistic_regression_ensemble': {'label_nr': 6,
