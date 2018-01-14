@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [count_features, bad_words, svm]
+tags: [prepro, tfidf, logreg]
 
 
 metric:
@@ -27,18 +27,21 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/bad_word_count_features_svm_ml100
+  experiment_dir: /mnt/ml-team/minerva/toxic/experiments/tfidf_logreg_ml100
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 1
   num_workers: -2
 
   # Preprocessing
-  max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
-  max_features_word: 100000
+  max_features_char: #100 for vdcnn, for tfidf something like 20000 should be used
+      value: [10000, 20000, 100000]
+  max_features_word: 
+      value: [10000, 20000, 100000]
   maxlen_char: 512
   maxlen_words: 100
-  char_ngram_max: 4
+  char_ngram_max: 
+      value: [3, 4]
   drop_punctuation: 1
   drop_newline: 1
   drop_multispaces: 1
@@ -113,14 +116,15 @@ parameters:
   use_prelu: 0
 
   # Log Reg Params
-  log_reg_c: 4.0
+  log_reg_c:
+      value: [0.1, 1, 10, 100]
+  log_reg_penalty: 'l2'
+#      value: ['l1','l2']
   max_iter: 1000
 
   # SVM Params
-  svm_C:
-      value: [0.01, 0.1, 1, 10]
-  svm_gamma:
-    value: [0.001, 0.01, 0.1, 1]
+  svm_C: 0.001
+#      value: [0.001, 0.01, 0.1, 1, 10]
   
   # Ensemble weighted average
   weights: None

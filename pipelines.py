@@ -8,7 +8,7 @@ from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix
 from steps.postprocessing import PredictionAverage
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter
-from steps.sklearn.models import LogisticRegressionMultilabel, SVCMultilabel, RandomForestMultilabel
+from steps.sklearn.models import LogisticRegressionMultilabel, LinearSVCMultilabel, RandomForestMultilabel
 
 
 def train_preprocessing(config):
@@ -393,7 +393,7 @@ def tfidf_svm(config):
     tfidf_char_vectorizer, tfidf_word_vectorizer = tfidf(preprocessed_input, config)
     
     svm_multi = Step(name='svm_multi',
-                         transformer=SVCMultilabel(**config.logistic_regression_multilabel),
+                         transformer=LinearSVCMultilabel(**config.svc_multilabel),
                          input_steps=[preprocessed_input, tfidf_char_vectorizer, tfidf_word_vectorizer],
                          adapter={'X': ([('tfidf_char_vectorizer', 'features'),
                                          ('tfidf_word_vectorizer', 'features')], sparse_hstack_inputs),
@@ -448,7 +448,7 @@ def bad_word_tfidf_svm(config):
     tfidf_word_vectorizer = bad_word_tfidf(preprocessed_input, config)
     
     svm_multi = Step(name='svm_multi',
-                         transformer=SVCMultilabel(),
+                         transformer=LinearSVCMultilabel(**config.svc_multilabel),
                          input_steps=[preprocessed_input, tfidf_word_vectorizer],
                          adapter={'X': ([('bad_word_tfidf_word_vectorizer', 'features')]),
                                   'y': ([('cleaning_output', 'y')]),
@@ -510,7 +510,7 @@ def count_features_svm(config):
     xy_split = normalizer.get_step('xy_split')
         
     svm_multi = Step(name='svm_multi',
-                         transformer=SVCMultilabel(),
+                         transformer=LinearSVCMultilabel(**config.svc_multilabel),
                          input_steps=[xy_split, normalizer],
                          adapter={'X': ([('normalizer', 'X')]),
                                   'y': ([('xy_split', 'y')]),
@@ -556,7 +556,7 @@ def bad_word_count_features_svm(config):
 
     
     svm_multi = Step(name='svm_multi',
-                         transformer=SVCMultilabel(**config.svc_multilabel),
+                         transformer=LinearSVCMultilabel(**config.svc_multilabel),
                          input_steps=[xy_split, normalizer, tfidf_word_vectorizer],
                          adapter={'X': ([('normalizer', 'X'),
                                          ('bad_word_tfidf_word_vectorizer', 'features')], sparse_hstack_inputs),
@@ -607,7 +607,7 @@ def hand_crafted_all_svm(config):
     xy_split, normalizer, char_vector, word_vector, bad_word_vector =  hand_crafted_all(config)
     
     svm_multi = Step(name='svm_multi',
-                         transformer=SVCMultilabel(**config.svc_multilabel),
+                         transformer=LinearSVCMultilabel(**config.svc_multilabel),
                          input_steps=[xy_split, normalizer, char_vector, word_vector, bad_word_vector],
                          adapter={'X': ([('normalizer', 'X'),
                                          ('tfidf_char_vectorizer', 'features'),
@@ -826,11 +826,11 @@ def random_forest_ensemble_train(config):
     return random_forest_ensemble_output
 
 def random_forest_ensemble_inference(config):
-    linear_regression_ensemble = logistic_regression_ensemble_train(config)
-    linear_regression_ensemble.get_step('logreg_ensemble').overwrite_transformer = False
-    for step in linear_regression_ensemble.get_step('logreg_ensemble').input_steps:
+    random_forest_ensemble = random_forest_ensemble_train(config)
+    random_forest_ensemble.get_step('random_forest_ensemble').overwrite_transformer = False
+    for step in random_forest_ensemble.get_step('random_forest_ensemble').input_steps:
         step.cache_output = False
-    return linear_regression_ensemble
+    return random_forest_ensemble
 
 PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
                             'inference': char_vdcnn_inference},

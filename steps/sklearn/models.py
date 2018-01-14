@@ -1,7 +1,7 @@
 import numpy as np
 import sklearn.linear_model as lr
 from sklearn import svm
-from sklearn.ensamble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
 
 from steps.base import BaseTransformer
@@ -45,12 +45,12 @@ class MultilabelEstimator(BaseTransformer):
     def load(self, filepath):
         params = joblib.load(filepath)
         self.label_nr = params['label_nr']
-        self.estimator = params['estimator']
+        self.estimators = params['estimators']
         return self
 
     def save(self, filepath):
         params = {'label_nr': self.label_nr,
-                  'estimator': self.estimator}
+                  'estimators': self.estimators}
         joblib.dump(params, filepath)
         
 
@@ -63,8 +63,27 @@ class LogisticRegressionMultilabel(MultilabelEstimator):
 class SVCMultilabel(MultilabelEstimator):
     @property
     def estimator(self):
-        return lr.svm.SVC
+        return svm.SVC
 
+class LinearSVC_proba(svm.LinearSVC):
+
+    def __platt_func(self,x):
+        return 1/(1+np.exp(-x))
+
+    def predict_proba(self, X):
+        f = np.vectorize(self.__platt_func)
+        raw_predictions = self.decision_function(X)
+        platt_predictions = f(raw_predictions).reshape(-1,1)
+        prob_positive = platt_predictions / platt_predictions.sum(axis=1)[:, None]
+        prob_negative = 1.0 - prob_positive
+        probs = np.hstack([prob_negative, prob_positive])
+        print(prob_positive)
+        return probs
+    
+class LinearSVCMultilabel(MultilabelEstimator):
+    @property
+    def estimator(self):
+        return LinearSVC_proba
     
 class RandomForestMultilabel(BaseTransformer):
     @property
