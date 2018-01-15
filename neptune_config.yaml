@@ -35,13 +35,12 @@ parameters:
 
   # Preprocessing
   max_features_char: #100 for vdcnn, for tfidf something like 20000 should be used
-      value: [10000, 20000, 100000]
+      value: [10000, 20000, 50000]
   max_features_word: 
-      value: [10000, 20000, 100000]
+      value: [10000, 20000, 50000]
   maxlen_char: 512
   maxlen_words: 100
-  char_ngram_max: 
-      value: [3, 4]
+  char_ngram_max: 4
   drop_punctuation: 1
   drop_newline: 1
   drop_multispaces: 1

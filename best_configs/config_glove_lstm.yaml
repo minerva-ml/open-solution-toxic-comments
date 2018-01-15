@@ -112,9 +112,13 @@ parameters:
   # General Architecture
   use_prelu: 1
 
-  # Log Reg Params
+ # Log Reg Params
   log_reg_c: 4.0
+  log_reg_penalty: 'l2'
   max_iter: 1000
+
+  # SVM Params
+  svm_C: 0.001
   
   # Ensemble weighted average
   weights: None

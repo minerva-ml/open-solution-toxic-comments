@@ -29,11 +29,12 @@ parameters:
   data_dir: /mnt/ml-team/minerva/toxic/data
   experiment_dir: /mnt/ml-team/minerva/toxic/experiments/glove_dpcnn_best
   embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
-  overwrite: 0
+  bad_words_filepath: external_data/compiled_bad_words.txt
+  overwrite: 1
   num_workers: -2
 
   # Preprocessing
-  max_features_char: 20000 #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 100
@@ -113,7 +114,11 @@ parameters:
 
   # Log Reg Params
   log_reg_c: 4.0
+  log_reg_penalty: 'l2'
   max_iter: 1000
+
+  # SVM Params
+  svm_C: 0.001
 
   # Ensemble weighted average
   weights: None
