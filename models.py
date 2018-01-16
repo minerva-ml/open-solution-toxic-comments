@@ -57,7 +57,7 @@ class CharVDCNN(CharacterClassifier):
 
 class WordLSTM(CharacterClassifier):
     def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
+        return Adam(kwargs['lr'])
 
     def _build_model(self, embedding_size,
                      maxlen, max_features,
@@ -110,7 +110,7 @@ class GloveBasic(CharacterClassifier):
 
 class GloveLSTM(GloveBasic):
     def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
+        return Adam(kwargs['lr'])
 
     def _build_model(self, embedding_matrix, embedding_size,
                      maxlen, max_features,
@@ -153,22 +153,6 @@ class GloveDPCNN(GloveBasic):
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
         return dpcnn(embedding_matrix, embedding_size,
-                     maxlen, max_features,
-                     filter_nr, kernel_size, repeat_block, dropout_convo,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm)
-
-
-class GloveCLSTM(GloveBasic):
-    def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
-
-    def _build_model(self, embedding_matrix, embedding_size,
-                     maxlen, max_features,
-                     filter_nr, kernel_size, repeat_block, dropout_convo,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm):
-        return clstm(embedding_matrix, embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,

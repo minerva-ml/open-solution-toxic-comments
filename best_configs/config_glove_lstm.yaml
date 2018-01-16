@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [prepro, glove, lstm, sgd]
+tags: [prepro, glove, lstm, adam]
 
 
 metric:
@@ -39,9 +39,9 @@ parameters:
   maxlen_char: 512
   maxlen_words: 100
   char_ngram_max: 4
-  drop_punctuation: 1
-  drop_newline: 1
-  drop_multispaces: 1
+  drop_punctuation: 0
+  drop_newline: 0
+  drop_multispaces: 0
   all_lower_case: 1
   fill_na_with: ' '
 
@@ -119,7 +119,7 @@ parameters:
 
   # SVM Params
   svm_C: 0.001
-  
+
   # Ensemble weighted average
   weights: None
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+#Train single models
+<<COMMENT
 neptune run experiment_manager.py \
 --config best_configs/config_char_vdcnn.yaml \
 -- train_evaluate_predict_pipeline -p char_vdcnn
@@ -11,18 +13,6 @@ neptune run experiment_manager.py \
 neptune run experiment_manager.py \
 --config best_configs/config_glove_scnn.yaml \
 -- train_evaluate_predict_pipeline -p glove_scnn
-
-neptune run experiment_manager.py \
---config best_configs/config_glove_lstm.yaml \
--- train_evaluate_predict_pipeline -p glove_lstm
-
-neptune run experiment_manager.py \
---config best_configs/config_glove_lstm.yaml \
--- train_evaluate_predict_pipeline -p glove_lstm
-
-neptune run experiment_manager.py \
---config best_configs/config_word_lstm.yaml \
--- train_evaluate_predict_pipeline -p word_lstm
 
 neptune run experiment_manager.py \
 --config best_configs/config_tfidf_logreg.yaml \
@@ -37,6 +27,15 @@ neptune run experiment_manager.py \
 -- train_evaluate_predict_pipeline -p bad_word_count_logreg
 
 neptune run experiment_manager.py \
+--config best_configs/config_glove_lstm.yaml \
+-- train_evaluate_predict_pipeline -p glove_lstm
+
+neptune run experiment_manager.py \
+--config best_configs/config_word_lstm.yaml \
+-- train_evaluate_predict_pipeline -p word_lstm
+COMMENT
+
+neptune run experiment_manager.py \
 --config neptune_config.yaml \
 --experiment_dir /mnt/ml-team/minerva/toxic/experiments \
 -- blend_pipelines bad_word_count_logreg_best char_vdcnn_best \
@@ -45,4 +44,4 @@ count_logreg_best glove_dpcnn_best glove_lstm_best glove_scnn_best tfidf_logreg_
 
 neptune run experiment_manager.py \
 --config best_configs/config_random_forest_ensemble.yaml \
--- train_evaluate_predict_pipeline -p random_forest_ensemble_best
+-- train_evaluate_predict_pipeline -p random_forest_ensemble
