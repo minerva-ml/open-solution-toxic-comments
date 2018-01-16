@@ -285,7 +285,7 @@ SOLUTION_CONFIG = AttrDict({
                                      'n_jobs': params.num_workers,
                                      },
     'random_forest_ensemble': {'label_nr': 6,
-                               'n_estimator': params.rf_n_estimators,
+                               'n_estimators': params.rf_n_estimators,
                                'n_jobs': params.num_workers,
                      },
     'prediction_average': {'weights': params.weights

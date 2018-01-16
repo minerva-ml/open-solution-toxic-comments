@@ -13,13 +13,13 @@ logger = get_logger()
 
 
 class MultilabelEstimator(BaseTransformer):
-    @property
-    def estimator(self):
-        return NotImplementedError
-    
     def __init__(self, label_nr, **kwargs):
         self.label_nr = label_nr
         self.estimators = self._get_estimators(**kwargs)
+
+    @property
+    def estimator(self):
+        return NotImplementedError
 
     def _get_estimators(self, **kwargs):
         estimators = []
@@ -85,7 +85,7 @@ class LinearSVCMultilabel(MultilabelEstimator):
     def estimator(self):
         return LinearSVC_proba
     
-class RandomForestMultilabel(BaseTransformer):
+class RandomForestMultilabel(MultilabelEstimator):
     @property
     def estimator(self):
         return RandomForestClassifier

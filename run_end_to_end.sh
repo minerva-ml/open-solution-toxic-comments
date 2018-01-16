@@ -36,12 +36,13 @@ neptune run experiment_manager.py \
 COMMENT
 
 neptune run experiment_manager.py \
---config neptune_config.yaml \
---experiment_dir /mnt/ml-team/minerva/toxic/experiments \
--- blend_pipelines bad_word_count_logreg_best char_vdcnn_best \
-count_logreg_best glove_dpcnn_best glove_lstm_best glove_scnn_best tfidf_logreg_best word_lstm_best \
---blended_name random_forest_ensemble_best
+--config best_configs/config_blend.yaml \
+-- blend_pipelines bad_word_logreg_best bad_word_count_logreg_best char_vdcnn_best \
+count_logreg_best glove_dpcnn_best glove_lstm_best glove_scnn_best_ml100 tfidf_logreg_best word_lstm_best_ml100 \
+--blended_name logreg_ensemble_best
 
+<<COMMENT
 neptune run experiment_manager.py \
---config best_configs/config_random_forest_ensemble.yaml \
--- train_evaluate_predict_pipeline -p random_forest_ensemble
+--config best_configs/config_logreg_ensemble.yaml \
+-- train_evaluate_predict_pipeline -p logreg_ensemble
+COMMENT
