@@ -144,7 +144,7 @@ def word_lstm_train(config):
                                    'X_valid': ([('cleaning_output', 'X_valid')]),
                                    'train_mode': ([('cleaning_output', 'train_mode')])
                                    },
-                          cache_dirpath=config.env.cacyhe_dirpath)
+                          cache_dirpath=config.env.cache_dirpath)
 
     word_lstm = Step(name='word_lstm',
                      transformer=WordLSTM(**config.word_lstm_network),
