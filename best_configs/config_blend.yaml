@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [word, lstm, prepro, adam]
+tags: [blending]
 
 
 metric:
@@ -23,7 +23,7 @@ exclude:
 parameters:
   # Cloud Environment
 #  data_dir: /public/toxic_comments
-#  experiment_dir: /output/experiments/glove_lstm
+#  experiment_dir: /output/trained_pipelines/glove_lstm
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
