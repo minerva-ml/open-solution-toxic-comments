@@ -39,7 +39,7 @@ neptune run experiment_manager.py \
 
 #Blend/copy single models
 neptune run experiment_manager.py \
---config best_configs/config_blend.yaml \
+--config best_configs/config_setup.yaml \
 -- blend_pipelines \
 count_logreg_best \
 bad_word_logreg_best \
