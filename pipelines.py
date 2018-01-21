@@ -857,8 +857,9 @@ def logistic_regression_ensemble_train(config):
 
 def logistic_regression_ensemble_inference(config):
     linear_regression_ensemble = logistic_regression_ensemble_train(config)
-    linear_regression_ensemble.get_step('logreg_ensemble').overwrite_transformer = False
-    for step in linear_regression_ensemble.get_step('logreg_ensemble').input_steps:
+    ensemble_step = linear_regression_ensemble.get_step('logreg_ensemble')
+    ensemble_step.overwrite_transformer = False
+    for step in ensemble_step.input_steps:
         step.cache_output = False
     return linear_regression_ensemble
 
