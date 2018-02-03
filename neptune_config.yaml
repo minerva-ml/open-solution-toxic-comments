@@ -68,31 +68,30 @@ parameters:
 #  global_pooling: 1
 
   # Char VDCNN Architecture
-  filter_nr: 64
+#  filter_nr: 64
 #     value: [64, 128]
-  kernel_size: 3
-  repeat_block: 3
+#  kernel_size: 3
+#  repeat_block: 3
 #     value: [2, 3, 4, 5]
-  global_pooling: 1
-  trainable_embedding: 1
-  dense_size: 256
+#  global_pooling: 1
+#  trainable_embedding: 1
+#  dense_size: 256
 #     value: [256, 512, 1024]
-  repeat_dense: 1
+#  repeat_dense: 1
 #     value: [1, 2]
-  char_embedding_size: 16
-  word_embedding_size: None
-
+#  char_embedding_size: 16
+#  word_embedding_size: None
 
   # Glove LSTM Architecture
-#  filter_nr: 64
-#  kernel_size: None
-#  repeat_block: 2
-#  dense_size: 256
-#  repeat_dense: 2
-#  global_pooling: 1
-#  trainable_embedding: 0
-#  word_embedding_size: 300
-#  char_embedding_size: None
+  filter_nr: 64
+  kernel_size: None
+  repeat_block: 2
+  dense_size: 256
+  repeat_dense: 2
+  global_pooling: 1
+  trainable_embedding: 0
+  word_embedding_size: 300
+  char_embedding_size: None
 
   # Word LSTM Architecture
 #  filter_nr:
@@ -121,18 +120,17 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 64
+  batch_size_train: 128
   batch_size_inference: 128
   lr: 0.01
   momentum: 0.9
   gamma: 0.97
-  patience: 5
-
-  # Regularization
+  patience: 10
+  
+  # Regularization  
   use_batch_norm: 1
-    #value: [0,1]
-  l2_reg_convo: 0.001
+  l2_reg_convo: 0.0001
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
-  dropout_convo: 0.1
-  dropout_dense: 0.0
+  dropout_convo: 0.2
+  dropout_dense: 0.5
