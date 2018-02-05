@@ -6,6 +6,7 @@ Here, at [Neptune](https://neptune.ml/ 'machine learning lab') we enjoy particip
 If you are registered to neptune.ml you can use our predictions for your ensemble models.
 Simply click `start notebook` and choose `browse` button, then select the `neptune_ensembling.ipynb` file from this repository. By running the first few cells you can load our predictions on the held out set along with the labels and train your second level, ensemble model.
 Then predict with this model on competition test set. 
+After saving your submission click on browse files select path to your submission and download it.
 
 ## The idea
 We are contributing starter code that is easy to use and extend. We did it before with [Cdiscount’s Image Classification Challenge](https://github.com/deepsense-ai/cdiscount-starter) and we believe that it is correct way to open data science to the wider community and encourage more people to participate in Challenges. This starter is ready-to-use end-to-end solution. Since all computations are organized in separate steps, it is also easy to extend. Check [devbook.ipynb](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/devbook.ipynb) for more information about different pipelines.
