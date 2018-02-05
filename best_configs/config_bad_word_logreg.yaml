@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [prepro, glove, lstm, adam]
+tags: [bad_words, logreg]
 
 
 metric:
@@ -9,7 +9,7 @@ metric:
   goal: minimize
 
 #Comment out if not in Cloud Environment
-pip-requirements-file: requirements.txt
+#pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,14 +22,15 @@ exclude:
 
 parameters:
   # Cloud Environment
-  data_dir: /public/toxic_comments
-  experiment_dir: /output/experiments/glove_lstm
-  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+#  data_dir: /public/toxic_comments
+#  experiment_dir: /output/trained_pipelines/glove_lstm
+#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
-#  data_dir: my/path/to/toxic/data
-#  experiment_dir: my/path/to/experiments/glove_lstm
-#  embedding_filepath: my/path/to/glove.840B.300d.txt
-  overwrite: 0
+  data_dir: /mnt/ml-team/minerva/toxic/data
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/bad_word_logreg_best
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+  bad_words_filepath: external_data/compiled_bad_words.txt
+  overwrite: 1
   num_workers: -2
 
   # Preprocessing
@@ -68,30 +69,31 @@ parameters:
 #  global_pooling: 1
 
   # Char VDCNN Architecture
-#  filter_nr: 64
+  filter_nr: 128
 #     value: [64, 128]
-#  kernel_size: 3
-#  repeat_block: 3
+  kernel_size: 3
+  repeat_block: 3
 #     value: [2, 3, 4, 5]
-#  global_pooling: 1
-#  trainable_embedding: 1
-#  dense_size: 256
+  global_pooling: 1
+  trainable_embedding: 1
+  dense_size: 256
 #     value: [256, 512, 1024]
-#  repeat_dense: 1
+  repeat_dense: 1
 #     value: [1, 2]
-#  char_embedding_size: 16
-#  word_embedding_size: None
+  char_embedding_size: 16
+  word_embedding_size: None
+
 
   # Glove LSTM Architecture
-  filter_nr: 64
-  kernel_size: None
-  repeat_block: 2
-  dense_size: 256
-  repeat_dense: 2
-  global_pooling: 1
-  trainable_embedding: 0
-  word_embedding_size: 300
-  char_embedding_size: None
+#  filter_nr: 64
+#  kernel_size: None
+#  repeat_block: 2
+#  dense_size: 256
+#  repeat_dense: 2
+#  global_pooling: 1
+#  trainable_embedding: 0
+#  word_embedding_size: 300
+#  char_embedding_size: None
 
   # Word LSTM Architecture
 #  filter_nr:
@@ -110,13 +112,22 @@ parameters:
   # General Architecture
   use_prelu: 0
 
-  # Log Reg Params
-  log_reg_c: 4.0
+ # Log Reg Params
+  log_reg_c: 100
+  log_reg_penalty: 'l2'
   max_iter: 1000
+
+  # SVM Params
+  svm_C: 0.001
+
+  # Ensemble weighted average
+  weights: None
 
   # Ensemble Log Reg
   ensemble_log_reg_c: 1.0
-  weights: None
+
+  # Ensemble Random Forest
+  rf_n_estimators: 1000
 
   # Training schedule
   epochs_nr: 1000
@@ -127,10 +138,11 @@ parameters:
   gamma: 0.97
   patience: 10
 
-  # Regularization  
+  # Regularization
   use_batch_norm: 1
+    #value: [0,1]
   l2_reg_convo: 0.0001
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
   dropout_convo: 0.2
-  dropout_dense: 0.5
+  dropout_dense: 0.0

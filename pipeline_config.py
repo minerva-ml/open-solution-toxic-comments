@@ -26,6 +26,7 @@ SOLUTION_CONFIG = AttrDict({
                      'all_lower_case': bool(params.all_lower_case),
                      'fill_na_with': params.fill_na_with                     
                      },
+    'bad_word_filter': {'word_list_filepath':params.bad_words_filepath},
     'char_tokenizer': {'char_level': True,
                        'maxlen': params.maxlen_char,
                        'num_words': params.max_features_char
@@ -145,6 +146,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'dropout_dense': params.dropout_dense
                                                  },
                                 'optimizer_params': {'lr': params.lr,
+                                                     'momentum': params.momentum,
+                                                     'nesterov': True
                                                      },
                                 },
         'training_config': {'epochs': params.epochs_nr,
@@ -177,6 +180,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'dropout_dense': params.dropout_dense
                                                  },
                                 'optimizer_params': {'lr': params.lr,
+                                                     'momentum': params.momentum,
+                                                     'nesterov': True
                                                      },
                                 },
         'training_config': {'epochs': params.epochs_nr,
@@ -247,6 +252,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'dropout_dense': params.dropout_dense
                                                  },
                                 'optimizer_params': {'lr': params.lr,
+                                                     'momentum': params.momentum,
+                                                     'nesterov': True
                                                      },
                                 },
         'training_config': {'epochs': params.epochs_nr,
@@ -265,14 +272,22 @@ SOLUTION_CONFIG = AttrDict({
     },
     'logistic_regression_multilabel': {'label_nr': 6,
                                        'C': params.log_reg_c,
+                                       'penalty':params.log_reg_penalty,
                                        'solver': 'sag',
                                        'max_iter': params.max_iter, 
                                        'n_jobs': params.num_workers,
                                        },
+    'svc_multilabel':{'label_nr': 6,
+                      'C':params.svm_C,
+                     },
     'logistic_regression_ensemble': {'label_nr': 6,
                                      'C': params.ensemble_log_reg_c,
                                      'n_jobs': params.num_workers,
                                      },
+    'random_forest_ensemble': {'label_nr': 6,
+                               'n_estimators': params.rf_n_estimators,
+                               'n_jobs': params.num_workers,
+                     },
     'prediction_average': {'weights': params.weights
                            }
 })

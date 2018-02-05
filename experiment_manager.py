@@ -19,7 +19,7 @@ def action():
 
 
 @action.command()
-@click.option('-v', '--validation_size', help='percentage of training used for validation', default=0.2, required=False)
+@click.option('-v', '--validation_size', help='percentage of training used for validation', default=0.1, required=False)
 def train_valid_split(validation_size):
     params = ctx.params
     logger.info('preprocessing training data')

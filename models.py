@@ -15,7 +15,7 @@ from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D
     PReLU, BatchNormalization, Lambda
 from keras.layers.merge import add
 from keras.models import Model
-from keras.optimizers import Adam, SGD, Adagrad, Adadelta
+from keras.optimizers import SGD, Adam, Adagrad, Adadelta
 
 from steps.keras.callbacks import NeptuneMonitor, ReduceLR
 from steps.keras.models import ClassifierXY
@@ -24,7 +24,7 @@ from steps.utils import create_filepath
 
 class CharacterClassifier(ClassifierXY):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return SGD(**kwargs)
 
     def _build_loss(self, **kwargs):
         return 'binary_crossentropy'
@@ -41,7 +41,7 @@ class CharacterClassifier(ClassifierXY):
 
 class CharVDCNN(CharacterClassifier):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return SGD(**kwargs)
 
     def _build_model(self, embedding_size,
                      maxlen, max_features,
@@ -57,7 +57,7 @@ class CharVDCNN(CharacterClassifier):
 
 class WordLSTM(CharacterClassifier):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return Adam(kwargs['lr'])
 
     def _build_model(self, embedding_size,
                      maxlen, max_features,
@@ -73,7 +73,7 @@ class WordLSTM(CharacterClassifier):
 
 class WordDPCNN(CharacterClassifier):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return SGD(**kwargs)
 
     def _build_model(self, embedding_size,
                      maxlen, max_features,
@@ -110,7 +110,7 @@ class GloveBasic(CharacterClassifier):
 
 class GloveLSTM(GloveBasic):
     def _build_optimizer(self, **kwargs):
-        return Adam(**kwargs)
+        return Adam(kwargs['lr'])
 
     def _build_model(self, embedding_matrix, embedding_size,
                      maxlen, max_features,
@@ -153,22 +153,6 @@ class GloveDPCNN(GloveBasic):
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
         """
         return dpcnn(embedding_matrix, embedding_size,
-                     maxlen, max_features,
-                     filter_nr, kernel_size, repeat_block, dropout_convo,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm)
-
-
-class GloveCLSTM(GloveBasic):
-    def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
-
-    def _build_model(self, embedding_matrix, embedding_size,
-                     maxlen, max_features,
-                     filter_nr, kernel_size, repeat_block, dropout_convo,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm):
-        return clstm(embedding_matrix, embedding_size,
                      maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dropout_convo,
                      dense_size, repeat_dense, dropout_dense,
@@ -287,17 +271,6 @@ def vdcnn(embedding_size,
     predictions = Dense(6, activation='sigmoid')(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
-
-
-def clstm(embedding_matrix, embedding_size,
-          maxlen, max_features,
-          filter_nr, kernel_size, repeat_block, dropout_convo,
-          dense_size, repeat_dense, dropout_dense,
-          l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm):
-    """
-    Implementation of https://arxiv.org/pdf/1511.08630.pdf
-    """
-    return NotImplementedError
 
 
 def _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout):

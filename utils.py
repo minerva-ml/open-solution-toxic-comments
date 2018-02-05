@@ -44,7 +44,7 @@ def create_submission(experiments_dir, meta, predictions, columns, logger):
     submission = meta[['id']]
     predictions_ = pd.DataFrame(predictions, columns=columns)
     submission = pd.concat([submission, predictions_], axis=1)
-    logger.info('submission head', submission.head())
+    logger.info('submission head \n\n {}'.format(submission.head()))
 
     submission_filepath = os.path.join(experiments_dir, 'submission.csv')
     submission.to_csv(submission_filepath, index=None)
