@@ -127,7 +127,7 @@ parameters:
   gamma: 0.97
   patience: 10
 
-  # Regularization
+  # Regularization  
   use_batch_norm: 1
   l2_reg_convo: 0.0001
   l2_reg_dense: 0.0
