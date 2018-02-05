@@ -25,6 +25,7 @@ parameters:
   data_dir: /public/toxic_comments
   experiment_dir: /output/experiments/glove_lstm
   embedding_filepath: /public/models/glove/glove.840B.300d.txt
+  bad_words_filepath: external_data/compiled_bad_words.txt
   # Local Environment
 #  data_dir: my/path/to/toxic/data
 #  experiment_dir: my/path/to/experiments/glove_lstm
