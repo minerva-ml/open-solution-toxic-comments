@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [prepro, glove, lstm, sgd]
+tags: [prepro, glove, lstm, adam]
 
 
 metric:
@@ -29,13 +29,12 @@ parameters:
 #  data_dir: my/path/to/toxic/data
 #  experiment_dir: my/path/to/experiments/glove_lstm
 #  embedding_filepath: my/path/to/glove.840B.300d.txt
-  bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 1
+  overwrite: 0
   num_workers: -2
 
   # Preprocessing
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
-  max_features_word: 50000
+  max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 100
   char_ngram_max: 4
@@ -69,31 +68,30 @@ parameters:
 #  global_pooling: 1
 
   # Char VDCNN Architecture
-  filter_nr: 128
+#  filter_nr: 64
 #     value: [64, 128]
-  kernel_size: 3
-  repeat_block: 3
+#  kernel_size: 3
+#  repeat_block: 3
 #     value: [2, 3, 4, 5]
-  global_pooling: 1
-  trainable_embedding: 1
-  dense_size: 256
+#  global_pooling: 1
+#  trainable_embedding: 1
+#  dense_size: 256
 #     value: [256, 512, 1024]
-  repeat_dense: 1
+#  repeat_dense: 1
 #     value: [1, 2]
-  char_embedding_size: 16
-  word_embedding_size: None
-
+#  char_embedding_size: 16
+#  word_embedding_size: None
 
   # Glove LSTM Architecture
-#  filter_nr: 64
-#  kernel_size: None
-#  repeat_block: 2
-#  dense_size: 256
-#  repeat_dense: 2
-#  global_pooling: 1
-#  trainable_embedding: 0
-#  word_embedding_size: 300
-#  char_embedding_size: None
+  filter_nr: 64
+  kernel_size: None
+  repeat_block: 2
+  dense_size: 256
+  repeat_dense: 2
+  global_pooling: 1
+  trainable_embedding: 0
+  word_embedding_size: 300
+  char_embedding_size: None
 
   # Word LSTM Architecture
 #  filter_nr:
@@ -113,21 +111,12 @@ parameters:
   use_prelu: 0
 
   # Log Reg Params
-  log_reg_c: 1
-  log_reg_penalty: 'l2'
+  log_reg_c: 4.0
   max_iter: 1000
-
-  # SVM Params
-  svm_C: 0.001
-
-  # Ensemble weighted average
-  weights: None
 
   # Ensemble Log Reg
   ensemble_log_reg_c: 1.0
-
-  # Ensemble Random Forest
-  rf_n_estimators: 1000
+  weights: None
 
   # Training schedule
   epochs_nr: 1000
@@ -140,9 +129,8 @@ parameters:
 
   # Regularization
   use_batch_norm: 1
-    #value: [0,1]
   l2_reg_convo: 0.0001
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
   dropout_convo: 0.2
-  dropout_dense: 0.0
+  dropout_dense: 0.5
