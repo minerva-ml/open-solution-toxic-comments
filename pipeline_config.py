@@ -284,6 +284,8 @@ SOLUTION_CONFIG = AttrDict({
                           'iterations': params.catboost__iterations,
                           'learning_rate': params.catboost__learning_rate,
                           'depth': params.catboost__depth,
+                          'l2_leaf_reg': params.catboost__l2_leaf_reg,
+                          'border_count': params.catboost__border_count,
                           'verbose': bool(params.catboost__verbose),
                           },
 })
