@@ -50,9 +50,9 @@ word_lstm_best \
 glove_lstm_best \
 glove_scnn_best \
 glove_dpcnn_best \
---blended_name logreg_ensemble_best
+--blended_name catboost_ensemble_best
 
 #Train ensemble model
 neptune run experiment_manager.py \
---config best_configs/config_logreg_ensemble.yaml \
--- train_evaluate_predict_pipeline -p logreg_ensemble
+--config best_configs/catboost_ensemble.yaml \
+-- train_evaluate_predict_pipeline -p catboost_ensemble

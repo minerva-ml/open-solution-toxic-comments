@@ -5,8 +5,8 @@ tags: [prepro, tfidf, logreg]
 
 
 metric:
-  channel: 'Final Validation Score'
-  goal: minimize
+  channel: 'Final Validation Score ROC_AUC'
+  goal: maximize
 
 #Comment out if not in Cloud Environment
 #pip-requirements-file: requirements.txt
@@ -120,14 +120,11 @@ parameters:
   # SVM Params
   svm_C: 0.001
 
-  # Ensemble weighted average
-  weights: None
-
-  # Ensemble Log Reg
-  ensemble_log_reg_c: 1.0
-
-  # Ensemble Random Forest
-  rf_n_estimators: 1000
+  # Ensemble Catboost
+  catboost__iterations: 500
+  catboost__learning_rate: 0.02
+  catboost__depth: 2
+  catboost__verbose: 0
 
   # Training schedule
   epochs_nr: 1000
