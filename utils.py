@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import yaml
 from attrdict import AttrDict
-from sklearn.metrics import log_loss
+from sklearn.metrics import roc_auc_score, log_loss
 
 
 def read_yaml(filepath):
@@ -57,4 +57,12 @@ def multi_log_loss(y_true, y_pred):
     column_losses = []
     for i in range(0, columns):
         column_losses.append(log_loss(y_true[:, i], y_pred[:, i]))
+    return np.array(column_losses).mean()
+
+def multi_roc_auc_score(y_true, y_pred):
+    assert y_true.shape == y_pred.shape
+    columns = y_true.shape[1]
+    column_losses = []
+    for i in range(0, columns):
+        column_losses.append(roc_auc_score(y_true[:, i], y_pred[:, i]))
     return np.array(column_losses).mean()

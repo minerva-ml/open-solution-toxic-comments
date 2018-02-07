@@ -7,7 +7,7 @@ neptune run experiment_manager.py \
 
 neptune run experiment_manager.py \
 --config best_configs/config_bad_word_logreg.yaml \
--- train_evaluate_predict_pipeline -p bad_word_tfidf_logreg
+-- train_evaluate_predict_pipeline -p bad_word_logreg
 
 neptune run experiment_manager.py \
 --config best_configs/config_bad_word_count_logreg.yaml \

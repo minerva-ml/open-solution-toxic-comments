@@ -429,7 +429,7 @@ def bad_word_tfidf(preprocessed_input, config):
     return tfidf_word_vectorizer
 
 
-def bad_word_tfidf_logreg(config):
+def bad_word_logreg(config):
     preprocessed_input = inference_preprocessing(config)
     tfidf_word_vectorizer = bad_word_tfidf(preprocessed_input, config)
 
@@ -910,8 +910,8 @@ PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
                               'inference': tfidf_logreg},
              'tfidf_svm': {'train': tfidf_svm,
                            'inference': tfidf_svm},
-             'bad_word_tfidf_logreg': {'train': bad_word_tfidf_logreg,
-                                       'inference': bad_word_tfidf_logreg},
+             'bad_word_logreg': {'train': bad_word_logreg,
+                                 'inference': bad_word_logreg},
              'bad_word_tfidf_svm': {'train': bad_word_tfidf_svm,
                                     'inference': bad_word_tfidf_svm},
              'count_logreg': {'train': count_features_logreg,

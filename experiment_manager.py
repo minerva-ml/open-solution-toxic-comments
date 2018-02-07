@@ -7,7 +7,7 @@ from deepsense import neptune
 from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS
 from pipelines import PIPELINES
 from preprocessing import split_train_data
-from utils import init_logger, get_logger, read_yaml, read_data, multi_log_loss, create_submission
+from utils import init_logger, get_logger, read_yaml, read_data, multi_roc_auc_score, create_submission
 
 logger = get_logger()
 ctx = neptune.Context()
@@ -80,9 +80,9 @@ def _evaluate_pipeline(pipeline_name):
     output = pipeline.transform(data)
     y_true = valid[Y_COLUMNS].values
     y_pred = output['y_pred']
-    score = multi_log_loss(y_true, y_pred)
+    score = multi_roc_auc_score(y_true, y_pred)
     logger.info('Score on validation is {}'.format(score))
-    ctx.channel_send('Final Validation Score', 0, score)
+    ctx.channel_send('Final Validation Score ROC_AUC', 0, score)
 
 
 @action.command()
