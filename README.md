@@ -3,7 +3,7 @@
 Here, at [Neptune](https://neptune.ml/ 'machine learning lab') we enjoy participating in the Kaggle competitions. [Toxic Comment Classification Challenge](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge 'Kaggle competition') is especially interesting because it touches important issue of online harassment.
 
 ## Ensemble our predictions in the cloud!
-You need to be registered to neptune.ml to be abke ti use our predictions for your ensemble models.
+You need to be registered to neptune.ml to be able to use our predictions for your ensemble models.
 
 * click `start notebook` 
 * choose `browse` button
