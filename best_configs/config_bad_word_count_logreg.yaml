@@ -123,7 +123,11 @@ parameters:
   # Ensemble Catboost
   catboost__iterations: 500
   catboost__learning_rate: 0.02
-  catboost__depth: 2
+  catboost__depth: 6
+  catboost__l2_leaf_reg: 10
+  catboost__border_count: 100
+  catboost__model_size_reg: None # Todo: Explore
+  catboost__rsm: None # Todo: Explore
   catboost__verbose: 0
 
   # Training schedule
