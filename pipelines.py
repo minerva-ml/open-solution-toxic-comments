@@ -1,4 +1,4 @@
-from models import CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
+from models import CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN, GloveCuDNNGRU
 from steps.base import Step, Dummy, hstack_inputs, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix
@@ -344,6 +344,49 @@ def glove_dpcnn_inference(config):
                         transformer=Dummy(),
                         input_steps=[glove_dpcnn],
                         adapter={'y_pred': ([('glove_dpcnn', 'prediction_probability')]),
+                                 },
+                        cache_dirpath=config.env.cache_dirpath)
+    return glove_output
+
+
+def glove_gru_train(config):
+    preprocessed_input = train_preprocessing(config)
+    word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
+    glove_gru = Step(name='glove_gru',
+                     transformer=GloveCuDNNGRU(**config.glove_gru_network),
+                     overwrite_transformer=True,
+                     input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
+                     adapter={'X': ([('word_tokenizer', 'X')]),
+                              'y': ([('cleaning_output', 'y')]),
+                              'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
+                              'validation_data': (
+                                  [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')], to_tuple_inputs),
+                              },
+                     cache_dirpath=config.env.cache_dirpath)
+    glove_output = Step(name='output_glove',
+                        transformer=Dummy(),
+                        input_steps=[glove_gru],
+                        adapter={'y_pred': ([('glove_gru', 'prediction_probability')]),
+                                 },
+                        cache_dirpath=config.env.cache_dirpath)
+    return glove_output
+
+
+def glove_gru_inference(config):
+    preprocessed_input = inference_preprocessing(config)
+    word_tokenizer, glove_embeddings = glove_preprocessing_inference(config, preprocessed_input)
+    glove_gru = Step(name='glove_gru',
+                     transformer=GloveCuDNNGRU(**config.glove_gru_network),
+                     input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
+                     adapter={'X': ([('word_tokenizer', 'X')]),
+                              'y': ([('cleaning_output', 'y')]),
+                              'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
+                              },
+                     cache_dirpath=config.env.cache_dirpath)
+    glove_output = Step(name='output_glove',
+                        transformer=Dummy(),
+                        input_steps=[glove_gru],
+                        adapter={'y_pred': ([('glove_gru', 'prediction_probability')]),
                                  },
                         cache_dirpath=config.env.cache_dirpath)
     return glove_output
@@ -838,6 +881,8 @@ PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
                             'inference': glove_scnn_inference},
              'glove_dpcnn': {'train': glove_dpcnn_train,
                              'inference': glove_dpcnn_inference},
+             'glove_gru': {'train': glove_gru_train,
+                           'inference': glove_gru_inference},
              'tfidf_logreg': {'train': tfidf_logreg,
                               'inference': tfidf_logreg},
              'tfidf_svm': {'train': tfidf_svm,

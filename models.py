@@ -12,7 +12,7 @@ from keras.activations import relu
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.initializers import RandomNormal
 from keras.layers import Input, Embedding, Conv1D, GlobalMaxPool1D, MaxPooling1D, LSTM, Bidirectional, Dense, Dropout, \
-    PReLU, BatchNormalization, Lambda
+    PReLU, BatchNormalization, Lambda, CuDNNGRU
 from keras.layers.merge import add
 from keras.models import Model
 from keras.optimizers import SGD, Adam, Adagrad, Adadelta
@@ -159,6 +159,22 @@ class GloveDPCNN(GloveBasic):
                      l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm)
 
 
+class GloveCuDNNGRU(GloveBasic):
+    def _build_optimizer(self, **kwargs):
+        return Adam(kwargs['lr'])
+
+    def _build_model(self, embedding_matrix, embedding_size,
+                     maxlen, max_features,
+                     unit_nr, repeat_block, dropout_lstm,
+                     dense_size, repeat_dense, dropout_dense,
+                     l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling):
+        return cudnn_gru(embedding_matrix, embedding_size,
+                         maxlen, max_features,
+                         unit_nr, repeat_block,
+                         dense_size, repeat_dense, dropout_dense,
+                         l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling)
+
+
 def scnn(embedding_matrix, embedding_size,
          maxlen, max_features,
          filter_nr, kernel_size, dropout_convo,
@@ -184,7 +200,6 @@ def dpcnn(embedding_matrix, embedding_size,
           dense_size, repeat_dense, dropout_dense,
           l2_reg_convo, l2_reg_dense, use_prelu,
           trainable_embedding, use_batch_norm):
-
     """
     Note:
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
@@ -236,6 +251,36 @@ def lstm(embedding_matrix, embedding_size,
         x = _lstm_block(unit_nr, return_sequences=False, dropout_lstm=dropout_lstm)(x)
     for _ in range(repeat_dense):
         x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
+    predictions = Dense(6, activation="sigmoid")(x)
+    model = Model(inputs=input_text, outputs=predictions)
+    return model
+
+
+def cudnn_gru(embedding_matrix, embedding_size,
+              maxlen, max_features,
+              unit_nr, repeat_block,
+              dense_size, repeat_dense, dropout_dense,
+              l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling):
+    input_text = Input(shape=(maxlen,))
+    if embedding_matrix is not None:
+        x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
+            input_text)
+    else:
+        x = Embedding(max_features, embedding_size)(input_text)
+
+    x = _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout_dense)(x)
+
+    for _ in range(repeat_block - 1):
+        x = _cudnn_gru_block(unit_nr, return_sequences=True)(x)
+    if global_pooling:
+        x = _cudnn_gru_block(unit_nr, return_sequences=True)(x)
+        x = GlobalMaxPool1D()(x)
+    else:
+        x = _cudnn_gru_block(unit_nr, return_sequences=False)(x)
+    for _ in range(repeat_dense):
+        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
+    x = _dense_block(dense_size, use_batch_norm, use_prelu,
+                     dropout=0, l2_reg=l2_reg_dense)(x)
     predictions = Dense(6, activation="sigmoid")(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
@@ -326,6 +371,20 @@ def _lstm_block(unit_nr, return_sequences, dropout_lstm, bidirectional=True):
                      return_sequences=return_sequences,
                      dropout=dropout_lstm,
                      recurrent_dropout=dropout_lstm)(x)
+        return x
+
+    return f
+
+
+def _cudnn_gru_block(unit_nr, return_sequences, bidirectional=True):
+    def f(x):
+        if bidirectional:
+            x = Bidirectional(
+                CuDNNGRU(unit_nr,
+                         return_sequences=return_sequences))(x)
+        else:
+            x = CuDNNGRU(unit_nr,
+                         return_sequences=return_sequences)(x)
         return x
 
     return f
