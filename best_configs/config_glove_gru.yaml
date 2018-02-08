@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [prepro, glove, lstm, adam]
+tags: [prepro, glove, gru, adam]
 
 
 metric:
@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-pip-requirements-file: requirements.txt
+#pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,16 +22,15 @@ exclude:
 
 parameters:
   # Cloud Environment
-  data_dir: /public/toxic_comments
-  experiment_dir: /output/trained_pipelines/glove_lstm
-  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+#  data_dir: /public/toxic_comments
+#  experiment_dir: /output/trained_pipelines/glove_lstm
+#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
-#  data_dir: path/to/your/data
-#  experiment_dir: path/to/your/experiment
-#  embedding_filepath: path/to/your/pretrained/glove.840B.300d.txt
-
+  data_dir: /mnt/ml-team/minerva/toxic/data
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/glove_gru_best
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
   bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 1
+  overwrite: 0
   num_workers: -2
 
   # Preprocessing
@@ -86,6 +85,17 @@ parameters:
 
 
   # Glove LSTM Architecture
+#  filter_nr: 64
+#  kernel_size: None
+#  repeat_block: 2
+#  dense_size: 256
+#  repeat_dense: 2
+#  global_pooling: 1
+#  trainable_embedding: 0
+#  word_embedding_size: 300
+#  char_embedding_size: None
+
+  # Glove GRU Architecture
   filter_nr: 64
   kernel_size: None
   repeat_block: 2
@@ -135,9 +145,9 @@ parameters:
   epochs_nr: 1000
   batch_size_train: 128
   batch_size_inference: 128
-  lr: 0.01
+  lr: 0.0001
   momentum: 0.9
-  gamma: 0.97
+  gamma: 0.99
   patience: 10
 
   # Regularization
@@ -146,4 +156,4 @@ parameters:
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
   dropout_convo: 0.2
-  dropout_dense: 0.5
+  dropout_dense: 0.25
