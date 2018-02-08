@@ -29,9 +29,8 @@ parameters:
 #  data_dir: path/to/your/data
 #  experiment_dir: path/to/your/experiment
 #  embedding_filepath: path/to/your/pretrained/glove.840B.300d.txt
-
   bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 1
+  overwrite: 0
   num_workers: -2
 
   # Preprocessing
