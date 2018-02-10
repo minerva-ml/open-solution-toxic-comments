@@ -1,3 +1,4 @@
+attrdict==2.0.0
 affine==2.0.0.post1
 appdirs==1.4.3
 Babel==1.3
