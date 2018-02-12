@@ -1,14 +1,9 @@
-"""
-Implement trainable ensemble: XGBoost, random forest, Linear Regression
-"""
-
-from models import CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN
-from steps.base import Step, Dummy, stack_inputs, hstack_inputs, sparse_hstack_inputs, to_tuple_inputs
+from models import CharVDCNN, WordLSTM, GloveLSTM, GloveSCNN, GloveDPCNN, GloveCuDNNGRU
+from steps.base import Step, Dummy, hstack_inputs, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix
-from steps.postprocessing import PredictionAverage
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter
-from steps.sklearn.models import LogisticRegressionMultilabel, LinearSVCMultilabel, RandomForestMultilabel
+from steps.sklearn.models import LogisticRegressionMultilabel, LinearSVCMultilabel, CatboostClassifierMultilabel
 
 
 def train_preprocessing(config):
@@ -349,6 +344,49 @@ def glove_dpcnn_inference(config):
                         transformer=Dummy(),
                         input_steps=[glove_dpcnn],
                         adapter={'y_pred': ([('glove_dpcnn', 'prediction_probability')]),
+                                 },
+                        cache_dirpath=config.env.cache_dirpath)
+    return glove_output
+
+
+def glove_gru_train(config):
+    preprocessed_input = train_preprocessing(config)
+    word_tokenizer, glove_embeddings = glove_preprocessing_train(config, preprocessed_input)
+    glove_gru = Step(name='glove_gru',
+                     transformer=GloveCuDNNGRU(**config.glove_gru_network),
+                     overwrite_transformer=True,
+                     input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
+                     adapter={'X': ([('word_tokenizer', 'X')]),
+                              'y': ([('cleaning_output', 'y')]),
+                              'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
+                              'validation_data': (
+                                  [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')], to_tuple_inputs),
+                              },
+                     cache_dirpath=config.env.cache_dirpath)
+    glove_output = Step(name='output_glove',
+                        transformer=Dummy(),
+                        input_steps=[glove_gru],
+                        adapter={'y_pred': ([('glove_gru', 'prediction_probability')]),
+                                 },
+                        cache_dirpath=config.env.cache_dirpath)
+    return glove_output
+
+
+def glove_gru_inference(config):
+    preprocessed_input = inference_preprocessing(config)
+    word_tokenizer, glove_embeddings = glove_preprocessing_inference(config, preprocessed_input)
+    glove_gru = Step(name='glove_gru',
+                     transformer=GloveCuDNNGRU(**config.glove_gru_network),
+                     input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
+                     adapter={'X': ([('word_tokenizer', 'X')]),
+                              'y': ([('cleaning_output', 'y')]),
+                              'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
+                              },
+                     cache_dirpath=config.env.cache_dirpath)
+    glove_output = Step(name='output_glove',
+                        transformer=Dummy(),
+                        input_steps=[glove_gru],
+                        adapter={'y_pred': ([('glove_gru', 'prediction_probability')]),
                                  },
                         cache_dirpath=config.env.cache_dirpath)
     return glove_output
@@ -725,15 +763,14 @@ def ensemble_extraction(config):
                                  },
                         cache_dirpath=config.env.cache_dirpath,
                         cache_output=True)
-
     logreg_bad_word = Step(name='logreg_bad_word',
                            transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
                            input_steps=[xy_train, bad_word_tfidf_word_vectorizer],
                            adapter={'X': ([('bad_word_tfidf_word_vectorizer', 'features')]),
                                     'y': ([('xy_train', 'y')]),
                                     },
-                           cache_dirpath=config.env.cache_dirpath)
-
+                           cache_dirpath=config.env.cache_dirpath,
+                           cache_output=True)
     logreg_bad_word_count = Step(name='logreg_bad_word_count',
                                  transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
                                  input_steps=[xy_train, normalizer, bad_word_tfidf_word_vectorizer],
@@ -743,7 +780,6 @@ def ensemble_extraction(config):
                                           },
                                  cache_dirpath=config.env.cache_dirpath,
                                  cache_output=True)
-
     logreg_tfidf = Step(name='logreg_tfidf',
                         transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
                         input_steps=[xy_train, tfidf_char_vectorizer, tfidf_word_vectorizer],
@@ -753,7 +789,6 @@ def ensemble_extraction(config):
                                  },
                         cache_dirpath=config.env.cache_dirpath,
                         cache_output=True)
-
     char_vdcnn = Step(name='char_vdcnn',
                       transformer=CharVDCNN(**config.char_vdcnn_network),
                       input_steps=[char_tokenizer, xy_train],
@@ -788,7 +823,6 @@ def ensemble_extraction(config):
                                },
                       cache_dirpath=config.env.cache_dirpath,
                       cache_output=True)
-
     glove_dpcnn = Step(name='glove_dpcnn',
                        transformer=GloveDPCNN(**config.glove_dpcnn_network),
                        input_steps=[word_tokenizer, xy_train, glove_embeddings],
@@ -804,34 +838,7 @@ def ensemble_extraction(config):
             glove_scnn, glove_dpcnn]
 
 
-def weighted_average_ensemble_train(config):
-    model_outputs = ensemble_extraction(config)
-    output_mappings = [(output_step.name, 'prediction_probability') for output_step in model_outputs]
-
-    prediction_average = Step(name='prediction_average',
-                              transformer=PredictionAverage(**config.prediction_average),
-                              input_steps=model_outputs,
-                              adapter={'prediction_proba_list': (output_mappings, stack_inputs)},
-                              cache_dirpath=config.env.cache_dirpath)
-
-    average_ensemble_output = Step(name='average_ensemble_output',
-                                   transformer=Dummy(),
-                                   input_steps=[prediction_average],
-                                   adapter={'y_pred': ([('prediction_average', 'prediction_probability')])},
-                                   cache_dirpath=config.env.cache_dirpath)
-    return average_ensemble_output
-
-
-def weighted_average_ensemble_inference(config):
-    weighted_average_ensemble = weighted_average_ensemble_train(config)
-
-    for step in weighted_average_ensemble.get_step('prediction_average').input_steps:
-        step.cache_output = False
-
-    return weighted_average_ensemble
-
-
-def logistic_regression_ensemble_train(config):
+def catboost_ensemble_train(config):
     model_outputs = ensemble_extraction(config)
     output_mappings = [(output_step.name, 'prediction_probability') for output_step in model_outputs]
 
@@ -839,61 +846,29 @@ def logistic_regression_ensemble_train(config):
 
     input_steps = model_outputs + [label]
 
-    logreg = Step(name='logreg_ensemble',
-                  transformer=LogisticRegressionMultilabel(**config.logistic_regression_ensemble),
-                  overwrite_transformer=True,
-                  input_steps=input_steps,
-                  adapter={'X': (output_mappings, hstack_inputs),
-                           'y': ([('xy_train', 'y')])},
-                  cache_dirpath=config.env.cache_dirpath)
+    catboost_ensemble = Step(name='catboost_ensemble',
+                             transformer=CatboostClassifierMultilabel(**config.catboost_ensemble),
+                             overwrite_transformer=True,
+                             input_steps=input_steps,
+                             adapter={'X': (output_mappings, hstack_inputs),
+                                      'y': ([('xy_train', 'y')])},
+                             cache_dirpath=config.env.cache_dirpath)
 
-    logreg_ensemble_output = Step(name='logreg_ensemble_output',
-                                  transformer=Dummy(),
-                                  input_steps=[logreg],
-                                  adapter={'y_pred': ([('logreg_ensemble', 'prediction_probability')])},
-                                  cache_dirpath=config.env.cache_dirpath)
-    return logreg_ensemble_output
+    catboost_ensemble_output = Step(name='catboost_ensemble_output',
+                                    transformer=Dummy(),
+                                    input_steps=[catboost_ensemble],
+                                    adapter={'y_pred': ([('catboost_ensemble', 'prediction_probability')])},
+                                    cache_dirpath=config.env.cache_dirpath)
+    return catboost_ensemble_output
 
 
-def logistic_regression_ensemble_inference(config):
-    linear_regression_ensemble = logistic_regression_ensemble_train(config)
-    ensemble_step = linear_regression_ensemble.get_step('logreg_ensemble')
+def catboost_ensemble_inference(config):
+    catboost_ensemble = catboost_ensemble_train(config)
+    ensemble_step = catboost_ensemble.get_step('catboost_ensemble')
     ensemble_step.overwrite_transformer = False
     for step in ensemble_step.input_steps:
         step.cache_output = False
-    return linear_regression_ensemble
-
-
-def random_forest_ensemble_train(config):
-    model_outputs = ensemble_extraction(config)
-    output_mappings = [(output_step.name, 'prediction_probability') for output_step in model_outputs]
-
-    label = model_outputs[0].get_step('xy_train')
-
-    input_steps = model_outputs + [label]
-
-    random_forest_ensemble = Step(name='random_forest_ensemble',
-                                  transformer=RandomForestMultilabel(**config.random_forest_ensemble),
-                                  overwrite_transformer=True,
-                                  input_steps=input_steps,
-                                  adapter={'X': (output_mappings, hstack_inputs),
-                                           'y': ([('xy_train', 'y')])},
-                                  cache_dirpath=config.env.cache_dirpath)
-
-    random_forest_ensemble_output = Step(name='random_forest_ensemble_output',
-                                         transformer=Dummy(),
-                                         input_steps=[random_forest_ensemble],
-                                         adapter={'y_pred': ([('random_forest_ensemble', 'prediction_probability')])},
-                                         cache_dirpath=config.env.cache_dirpath)
-    return random_forest_ensemble_output
-
-
-def random_forest_ensemble_inference(config):
-    random_forest_ensemble = random_forest_ensemble_train(config)
-    random_forest_ensemble.get_step('random_forest_ensemble').overwrite_transformer = False
-    for step in random_forest_ensemble.get_step('random_forest_ensemble').input_steps:
-        step.cache_output = False
-    return random_forest_ensemble
+    return catboost_ensemble
 
 
 PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
@@ -906,6 +881,8 @@ PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
                             'inference': glove_scnn_inference},
              'glove_dpcnn': {'train': glove_dpcnn_train,
                              'inference': glove_dpcnn_inference},
+             'glove_gru': {'train': glove_gru_train,
+                           'inference': glove_gru_inference},
              'tfidf_logreg': {'train': tfidf_logreg,
                               'inference': tfidf_logreg},
              'tfidf_svm': {'train': tfidf_svm,
@@ -924,10 +901,6 @@ PIPELINES = {'char_vdcnn': {'train': char_vdcnn_train,
                                     'inference': bad_word_count_features_svm},
              'hand_crafted_all_svm': {'train': hand_crafted_all_svm,
                                       'inference': hand_crafted_all_svm},
-             'weighted_average_ensemble': {'train': weighted_average_ensemble_train,
-                                           'inference': weighted_average_ensemble_inference},
-             'logreg_ensemble': {'train': logistic_regression_ensemble_train,
-                                 'inference': logistic_regression_ensemble_inference},
-             'random_forest_ensemble': {'train': random_forest_ensemble_train,
-                                        'inference': random_forest_ensemble_inference},
+             'catboost_ensemble': {'train': catboost_ensemble_train,
+                                   'inference': catboost_ensemble_inference},
              }
