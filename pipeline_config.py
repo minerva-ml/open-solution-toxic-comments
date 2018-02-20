@@ -54,7 +54,11 @@ SOLUTION_CONFIG = AttrDict({
                    'embedding_size': params.word_embedding_size
                    },
     'dpcnn_network': {
-        'architecture_config': {'model_params': {'filter_nr': params.filter_nr,
+        'architecture_config': {'model_params': {'max_features': params.max_features_word,
+                                                 'maxlen': params.maxlen_words,
+                                                 'embedding_size': params.word_embedding_size,
+                                                 'trainable_embedding': bool(params.trainable_embedding),
+                                                 'filter_nr': params.filter_nr,
                                                  'kernel_size': params.kernel_size,
                                                  'repeat_block': params.repeat_block,
                                                  'dense_size': params.dense_size,
@@ -96,7 +100,11 @@ SOLUTION_CONFIG = AttrDict({
         },
     },
     'scnn_network': {
-        'architecture_config': {'model_params': {'filter_nr': params.filter_nr,
+        'architecture_config': {'model_params': {'max_features': params.max_features_word,
+                                                 'maxlen': params.maxlen_words,
+                                                 'embedding_size': params.word_embedding_size,
+                                                 'trainable_embedding': bool(params.trainable_embedding),
+                                                 'filter_nr': params.filter_nr,
                                                  'kernel_size': params.kernel_size,
                                                  'repeat_block': params.repeat_block,
                                                  'dense_size': params.dense_size,

@@ -1,6 +1,6 @@
 from functools import partial
 
-from models import CharVDCNN, WordLSTM, WordSCNN, WordDPCNN, WordCuDNNGRU
+from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM
 from steps.base import Step, Dummy, hstack_inputs, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
@@ -199,7 +199,7 @@ def glove_lstm(config, is_train):
     glove_embeddings = _glove_embeddings(word_tokenizer, config)
     if is_train:
         glove_lstm = Step(name='glove_lstm',
-                          transformer=WordLSTM(**config.lstm_network),
+                          transformer=WordCuDNNLSTM(**config.lstm_network),
                           overwrite_transformer=True,
                           input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                           adapter={'X': ([('word_tokenizer', 'X')]),
@@ -212,7 +212,7 @@ def glove_lstm(config, is_train):
                           cache_dirpath=config.env.cache_dirpath)
     else:
         glove_lstm = Step(name='glove_lstm',
-                          transformer=WordLSTM(**config.lstm_network),
+                          transformer=WordCuDNNLSTM(**config.lstm_network),
                           input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                           adapter={'X': ([('word_tokenizer', 'X')]),
                                    'y': ([('cleaning_output', 'y')]),

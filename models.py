@@ -36,16 +36,20 @@ class CharVDCNN(BasicClassifier):
     def _build_optimizer(self, **kwargs):
         return SGD(**kwargs)
 
-    def _build_model(self, embedding_size,
-                     maxlen, max_features,
-                     filter_nr, kernel_size, repeat_block, dropout_convo,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_convo, l2_reg_dense, use_prelu, use_batch_norm):
-        return vdcnn(embedding_size,
-                     maxlen, max_features,
-                     filter_nr, kernel_size, repeat_block, dropout_convo,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_convo, l2_reg_dense, use_prelu, use_batch_norm)
+    def _build_model(self, embedding_size, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        return vdcnn(embedding_size, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first)
 
 
 class PretrainedEmbeddingModel(BasicClassifier):
@@ -66,7 +70,50 @@ class PretrainedEmbeddingModel(BasicClassifier):
         return {'prediction_probability': predictions}
 
 
-class WordLSTM(PretrainedEmbeddingModel):
+class WordSCNN(PretrainedEmbeddingModel):
+    def _build_optimizer(self, **kwargs):
+        return SGD(**kwargs)
+
+    def _build_model(self, embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        return scnn(embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+                    filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
+                    max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                    dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                    conv_kernel_reg_l2, conv_bias_reg_l2,
+                    dense_kernel_reg_l2, dense_bias_reg_l2,
+                    use_prelu, use_batch_norm, batch_norm_first)
+
+
+class WordDPCNN(PretrainedEmbeddingModel):
+    def _build_optimizer(self, **kwargs):
+        return SGD(**kwargs)
+
+    def _build_model(self, embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        """
+        Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
+        """
+        return dpcnn(embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first)
+
+
+class WordCuDNNLSTM(PretrainedEmbeddingModel):
     def _build_optimizer(self, **kwargs):
         return Adam(kwargs['lr'])
 
@@ -75,46 +122,12 @@ class WordLSTM(PretrainedEmbeddingModel):
                      unit_nr, repeat_block, dropout_lstm,
                      dense_size, repeat_dense, dropout_dense,
                      l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling, batch_norm_first):
-        return lstm(embedding_matrix, embedding_size,
-                    maxlen, max_features,
-                    unit_nr, repeat_block, dropout_lstm,
-                    dense_size, repeat_dense, dropout_dense,
-                    l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling, batch_norm_first)
-
-
-class WordSCNN(PretrainedEmbeddingModel):
-    def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
-
-    def _build_model(self, embedding_matrix, embedding_size,
-                     maxlen, max_features,
-                     filter_nr, kernel_size, dropout_convo,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm, batch_norm_first):
-        return scnn(embedding_matrix, embedding_size,
-                    maxlen, max_features,
-                    filter_nr, kernel_size, dropout_convo,
-                    dense_size, repeat_dense, dropout_dense,
-                    l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm, batch_norm_first)
-
-
-class WordDPCNN(PretrainedEmbeddingModel):
-    def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
-
-    def _build_model(self, embedding_matrix, embedding_size,
-                     maxlen, max_features,
-                     filter_nr, kernel_size, repeat_block, dropout_convo,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm, batch_norm_first):
-        """
-        Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
-        """
-        return dpcnn(embedding_matrix, embedding_size,
-                     maxlen, max_features,
-                     filter_nr, kernel_size, repeat_block, dropout_convo,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm, batch_norm_first)
+        return cudnn_lstm(embedding_matrix, embedding_size,
+                          maxlen, max_features,
+                          unit_nr, repeat_block, dropout_lstm,
+                          dense_size, repeat_dense, dropout_dense,
+                          l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling,
+                          batch_norm_first)
 
 
 class WordCuDNNGRU(PretrainedEmbeddingModel):
@@ -141,31 +154,68 @@ class WordCuDNNGRU(PretrainedEmbeddingModel):
                          use_prelu, use_batch_norm, batch_norm_first)
 
 
-def scnn(embedding_matrix, embedding_size,
-         maxlen, max_features,
-         filter_nr, kernel_size, dropout_convo,
-         dense_size, repeat_dense, dropout_dense,
-         l2_reg_convo, l2_reg_dense, use_prelu, trainable_embedding, use_batch_norm, batch_norm_first):
+def scnn(embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+         filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
+         max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+         dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+         conv_kernel_reg_l2, conv_bias_reg_l2,
+         dense_kernel_reg_l2, dense_bias_reg_l2,
+         use_prelu, use_batch_norm, batch_norm_first):
     input_text = Input(shape=(maxlen,))
     x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
         input_text)
-    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(x)
 
-    x = GlobalMaxPool1D()(x)
+    x = _dropout(dropout_embedding, dropout_mode)(x)
+
+    for _ in range(repeat_block):
+        x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, conv_dropout, dropout_mode,
+                                 conv_kernel_reg_l2, conv_bias_reg_l2, batch_norm_first)(x)
+
+    if max_pooling:
+        x_max = GlobalMaxPool1D()(x)
+    else:
+        x_max = None
+
+    if mean_pooling:
+        x_mean = GlobalAveragePooling1D()(x)
+    else:
+        x_mean = None
+    if weighted_average_attention:
+        x_att = AttentionWeightedAverage()(x)
+    else:
+        x_att = None
+
+    x = [xi for xi in [x_max, x_mean, x_att] if xi is not None]
+    if len(x) == 1:
+        x = x[0]
+    else:
+        if concat_mode == 'concat':
+            x = concatenate(x, axis=-1)
+        else:
+            NotImplementedError('only mode concat for now')
+
     for _ in range(repeat_dense):
-        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
-    predictions = Dense(6, activation="sigmoid")(x)
+        x = _dense_block(dense_size=dense_size,
+                         use_batch_norm=use_batch_norm,
+                         use_prelu=use_prelu,
+                         dropout=dense_dropout,
+                         dropout_mode=dropout_mode,
+                         kernel_reg_l2=dense_kernel_reg_l2,
+                         bias_reg_l2=dense_bias_reg_l2,
+                         batch_norm_first=batch_norm_first)(x)
 
+    predictions = Dense(6, activation="sigmoid")(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
 
 
-def dpcnn(embedding_matrix, embedding_size,
-          maxlen, max_features,
-          filter_nr, kernel_size, repeat_block, dropout_convo,
-          dense_size, repeat_dense, dropout_dense,
-          l2_reg_convo, l2_reg_dense, use_prelu,
-          trainable_embedding, use_batch_norm, batch_norm_first):
+def dpcnn(embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+          filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
+          max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+          dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+          conv_kernel_reg_l2, conv_bias_reg_l2,
+          dense_kernel_reg_l2, dense_bias_reg_l2,
+          use_prelu, use_batch_norm, batch_norm_first):
     """
     Note:
         Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
@@ -178,80 +228,122 @@ def dpcnn(embedding_matrix, embedding_size,
             input_text)
     else:
         embedding = Embedding(max_features, embedding_size)(input_text)
-    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(embedding)
-    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(x)
+
+    embedding = _dropout(dropout_embedding, dropout_mode)(embedding)
+
+    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, conv_dropout, dropout_mode,
+                             conv_kernel_reg_l2, conv_bias_reg_l2, batch_norm_first)(embedding)
+    x = _convolutional_block(filter_nr, kernel_size, conv_bias_reg_l2, use_prelu, conv_dropout, dropout_mode,
+                             conv_kernel_reg_l2, conv_bias_reg_l2, batch_norm_first)(x)
     if embedding_size == filter_nr:
         x = add([embedding, x])
     else:
-        embedding_resized = _shape_matching_layer(filter_nr, use_prelu, dropout_convo, l2_reg_convo)(embedding)
+        embedding_resized = _shape_matching_layer(filter_nr, use_prelu, conv_kernel_reg_l2, conv_bias_reg_l2)(embedding)
         x = add([embedding_resized, x])
     for _ in range(repeat_block):
-        x = _dpcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(x)
+        x = _dpcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, conv_dropout, dropout_mode,
+                         conv_kernel_reg_l2, conv_bias_reg_l2, batch_norm_first)(x)
 
-    x = GlobalMaxPool1D()(x)
+    if max_pooling:
+        x_max = GlobalMaxPool1D()(x)
+    else:
+        x_max = None
+
+    if mean_pooling:
+        x_mean = GlobalAveragePooling1D()(x)
+    else:
+        x_mean = None
+    if weighted_average_attention:
+        x_att = AttentionWeightedAverage()(x)
+    else:
+        x_att = None
+
+    x = [xi for xi in [x_max, x_mean, x_att] if xi is not None]
+    if len(x) == 1:
+        x = x[0]
+    else:
+        if concat_mode == 'concat':
+            x = concatenate(x, axis=-1)
+        else:
+            NotImplementedError('only mode concat for now')
+
     for _ in range(repeat_dense):
-        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
-    predictions = Dense(6, activation="sigmoid")(x)
+        x = _dense_block(dense_size=dense_size,
+                         use_batch_norm=use_batch_norm,
+                         use_prelu=use_prelu,
+                         dropout=dense_dropout,
+                         dropout_mode=dropout_mode,
+                         kernel_reg_l2=dense_kernel_reg_l2,
+                         bias_reg_l2=dense_bias_reg_l2,
+                         batch_norm_first=batch_norm_first)(x)
 
+    predictions = Dense(6, activation="sigmoid")(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
 
 
-def cudnn_lstm(embedding_matrix, embedding_size,
+def cudnn_lstm(embedding_matrix, embedding_size, trainable_embedding,
                maxlen, max_features,
-               unit_nr, repeat_block, dropout_lstm,
-               dense_size, repeat_dense, dropout_dense,
-               l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling, batch_norm_first):
+               unit_nr, repeat_block,
+               dense_size, repeat_dense,
+               max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+               dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+               rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+               dense_kernel_reg_l2, dense_bias_reg_l2,
+               use_prelu, use_batch_norm, batch_norm_first):
     input_text = Input(shape=(maxlen,))
     if embedding_matrix is not None:
-        x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
-            input_text)
+        x = Embedding(max_features,
+                      embedding_size,
+                      weights=[embedding_matrix],
+                      trainable=trainable_embedding)(input_text)
     else:
-        x = Embedding(max_features, embedding_size)(input_text)
-    for _ in range(repeat_block - 1):
-        x = _cudnn_lstm_block(unit_nr, return_sequences=True, dropout_lstm=dropout_lstm)(x)
-    if global_pooling:
-        x = _cudnn_lstm_block(unit_nr, return_sequences=True, dropout_lstm=dropout_lstm)(x)
-        x = GlobalMaxPool1D()(x)
+        x = Embedding(max_features,
+                      embedding_size)(input_text)
+
+    x = _dropout(dropout_embedding, dropout_mode)(x)
+
+    for _ in range(repeat_block):
+        x = _cudnn_gru_block(unit_nr=unit_nr, return_sequences=True, bidirectional=True,
+                             kernel_reg_l2=rnn_kernel_reg_l2,
+                             recurrent_reg_l2=rnn_recurrent_reg_l2,
+                             bias_reg_l2=rnn_bias_reg_l2,
+                             use_batch_norm=use_batch_norm, batch_norm_first=batch_norm_first,
+                             dropout=rnn_dropout, dropout_mode=dropout_mode, use_prelu=use_prelu)(x)
+
+    if max_pooling:
+        x_max = GlobalMaxPool1D()(x)
     else:
-        x = _cudnn_lstm_block(unit_nr, return_sequences=False, dropout_lstm=dropout_lstm)(x)
-    for _ in range(repeat_dense):
-        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
-    predictions = Dense(6, activation="sigmoid")(x)
-    model = Model(inputs=input_text, outputs=predictions)
-    return model
+        x_max = None
 
-
-def cudnn_gru_old(embedding_matrix, embedding_size,
-                  maxlen, max_features,
-                  unit_nr, repeat_block,
-                  dense_size, repeat_dense, dropout_dense,
-                  l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling, batch_norm_first):
-    input_text = Input(shape=(maxlen,))
-    if embedding_matrix is not None:
-        x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
-            input_text)
+    if mean_pooling:
+        x_mean = GlobalAveragePooling1D()(x)
     else:
-        x = Embedding(max_features, embedding_size)(input_text)
-
-    # x = _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout_dense)(x)
-
-    for _ in range(repeat_block - 1):
-        x = _cudnn_gru_block(unit_nr, return_sequences=True)(x)
-        x = _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout_dense, batch_norm_first=batch_norm_first)(x)
-    if global_pooling:
-        x = _cudnn_gru_block(unit_nr, return_sequences=True)(x)
-        x = _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout_dense, batch_norm_first=batch_norm_first)(x)
-        x = GlobalMaxPool1D()(x)
+        x_mean = None
+    if weighted_average_attention:
+        x_att = AttentionWeightedAverage()(x)
     else:
-        x = _cudnn_gru_block(unit_nr, return_sequences=False)(x)
-        x = _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout_dense, batch_norm_first=batch_norm_first)(x)
+        x_att = None
+
+    x = [xi for xi in [x_max, x_mean, x_att] if xi is not None]
+    if len(x) == 1:
+        x = x[0]
+    else:
+        if concat_mode == 'concat':
+            x = concatenate(x, axis=-1)
+        else:
+            NotImplementedError('only mode concat for now')
 
     for _ in range(repeat_dense):
-        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
+        x = _dense_block(dense_size=dense_size,
+                         use_batch_norm=use_batch_norm,
+                         use_prelu=use_prelu,
+                         dropout=dense_dropout,
+                         dropout_mode=dropout_mode,
+                         kernel_reg_l2=dense_kernel_reg_l2,
+                         bias_reg_l2=dense_bias_reg_l2,
+                         batch_norm_first=batch_norm_first)(x)
 
-    # x = _dense_block(dense_size, use_batch_norm, use_prelu,
-    #                  dropout=0, l2_reg=l2_reg_dense)(x)
     predictions = Dense(6, activation="sigmoid")(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
@@ -299,11 +391,15 @@ def cudnn_gru(embedding_matrix, embedding_size, trainable_embedding,
         x_att = AttentionWeightedAverage()(x)
     else:
         x_att = None
-    if concat_mode == 'concat':
-        x = [xi for xi in [x_max, x_mean, x_att] if xi is not None]
-        x = concatenate(x, axis=-1)
+
+    x = [xi for xi in [x_max, x_mean, x_att] if xi is not None]
+    if len(x) == 1:
+        x = x[0]
     else:
-        NotImplementedError
+        if concat_mode == 'concat':
+            x = concatenate(x, axis=-1)
+        else:
+            NotImplementedError('only mode concat for now')
 
     for _ in range(repeat_dense):
         x = _dense_block(dense_size=dense_size,
@@ -320,11 +416,13 @@ def cudnn_gru(embedding_matrix, embedding_size, trainable_embedding,
     return model
 
 
-def vdcnn(embedding_size,
-          maxlen, max_features,
-          filter_nr, kernel_size, repeat_block, dropout_convo,
-          dense_size, repeat_dense, dropout_dense,
-          l2_reg_convo, l2_reg_dense, use_prelu, use_batch_norm, batch_norm_first):
+def vdcnn(embedding_size, maxlen, max_features,
+          filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
+          max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+          dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+          conv_kernel_reg_l2, conv_bias_reg_l2,
+          dense_kernel_reg_l2, dense_bias_reg_l2,
+          use_prelu, use_batch_norm, batch_norm_first):
     """
     Note:
         Implementation of http://www.aclweb.org/anthology/E17-1104
@@ -334,20 +432,54 @@ def vdcnn(embedding_size,
 
     input_text = Input(shape=(maxlen,))
     x = Embedding(input_dim=max_features, output_dim=embedding_size)(input_text)
-    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo)(x)
+
+    x = _dropout(dropout_embedding, dropout_mode)(x)
+
+    x = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, conv_dropout, dropout_mode,
+                             conv_kernel_reg_l2, conv_bias_reg_l2, batch_norm_first)(x)
 
     for i in range(repeat_block):
         if i + 1 != repeat_block:
-            x = _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo,
-                             last_block=False)(x)
+            x = _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, conv_dropout, dropout_mode,
+                             conv_kernel_reg_l2, conv_bias_reg_l2, batch_norm_first, last_block=False)(x)
         else:
-            x = _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout_convo, l2_reg_convo,
-                             last_block=True)(x)
+            x = _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, conv_dropout, dropout_mode,
+                             conv_kernel_reg_l2, conv_bias_reg_l2, batch_norm_first, last_block=True)(x)
 
-    x = GlobalMaxPool1D()(x)
-    for i in range(repeat_dense):
-        x = _dense_block(dense_size, use_batch_norm, use_prelu, dropout_dense, l2_reg_dense)(x)
-    predictions = Dense(6, activation='sigmoid')(x)
+    if max_pooling:
+        x_max = GlobalMaxPool1D()(x)
+    else:
+        x_max = None
+
+    if mean_pooling:
+        x_mean = GlobalAveragePooling1D()(x)
+    else:
+        x_mean = None
+    if weighted_average_attention:
+        x_att = AttentionWeightedAverage()(x)
+    else:
+        x_att = None
+
+    x = [xi for xi in [x_max, x_mean, x_att] if xi is not None]
+    if len(x) == 1:
+        x = x[0]
+    else:
+        if concat_mode == 'concat':
+            x = concatenate(x, axis=-1)
+        else:
+            NotImplementedError('only mode concat for now')
+
+    for _ in range(repeat_dense):
+        x = _dense_block(dense_size=dense_size,
+                         use_batch_norm=use_batch_norm,
+                         use_prelu=use_prelu,
+                         dropout=dense_dropout,
+                         dropout_mode=dropout_mode,
+                         kernel_reg_l2=dense_kernel_reg_l2,
+                         bias_reg_l2=dense_bias_reg_l2,
+                         batch_norm_first=batch_norm_first)(x)
+
+    predictions = Dense(6, activation="sigmoid")(x)
     model = Model(inputs=input_text, outputs=predictions)
     return model
 
@@ -421,7 +553,7 @@ def _cudnn_lstm_block(unit_nr, return_sequences, bidirectional,
                       use_batch_norm, batch_norm_first,
                       dropout, dropout_mode, use_prelu):
     def f(x):
-        gru_layer = CuDNNLSTM(unit_nr=unit_nr, return_sequences=return_sequences,
+        gru_layer = CuDNNLSTM(uunits=unit_nr, return_sequences=return_sequences,
                               kernel_regularizer=regularizers.l2(kernel_reg_l2),
                               recurrent_regularizer=regularizers.l2(recurrent_reg_l2),
                               bias_regularizer=regularizers.l2(bias_reg_l2)
@@ -443,7 +575,7 @@ def _cudnn_gru_block(unit_nr, return_sequences, bidirectional,
                      use_batch_norm, batch_norm_first,
                      dropout, dropout_mode, use_prelu):
     def f(x):
-        gru_layer = CuDNNGRU(unit_nr=unit_nr, return_sequences=return_sequences,
+        gru_layer = CuDNNGRU(units=unit_nr, return_sequences=return_sequences,
                              kernel_regularizer=regularizers.l2(kernel_reg_l2),
                              recurrent_regularizer=regularizers.l2(recurrent_reg_l2),
                              bias_regularizer=regularizers.l2(bias_reg_l2)
