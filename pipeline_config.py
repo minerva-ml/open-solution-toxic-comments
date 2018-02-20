@@ -9,7 +9,7 @@ ctx = neptune.Context()
 params = ctx.params
 
 if params.__class__.__name__ == 'OfflineContextParams':
-    neptune_config = read_yaml('neptune_config.yaml')
+    neptune_config = read_yaml('neptune.yaml')
     params = neptune_config.parameters
 
 X_COLUMNS = ['comment_text']
