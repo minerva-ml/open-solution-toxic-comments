@@ -121,16 +121,24 @@ class WordCuDNNGRU(PretrainedEmbeddingModel):
     def _build_optimizer(self, **kwargs):
         return Adam(kwargs['lr'])
 
-    def _build_model(self, embedding_matrix, embedding_size,
+    def _build_model(self, embedding_matrix, embedding_size, trainable_embedding,
                      maxlen, max_features,
-                     unit_nr, repeat_block, dropout_lstm,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling, batch_norm_first):
-        return cudnn_gru(embedding_matrix, embedding_size,
+                     unit_nr, repeat_block,
+                     dense_size, repeat_dense,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+                     rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        return cudnn_gru(embedding_matrix, embedding_size, trainable_embedding,
                          maxlen, max_features,
                          unit_nr, repeat_block,
-                         dense_size, repeat_dense, dropout_dense,
-                         l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling, batch_norm_first)
+                         dense_size, repeat_dense,
+                         max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                         dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+                         rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+                         dense_kernel_reg_l2, dense_bias_reg_l2,
+                         use_prelu, use_batch_norm, batch_norm_first)
 
 
 def scnn(embedding_matrix, embedding_size,
@@ -214,11 +222,11 @@ def cudnn_lstm(embedding_matrix, embedding_size,
     return model
 
 
-def cudnn_gru(embedding_matrix, embedding_size,
-              maxlen, max_features,
-              unit_nr, repeat_block,
-              dense_size, repeat_dense, dropout_dense,
-              l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling, batch_norm_first):
+def cudnn_gru_old(embedding_matrix, embedding_size,
+                  maxlen, max_features,
+                  unit_nr, repeat_block,
+                  dense_size, repeat_dense, dropout_dense,
+                  l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling, batch_norm_first):
     input_text = Input(shape=(maxlen,))
     if embedding_matrix is not None:
         x = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
@@ -249,14 +257,15 @@ def cudnn_gru(embedding_matrix, embedding_size,
     return model
 
 
-def DEV_cudnn_gru(embedding_matrix, embedding_size, trainable_embedding,
-                  maxlen, max_features,
-                  unit_nr, repeat_block,
-                  dense_size, repeat_dense,
-                  max_pooling, mean_pooling, weighted_average_attention, concat_mode,
-                  dropout_embedding, dropout_rnn, dropout_dense, dropout_mode,
-                  l2_reg_dense, l2_reg_rnn,
-                  use_prelu, use_batch_norm, batch_norm_first):
+def cudnn_gru(embedding_matrix, embedding_size, trainable_embedding,
+              maxlen, max_features,
+              unit_nr, repeat_block,
+              dense_size, repeat_dense,
+              max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+              dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+              rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+              dense_kernel_reg_l2, dense_bias_reg_l2,
+              use_prelu, use_batch_norm, batch_norm_first):
     input_text = Input(shape=(maxlen,))
     if embedding_matrix is not None:
         x = Embedding(max_features,
@@ -266,16 +275,16 @@ def DEV_cudnn_gru(embedding_matrix, embedding_size, trainable_embedding,
     else:
         x = Embedding(max_features,
                       embedding_size)(input_text)
-    if dropout_mode == 'spatial':
-        x = SpatialDropout1D(dropout_embedding)(x)
-    else:
-        x = Dropout(dropout_embedding)(x)
+
+    x = _dropout(dropout_embedding, dropout_mode)(x)
 
     for _ in range(repeat_block):
-        x = _cudnn_gru_block(unit_nr, return_sequences=True)(x)
-        x = _bn_relu_dropout_block(use_batch_norm=use_batch_norm, batch_norm_first=batch_norm_first,
-                                   dropout=dropout_dense, dropout_mode=dropout_mode,
-                                   use_prelu=use_prelu)(x)
+        x = _cudnn_gru_block(unit_nr=unit_nr, return_sequences=True, bidirectional=True,
+                             kernel_reg_l2=rnn_kernel_reg_l2,
+                             recurrent_reg_l2=rnn_recurrent_reg_l2,
+                             bias_reg_l2=rnn_bias_reg_l2,
+                             use_batch_norm=use_batch_norm, batch_norm_first=batch_norm_first,
+                             dropout=rnn_dropout, dropout_mode=dropout_mode, use_prelu=use_prelu)(x)
 
     if max_pooling:
         x_max = GlobalMaxPool1D()(x)
@@ -297,11 +306,14 @@ def DEV_cudnn_gru(embedding_matrix, embedding_size, trainable_embedding,
         NotImplementedError
 
     for _ in range(repeat_dense):
-        x = _dense_block(dense_size,
-                         use_batch_norm,
-                         use_prelu,
-                         dropout_dense,
-                         l2_reg_dense)(x)
+        x = _dense_block(dense_size=dense_size,
+                         use_batch_norm=use_batch_norm,
+                         use_prelu=use_prelu,
+                         dropout=dense_dropout,
+                         dropout_mode=dropout_mode,
+                         kernel_reg_l2=dense_kernel_reg_l2,
+                         bias_reg_l2=dense_bias_reg_l2,
+                         batch_norm_first=batch_norm_first)(x)
 
     predictions = Dense(6, activation="sigmoid")(x)
     model = Model(inputs=input_text, outputs=predictions)
@@ -362,7 +374,7 @@ def _prelu(use_prelu):
     return f
 
 
-def _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout, dropout_mode, batch_norm_first=True):
+def _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout, dropout_mode, batch_norm_first):
     def f(x):
         if use_batch_norm and batch_norm_first:
             x = BatchNormalization()(x)
@@ -377,12 +389,47 @@ def _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout, dropout_mode, bat
     return f
 
 
-def _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, dropout_mode, l2_reg,
-                         batch_norm_first=True):
+def _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, dropout_mode,
+                         kernel_reg_l2, bias_reg_l2, batch_norm_first):
     def f(x):
         x = Conv1D(filter_nr, kernel_size=kernel_size, padding='same', activation='linear',
-                   kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
-                   kernel_regularizer=regularizers.l2(l2_reg))(x)
+                   kernel_regularizer=regularizers.l2(kernel_reg_l2),
+                   bias_regularizer=regularizers.l2(bias_reg_l2))(x)
+        x = _bn_relu_dropout_block(use_batch_norm=use_batch_norm,
+                                   batch_norm_first=batch_norm_first,
+                                   dropout=dropout,
+                                   dropout_mode=dropout_mode,
+                                   use_prelu=use_prelu)(x)
+        return x
+
+    return f
+
+
+def _shape_matching_layer(filter_nr, use_prelu, kernel_reg_l2, bias_reg_l2):
+    def f(x):
+        x = Conv1D(filter_nr, kernel_size=1, padding='same', activation='linear',
+                   kernel_regularizer=regularizers.l2(kernel_reg_l2),
+                   bias_regularizer=regularizers.l2(bias_reg_l2))(x)
+        x = _prelu(use_prelu)(x)
+        return x
+
+    return f
+
+
+def _cudnn_lstm_block(unit_nr, return_sequences, bidirectional,
+                      kernel_reg_l2, recurrent_reg_l2, bias_reg_l2,
+                      use_batch_norm, batch_norm_first,
+                      dropout, dropout_mode, use_prelu):
+    def f(x):
+        gru_layer = CuDNNLSTM(unit_nr=unit_nr, return_sequences=return_sequences,
+                              kernel_regularizer=regularizers.l2(kernel_reg_l2),
+                              recurrent_regularizer=regularizers.l2(recurrent_reg_l2),
+                              bias_regularizer=regularizers.l2(bias_reg_l2)
+                              )
+        if bidirectional:
+            x = Bidirectional(gru_layer)(x)
+        else:
+            x = gru_layer(x)
         x = _bn_relu_dropout_block(use_batch_norm=use_batch_norm, batch_norm_first=batch_norm_first,
                                    dropout=dropout, dropout_mode=dropout_mode,
                                    use_prelu=use_prelu)(x)
@@ -391,75 +438,67 @@ def _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, drop
     return f
 
 
-def _shape_matching_layer(filter_nr, use_prelu, l2_reg):
+def _cudnn_gru_block(unit_nr, return_sequences, bidirectional,
+                     kernel_reg_l2, recurrent_reg_l2, bias_reg_l2,
+                     use_batch_norm, batch_norm_first,
+                     dropout, dropout_mode, use_prelu):
     def f(x):
-        x = Conv1D(filter_nr, kernel_size=1, padding='same', activation='linear',
-                   kernel_initializer=RandomNormal(mean=0.0, stddev=0.001),
-                   kernel_regularizer=regularizers.l2(l2_reg))(x)
-        x = _prelu(use_prelu)(x)
-        return x
-
-    return f
-
-
-def _cudnn_lstm_block(unit_nr, return_sequences, dropout_lstm, bidirectional=True):
-    def f(x):
+        gru_layer = CuDNNGRU(unit_nr=unit_nr, return_sequences=return_sequences,
+                             kernel_regularizer=regularizers.l2(kernel_reg_l2),
+                             recurrent_regularizer=regularizers.l2(recurrent_reg_l2),
+                             bias_regularizer=regularizers.l2(bias_reg_l2)
+                             )
         if bidirectional:
-            x = Bidirectional(
-                CuDNNLSTM(unit_nr,
-                          return_sequences=return_sequences,
-                          dropout=dropout_lstm,
-                          recurrent_dropout=dropout_lstm))(x)
+            x = Bidirectional(gru_layer)(x)
         else:
-            x = CuDNNLSTM(unit_nr,
-                          return_sequences=return_sequences,
-                          dropout=dropout_lstm,
-                          recurrent_dropout=dropout_lstm)(x)
+            x = gru_layer(x)
+        x = _bn_relu_dropout_block(use_batch_norm=use_batch_norm, batch_norm_first=batch_norm_first,
+                                   dropout=dropout, dropout_mode=dropout_mode,
+                                   use_prelu=use_prelu)(x)
         return x
 
     return f
 
 
-def _cudnn_gru_block(unit_nr, return_sequences, bidirectional=True):
-    def f(x):
-        if bidirectional:
-            x = Bidirectional(
-                CuDNNGRU(unit_nr,
-                         return_sequences=return_sequences))(x)
-        else:
-            x = CuDNNGRU(unit_nr,
-                         return_sequences=return_sequences)(x)
-        return x
-
-    return f
-
-
-def _dense_block(dense_size, use_batch_norm, use_prelu, dropout, l2_reg, batch_norm_first=True):
+def _dense_block(dense_size, use_batch_norm, use_prelu, dropout, dropout_mode, kernel_reg_l2, bias_reg_l2,
+                 batch_norm_first):
     def f(x):
         x = Dense(dense_size, activation='linear',
-                  kernel_regularizer=regularizers.l2(l2_reg))(x)
-        x = _bn_relu_dropout_block(use_batch_norm, use_prelu, dropout, batch_norm_first)(x)
+                  kernel_regularizer=regularizers.l2(kernel_reg_l2),
+                  bias_regularizer=regularizers.l2(bias_reg_l2))(x)
+
+        x = _bn_relu_dropout_block(use_batch_norm=use_batch_norm,
+                                   use_prelu=use_prelu,
+                                   dropout=dropout,
+                                   dropout_mode=dropout_mode,
+                                   batch_norm_first=batch_norm_first)(x)
         return x
 
     return f
 
 
-def _dpcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg):
+def _dpcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, dropout_mode,
+                 kernel_reg_l2, bias_reg_l2, batch_norm_first):
     def f(x):
         x = MaxPooling1D(pool_size=3, strides=2)(x)
-        main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg)(x)
-        main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg)(main)
+        main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, dropout_mode,
+                                    kernel_reg_l2, bias_reg_l2, batch_norm_first)(x)
+        main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, dropout_mode,
+                                    kernel_reg_l2, bias_reg_l2, batch_norm_first)(main)
         x = add([main, x])
         return x
 
     return f
 
 
-def _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg, last_block):
+def _vdcnn_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, dropout_mode,
+                 kernel_reg_l2, bias_reg_l2, batch_norm_first, last_block):
     def f(x):
-        main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg)(x)
+        main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, dropout_mode,
+                                    kernel_reg_l2, bias_reg_l2, batch_norm_first)(x)
         x = add([main, x])
-        main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, l2_reg)(x)
+        main = _convolutional_block(filter_nr, kernel_size, use_batch_norm, use_prelu, dropout, dropout_mode,
+                                    kernel_reg_l2, bias_reg_l2, batch_norm_first)(x)
         x = add([main, x])
         if not last_block:
             x = MaxPooling1D(pool_size=3, strides=2)(x)
