@@ -1,3 +1,5 @@
+# GRU one layer no dense TOX-374 LB 0.9843
+
 project-key: TOX
 
 name: toxic
@@ -23,11 +25,11 @@ exclude:
 parameters:
   # Cloud Environment
 #  data_dir: /public/toxic_comments
-#  experiment_dir: /output/trained_pipelines/glove_lstm
-#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+#  experiment_dir: /output/trained_pipelines/fasttext_gru_v1
+#  embedding_filepath: /public/models/fasttext/crawl-300d-2M.vec
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/dev
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_gru_v1
   embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
   bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 1
@@ -37,8 +39,7 @@ parameters:
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
-  maxlen_words:
-    value: [200, 300]
+  maxlen_words: 200
   char_ngram_max: 4
   drop_punctuation: 0
   drop_newline: 0
@@ -152,13 +153,10 @@ parameters:
   patience: 5
 
   # Regularization
-  batch_norm_first:
-    value: [0,1]
-  use_batch_norm:
-    value: [0,1]
+  batch_norm_first: 1
+  use_batch_norm: 0
   l2_reg_convo: 0.0001
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
   dropout_convo: 0.2
-  dropout_dense:
-      value: [0.0,0.25,0.5]
+  dropout_dense: 0.25

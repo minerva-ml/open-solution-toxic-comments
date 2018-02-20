@@ -68,6 +68,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'l2_reg_dense': params.l2_reg_dense,
                                                  'use_prelu': bool(params.use_prelu),
                                                  'use_batch_norm': bool(params.use_batch_norm),
+                                                 'batch_norm_first': bool(params.batch_norm_first),
                                                  'dropout_convo': params.dropout_convo,
                                                  'dropout_dense': params.dropout_dense
                                                  },
@@ -105,6 +106,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'l2_reg_dense': params.l2_reg_dense,
                                                  'use_prelu': bool(params.use_prelu),
                                                  'use_batch_norm': bool(params.use_batch_norm),
+                                                 'batch_norm_first': bool(params.batch_norm_first),
                                                  'dropout_convo': params.dropout_convo,
                                                  'dropout_dense': params.dropout_dense
                                                  },
@@ -142,6 +144,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'l2_reg_dense': params.l2_reg_dense,
                                                  'use_prelu': bool(params.use_prelu),
                                                  'use_batch_norm': bool(params.use_batch_norm),
+                                                 'batch_norm_first': bool(params.batch_norm_first),
                                                  'dropout_lstm': params.dropout_lstm,
                                                  'dropout_dense': params.dropout_dense
                                                  },
@@ -178,6 +181,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'l2_reg_dense': params.l2_reg_dense,
                                                  'use_prelu': bool(params.use_prelu),
                                                  'use_batch_norm': bool(params.use_batch_norm),
+                                                 'batch_norm_first': bool(params.batch_norm_first),
                                                  'dropout_lstm': params.dropout_lstm,
                                                  'dropout_dense': params.dropout_dense
                                                  },
@@ -213,6 +217,7 @@ SOLUTION_CONFIG = AttrDict({
                                                  'l2_reg_dense': params.l2_reg_dense,
                                                  'use_prelu': bool(params.use_prelu),
                                                  'use_batch_norm': bool(params.use_batch_norm),
+                                                 'batch_norm_first': bool(params.batch_norm_first),
                                                  'dropout_convo': params.dropout_convo,
                                                  'dropout_dense': params.dropout_dense
                                                  },

@@ -1,6 +1,6 @@
 from functools import partial
 
-from models import CharVDCNN, GloveLSTM, GloveSCNN, GloveDPCNN, GloveCuDNNGRU
+from models import CharVDCNN, WordLSTM, WordSCNN, WordDPCNN, WordCuDNNGRU
 from steps.base import Step, Dummy, hstack_inputs, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
@@ -164,7 +164,7 @@ def glove_gru(config, is_train):
     glove_embeddings = _glove_embeddings(word_tokenizer, config)
     if is_train:
         glove_gru = Step(name='glove_gru',
-                         transformer=GloveCuDNNGRU(**config.gru_network),
+                         transformer=WordCuDNNGRU(**config.gru_network),
                          overwrite_transformer=True,
                          input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                          adapter={'X': ([('word_tokenizer', 'X')]),
@@ -177,7 +177,7 @@ def glove_gru(config, is_train):
                          cache_dirpath=config.env.cache_dirpath)
     else:
         glove_gru = Step(name='glove_dpcnn',
-                         transformer=GloveCuDNNGRU(**config.gru_network),
+                         transformer=WordCuDNNGRU(**config.gru_network),
                          input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                          adapter={'X': ([('word_tokenizer', 'X')]),
                                   'y': ([('cleaning_output', 'y')]),
@@ -199,7 +199,7 @@ def glove_lstm(config, is_train):
     glove_embeddings = _glove_embeddings(word_tokenizer, config)
     if is_train:
         glove_lstm = Step(name='glove_lstm',
-                          transformer=GloveLSTM(**config.lstm_network),
+                          transformer=WordLSTM(**config.lstm_network),
                           overwrite_transformer=True,
                           input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                           adapter={'X': ([('word_tokenizer', 'X')]),
@@ -212,7 +212,7 @@ def glove_lstm(config, is_train):
                           cache_dirpath=config.env.cache_dirpath)
     else:
         glove_lstm = Step(name='glove_lstm',
-                          transformer=GloveLSTM(**config.lstm_network),
+                          transformer=WordLSTM(**config.lstm_network),
                           input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                           adapter={'X': ([('word_tokenizer', 'X')]),
                                    'y': ([('cleaning_output', 'y')]),
@@ -234,7 +234,7 @@ def glove_scnn(config, is_train):
     glove_embeddings = _glove_embeddings(word_tokenizer, config)
     if is_train:
         glove_lstm = Step(name='glove_lstm',
-                          transformer=GloveSCNN(**config.scnn_network),
+                          transformer=WordSCNN(**config.scnn_network),
                           overwrite_transformer=True,
                           input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                           adapter={'X': ([('word_tokenizer', 'X')]),
@@ -247,7 +247,7 @@ def glove_scnn(config, is_train):
                           cache_dirpath=config.env.cache_dirpath)
     else:
         glove_lstm = Step(name='glove_lstm',
-                          transformer=GloveSCNN(**config.scnn_network),
+                          transformer=WordSCNN(**config.scnn_network),
                           input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                           adapter={'X': ([('word_tokenizer', 'X')]),
                                    'y': ([('cleaning_output', 'y')]),
@@ -269,7 +269,7 @@ def glove_dpcnn(config, is_train):
     glove_embeddings = _glove_embeddings(word_tokenizer, config)
     if is_train:
         glove_dpcnn = Step(name='glove_dpcnn',
-                           transformer=GloveDPCNN(**config.dpcnn_network),
+                           transformer=WordDPCNN(**config.dpcnn_network),
                            overwrite_transformer=True,
                            input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                            adapter={'X': ([('word_tokenizer', 'X')]),
@@ -282,7 +282,7 @@ def glove_dpcnn(config, is_train):
                            cache_dirpath=config.env.cache_dirpath)
     else:
         glove_dpcnn = Step(name='glove_dpcnn',
-                           transformer=GloveDPCNN(**config.dpcnn_network),
+                           transformer=WordDPCNN(**config.dpcnn_network),
                            input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                            adapter={'X': ([('word_tokenizer', 'X')]),
                                     'y': ([('cleaning_output', 'y')]),
@@ -304,7 +304,7 @@ def fasttext_gru(config, is_train):
     fasttext_embeddings = _fasttext_embeddings(word_tokenizer, config)
     if is_train:
         fasttext_gru = Step(name='fasttext_gru',
-                            transformer=GloveCuDNNGRU(**config.gru_network),
+                            transformer=WordCuDNNGRU(**config.gru_network),
                             overwrite_transformer=True,
                             input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
                             adapter={'X': ([('word_tokenizer', 'X')]),
@@ -317,7 +317,7 @@ def fasttext_gru(config, is_train):
                             cache_dirpath=config.env.cache_dirpath)
     else:
         fasttext_gru = Step(name='fasttext_gru',
-                            transformer=GloveCuDNNGRU(**config.gru_network),
+                            transformer=WordCuDNNGRU(**config.gru_network),
                             input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
                             adapter={'X': ([('word_tokenizer', 'X')]),
                                      'y': ([('cleaning_output', 'y')]),
@@ -339,7 +339,7 @@ def word2vec_gru(config, is_train):
     word2vec_embeddings = _word2vec_embeddings(word_tokenizer, config)
     if is_train:
         word2vec_gru = Step(name='word2vec_gru',
-                            transformer=GloveCuDNNGRU(**config.gru_network),
+                            transformer=WordCuDNNGRU(**config.gru_network),
                             overwrite_transformer=True,
                             input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
                             adapter={'X': ([('word_tokenizer', 'X')]),
@@ -352,7 +352,7 @@ def word2vec_gru(config, is_train):
                             cache_dirpath=config.env.cache_dirpath)
     else:
         word2vec_gru = Step(name='word2vec_gru',
-                            transformer=GloveCuDNNGRU(**config.gru_network),
+                            transformer=WordCuDNNGRU(**config.gru_network),
                             input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
                             adapter={'X': ([('word_tokenizer', 'X')]),
                                      'y': ([('cleaning_output', 'y')]),
