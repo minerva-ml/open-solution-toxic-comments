@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [word, lstm, prepro, adam]
+tags: [prepro, word2vec, gru, adam]
 
 
 metric:
@@ -27,10 +27,10 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/word_lstm_best
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/word2vec_gru_best
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/word2vec/GoogleNews-vectors-negative300.bin
   bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 1
+  overwrite: 0
   num_workers: -2
 
   # Preprocessing
@@ -95,19 +95,33 @@ parameters:
 #  word_embedding_size: 300
 #  char_embedding_size: None
 
-  # Word LSTM Architecture
-  filter_nr: 128
+  # Glove GRU Architecture
+  filter_nr: 64
   kernel_size: None
-  repeat_block: 3
+  repeat_block: 2
   dense_size: 256
   repeat_dense: 2
   global_pooling: 1
-  trainable_embedding: 1
+  trainable_embedding: 0
   word_embedding_size: 300
   char_embedding_size: None
 
+  # Word LSTM Architecture
+#  filter_nr:
+#    value: [16, 64, 128]
+#  kernel_size: None
+#  repeat_block:
+#    value: [1, 2, 3]
+#  dense_size: 256
+#  repeat_dense: 2
+#  global_pooling: 1
+#  trainable_embedding: 1
+#  word_embedding_size:
+#    value: [64, 128, 300]
+#  char_embedding_size: None
+
   # General Architecture
-  use_prelu: 0
+  use_prelu: 1
 
  # Log Reg Params
   log_reg_c: 4.0
@@ -129,17 +143,17 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 32
+  batch_size_train: 128
   batch_size_inference: 128
-  lr: 0.001
+  lr: 0.0001
   momentum: 0.9
-  gamma: 0.97
-  patience: 2
+  gamma: 0.99
+  patience: 10
 
   # Regularization
-  use_batch_norm: 0
-  l2_reg_convo: 0.0
+  use_batch_norm: 1
+  l2_reg_convo: 0.0001
   l2_reg_dense: 0.0
   dropout_lstm: 0.2
-  dropout_convo: 0.0
-  dropout_dense: 0.5
+  dropout_convo: 0.2
+  dropout_dense: 0.25
