@@ -31,7 +31,7 @@ You are welcome to extend this pipeline and contribute your own models or proced
 on the [neptune](https://neptune.ml/ 'machine learning lab') site
 * register to receive $100 in GPU time
 * log in
-* create new project named `toxic`: Follow the link `Projects` (top bar, left side), then click `New project` button. This action will generate project-key `TOX`, which is already listed in the `neptune_config.yaml`.
+* create new project named `toxic`: Follow the link `Projects` (top bar, left side), then click `New project` button. This action will generate project-key `TOX`, which is already listed in the `neptune.yaml`.
 
 run setup commands
 ```bash
