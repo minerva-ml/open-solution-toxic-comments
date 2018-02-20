@@ -40,13 +40,13 @@ def read_data(data_dir, filename):
     return meta_data
 
 
-def create_submission(experiments_dir, meta, predictions, columns, logger):
+def create_submission(experiments_dir, filename, meta, predictions, columns, logger):
     submission = meta[['id']]
     predictions_ = pd.DataFrame(predictions, columns=columns)
     submission = pd.concat([submission, predictions_], axis=1)
     logger.info('submission head \n\n {}'.format(submission.head()))
 
-    submission_filepath = os.path.join(experiments_dir, 'submission.csv')
+    submission_filepath = os.path.join(experiments_dir, filename)
     submission.to_csv(submission_filepath, index=None)
     logger.info('submission saved to {}'.format(submission_filepath))
 
@@ -58,6 +58,7 @@ def multi_log_loss(y_true, y_pred):
     for i in range(0, columns):
         column_losses.append(log_loss(y_true[:, i], y_pred[:, i]))
     return np.array(column_losses).mean()
+
 
 def multi_roc_auc_score(y_true, y_pred):
     assert y_true.shape == y_pred.shape

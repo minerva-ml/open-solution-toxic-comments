@@ -145,9 +145,9 @@ parameters:
   epochs_nr: 1000
   batch_size_train: 128
   batch_size_inference: 128
-  lr: 0.0001
+  lr: 0.001
   momentum: 0.9
-  gamma: 0.99
+  gamma: 0.7
   patience: 5
 
   # Regularization
