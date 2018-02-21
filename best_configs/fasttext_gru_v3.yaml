@@ -50,7 +50,7 @@ parameters:
   # Architecture
   filter_nr: 512
   kernel_size: None
-  repeat_block: 1
+  repeat_block: 2
   dense_size: 256
   repeat_dense: 0
   max_pooling: 1
