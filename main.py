@@ -81,7 +81,7 @@ def _evaluate_pipeline(pipeline_name):
     y_true = valid[Y_COLUMNS].values
     y_pred = output['y_pred']
 
-    create_submission(params.experiment_dir, 'submission_valid.csv', valid, y_pred, Y_COLUMNS, logger)
+    create_submission(params.experiment_dir, '{}_predictions_valid.csv'.format(pipeline_name), valid, y_pred, Y_COLUMNS, logger)
 
     score = multi_roc_auc_score(y_true, y_pred)
     logger.info('Score on validation is {}'.format(score))
@@ -113,7 +113,7 @@ def _predict_pipeline(pipeline_name):
     output = pipeline.transform(data)
     y_pred = output['y_pred']
 
-    create_submission(params.experiment_dir, 'submission_test.csv', test, y_pred, Y_COLUMNS, logger)
+    create_submission(params.experiment_dir, '{}_predictions_test.csv'.format(pipeline_name), test, y_pred, Y_COLUMNS, logger)
 
 
 @action.command()

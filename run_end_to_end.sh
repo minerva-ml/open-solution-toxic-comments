@@ -13,6 +13,9 @@ neptune run \
 neptune run \
 --config best_configs/tfidf_logreg.yaml \
 -- train_evaluate_predict_pipeline -p tfidf_logreg
+neptune run \
+--config best_configs/hand_crafted_all_logreg.yaml \
+-- train_evaluate_predict_pipeline -p hand_crafted_all_logreg
 
 neptune run \
 --config best_configs/char_vdcnn.yaml \
@@ -65,6 +68,7 @@ count_logreg \
 bad_word_logreg \
 bad_word_count_logreg \
 tfidf_logreg \
+hand_crafted_all_logreg \
 char_vdcnn \
 glove_gru \
 glove_lstm \

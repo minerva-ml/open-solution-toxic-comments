@@ -864,6 +864,8 @@ PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
                               'inference': count_features_logreg},
              'bad_word_count_logreg': {'train': bad_word_count_features_logreg,
                                        'inference': bad_word_count_features_logreg},
+             'hand_crafted_all_logreg':{'train': hand_crafted_all_logreg,
+                                       'inference': hand_crafted_all_logreg},
              'catboost_ensemble': {'train': partial(catboost_ensemble, is_train=True),
                                    'inference': partial(catboost_ensemble, is_train=False)},
              }

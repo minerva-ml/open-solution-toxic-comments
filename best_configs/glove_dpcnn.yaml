@@ -44,6 +44,7 @@ parameters:
   drop_multispaces: 1
   all_lower_case: 1
   fill_na_with: ' '
+
   # Architecture
   filter_nr: 64
   kernel_size: 3
@@ -88,17 +89,17 @@ parameters:
   # Regularization
   batch_norm_first: 0
   use_batch_norm: 0
-  dropout_embedding: 0.2
-  rnn_dropout: 0.2
-  dense_dropout: 0.25
-  conv_dropout: 0.2
+  dropout_embedding: 0.5
+  rnn_dropout: 0.5
+  dense_dropout: 0.5
+  conv_dropout: 0.5
   dropout_mode: 'spatial'
-  rnn_kernel_reg_l2: 0.00001
-  rnn_recurrent_reg_l2: 0.00001
-  rnn_bias_reg_l2: 0.0
-  dense_kernel_reg_l2: 0.0
-  dense_bias_reg_l2: 0.0
-  conv_kernel_reg_l2: 0.0
-  conv_bias_reg_l2: 0.0
+  rnn_kernel_reg_l2: 0.0001
+  rnn_recurrent_reg_l2: 0.0001
+  rnn_bias_reg_l2: 0.0001
+  dense_kernel_reg_l2: 0.0001
+  dense_bias_reg_l2: 0.0001
+  conv_kernel_reg_l2: 0.0001
+  conv_bias_reg_l2: 0.0001
 
 
