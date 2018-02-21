@@ -236,7 +236,10 @@ SOLUTION_CONFIG = AttrDict({
         },
     },
     'char_vdcnn_network': {
-        'architecture_config': {'model_params': {'filter_nr': params.filter_nr,
+        'architecture_config': {'model_params': {'max_features': params.max_features_char,
+                                                 'maxlen': params.maxlen_char,
+                                                 'embedding_size': params.char_embedding_size,
+                                                 'filter_nr': params.filter_nr,
                                                  'kernel_size': params.kernel_size,
                                                  'repeat_block': params.repeat_block,
                                                  'dense_size': params.dense_size,

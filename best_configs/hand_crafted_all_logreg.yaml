@@ -34,7 +34,7 @@ parameters:
   num_workers: -2
 
   # Preprocessing
-  max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_char: 100000 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 100

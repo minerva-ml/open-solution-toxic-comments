@@ -153,6 +153,7 @@ class TextCounter(BaseTransformer):
         X['words_vs_unique'] = X['num_unique_words'] / X['num_words']
         X['mean_word_len'] = X['text'].apply(lambda x: np.mean([len(w) for w in str(x).split()]))
         X.drop('text', axis=1, inplace=True)
+        X.fillna(0, inplace=True)
         return {'X': X}
 
     def _transform(self, x):

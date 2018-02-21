@@ -36,8 +36,8 @@ parameters:
   # Preprocessing
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
-  maxlen_char: 512
-  maxlen_words: 100
+  maxlen_char: 2048
+  maxlen_words: 200
   char_ngram_max: 4
   drop_punctuation: 0
   drop_newline: 0
@@ -46,16 +46,16 @@ parameters:
   fill_na_with: ' '
 
   # Architecture
-  filter_nr: 128
+  filter_nr: 32
   kernel_size: 3
-  repeat_block: 3
+  repeat_block: 5
   dense_size: 256
   repeat_dense: 1
   max_pooling: 1
   mean_pooling: 0
   weighted_average_attention: 0
   concat_mode: 'concat'
-  trainable_embedding: 0
+  trainable_embedding: 1
   word_embedding_size: 300
   char_embedding_size: None
 
@@ -87,19 +87,19 @@ parameters:
   patience: 5
 
   # Regularization
-  batch_norm_first: 0
-  use_batch_norm: 0
-  dropout_embedding: 0.2
-  rnn_dropout: 0.2
-  dense_dropout: 0.25
+  batch_norm_first: 1
+  use_batch_norm: 1
+  dropout_embedding: 0.5
+  rnn_dropout: 0.5
+  dense_dropout: 0.5
   conv_dropout: 0.2
   dropout_mode: 'spatial'
-  rnn_kernel_reg_l2: 0.00001
-  rnn_recurrent_reg_l2: 0.00001
-  rnn_bias_reg_l2: 0.0
-  dense_kernel_reg_l2: 0.0
-  dense_bias_reg_l2: 0.0
-  conv_kernel_reg_l2: 0.0
-  conv_bias_reg_l2: 0.0
+  rnn_kernel_reg_l2: 0.0001
+  rnn_recurrent_reg_l2: 0.0001
+  rnn_bias_reg_l2: 0.0001
+  dense_kernel_reg_l2: 0.00001
+  dense_bias_reg_l2: 0.00001
+  conv_kernel_reg_l2: 0.00001
+  conv_bias_reg_l2: 0.00001
 
 

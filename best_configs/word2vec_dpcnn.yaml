@@ -87,12 +87,12 @@ parameters:
   patience: 5
 
   # Regularization
-  batch_norm_first: 0
-  use_batch_norm: 0
+  batch_norm_first: 1
+  use_batch_norm: 1
   dropout_embedding: 0.5
   rnn_dropout: 0.5
   dense_dropout: 0.5
-  conv_dropout: 0.5
+  conv_dropout: 0.2
   dropout_mode: 'spatial'
   rnn_kernel_reg_l2: 0.0001
   rnn_recurrent_reg_l2: 0.0001
