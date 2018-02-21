@@ -1,9 +1,7 @@
-# Bidirectional GRU + dense
-
 project-key: TOX
 
 name: toxic
-tags: [prepro, fasttext, gru, adam]
+tags: [glove, gru, adam]
 
 
 metric:
@@ -29,8 +27,8 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_gru_v1
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/glove_gru
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove/glove.840B.300d.txt
   bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 1
   num_workers: -2
@@ -39,11 +37,11 @@ parameters:
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
-  maxlen_words: 200
+  maxlen_words: 100
   char_ngram_max: 4
-  drop_punctuation: 0
-  drop_newline: 0
-  drop_multispaces: 0
+  drop_punctuation: 1
+  drop_newline: 1
+  drop_multispaces: 1
   all_lower_case: 1
   fill_na_with: ' '
 
@@ -68,9 +66,6 @@ parameters:
   log_reg_c: 4.0
   log_reg_penalty: 'l2'
   max_iter: 1000
-
-  # SVM Params
-  svm_C: 0.001
 
   # Ensemble Catboost
   catboost__iterations: 500

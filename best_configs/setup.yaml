@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [blending]
+tags: [setup]
 
 
 metric:
@@ -28,9 +28,9 @@ parameters:
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
   experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove.840B.300d.txt
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove/glove.840B.300d.txt
   bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 0
+  overwrite: 1
   num_workers: -2
 
   # Preprocessing
@@ -39,83 +39,33 @@ parameters:
   maxlen_char: 512
   maxlen_words: 100
   char_ngram_max: 4
-  drop_punctuation: 0
-  drop_newline: 0
-  drop_multispaces: 0
+  drop_punctuation: 1
+  drop_newline: 1
+  drop_multispaces: 1
   all_lower_case: 1
   fill_na_with: ' '
 
-
-  # Glove Deep Pyramid Architecture
-#  filter_nr: 64
-#  kernel_size: 3
-#  repeat_block: 2
-#  dense_size: 256
-#  repeat_dense: 1
-#  trainable_embedding: 1
-#  word_embedding_size: 300
-#  char_embedding_size: None
-#  global_pooling: 1
-
-  # Glove Shallow CNN Architecture
-#  filter_nr: 256
-#  kernel_size: 6
-#  repeat_block: None
-#  dense_size: 256
-#  repeat_dense: 1
-#  trainable_embedding: 1
-#  word_embedding_size: 300
-#  char_embedding_size: None
-#  global_pooling: 1
-
-  # Char VDCNN Architecture
-#  filter_nr: 128
-#     value: [64, 128]
-#  kernel_size: 3
-#  repeat_block: 3
-#     value: [2, 3, 4, 5]
-#  global_pooling: 1
-#  trainable_embedding: 1
-#  dense_size: 256
-#     value: [256, 512, 1024]
-#  repeat_dense: 1
-#     value: [1, 2]
-#  char_embedding_size: 16
-#  word_embedding_size: None
-
-
-  # Glove LSTM Architecture
-#  filter_nr: 64
-#  kernel_size: None
-#  repeat_block: 2
-#  dense_size: 256
-#  repeat_dense: 2
-#  global_pooling: 1
-#  trainable_embedding: 0
-#  word_embedding_size: 300
-#  char_embedding_size: None
-
-  # Word LSTM Architecture
-  filter_nr: 128
-  kernel_size: None
-  repeat_block: 3
+  # Architecture
+  filter_nr: 256
+  kernel_size: 6
+  repeat_block: 1
   dense_size: 256
-  repeat_dense: 2
-  global_pooling: 1
+  repeat_dense: 1
+  max_pooling: 1
+  mean_pooling: 0
+  weighted_average_attention: 0
+  concat_mode: 'concat'
   trainable_embedding: 1
   word_embedding_size: 300
   char_embedding_size: None
 
   # General Architecture
-  use_prelu: 0
+  use_prelu: 1
 
  # Log Reg Params
   log_reg_c: 4.0
   log_reg_penalty: 'l2'
   max_iter: 1000
-
-  # SVM Params
-  svm_C: 0.001
 
   # Ensemble Catboost
   catboost__iterations: 500
@@ -129,17 +79,27 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 32
+  batch_size_train: 128
   batch_size_inference: 128
   lr: 0.001
   momentum: 0.9
-  gamma: 0.97
-  patience: 10
+  gamma: 0.7
+  patience: 5
 
   # Regularization
+  batch_norm_first: 0
   use_batch_norm: 0
-  l2_reg_convo: 0.0
-  l2_reg_dense: 0.0
-  dropout_lstm: 0.2
-  dropout_convo: 0.0
-  dropout_dense: 0.5
+  dropout_embedding: 0.2
+  rnn_dropout: 0.2
+  dense_dropout: 0.25
+  conv_dropout: 0.2
+  dropout_mode: 'spatial'
+  rnn_kernel_reg_l2: 0.00001
+  rnn_recurrent_reg_l2: 0.00001
+  rnn_bias_reg_l2: 0.0
+  dense_kernel_reg_l2: 0.0
+  dense_bias_reg_l2: 0.0
+  conv_kernel_reg_l2: 0.0
+  conv_bias_reg_l2: 0.0
+
+

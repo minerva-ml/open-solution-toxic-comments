@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [count_features, logreg]
+tags: [word2vec, scnn, adam]
 
 
 metric:
@@ -27,8 +27,8 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/count_logreg
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/word2vec_scnn
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/word2vec/GoogleNews-vectors-negative300.bin
   bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 1
   num_workers: -2
@@ -46,16 +46,16 @@ parameters:
   fill_na_with: ' '
 
   # Architecture
-  filter_nr: 128
-  kernel_size: 3
-  repeat_block: 3
+  filter_nr: 256
+  kernel_size: 6
+  repeat_block: 1
   dense_size: 256
   repeat_dense: 1
   max_pooling: 1
-  mean_pooling: 1
-  weighted_average_attention: 1
+  mean_pooling: 0
+  weighted_average_attention: 0
   concat_mode: 'concat'
-  trainable_embedding: 0
+  trainable_embedding: 1
   word_embedding_size: 300
   char_embedding_size: None
 
