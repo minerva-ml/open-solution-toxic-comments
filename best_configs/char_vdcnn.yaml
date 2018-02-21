@@ -48,7 +48,7 @@ parameters:
   # Architecture
   filter_nr: 32
   kernel_size: 3
-  repeat_block: 5
+  repeat_block: 3
   dense_size: 256
   repeat_dense: 1
   max_pooling: 1
@@ -56,8 +56,8 @@ parameters:
   weighted_average_attention: 0
   concat_mode: 'concat'
   trainable_embedding: 1
-  word_embedding_size: 300
-  char_embedding_size: None
+  word_embedding_size: None
+  char_embedding_size: 32
 
   # General Architecture
   use_prelu: 1
