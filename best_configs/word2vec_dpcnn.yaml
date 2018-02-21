@@ -97,9 +97,9 @@ parameters:
   rnn_kernel_reg_l2: 0.0001
   rnn_recurrent_reg_l2: 0.0001
   rnn_bias_reg_l2: 0.0001
-  dense_kernel_reg_l2: 0.0001
-  dense_bias_reg_l2: 0.0001
-  conv_kernel_reg_l2: 0.0001
-  conv_bias_reg_l2: 0.0001
+  dense_kernel_reg_l2: 0.00001
+  dense_bias_reg_l2: 0.00001
+  conv_kernel_reg_l2: 0.00001
+  conv_bias_reg_l2: 0.00001
 
 

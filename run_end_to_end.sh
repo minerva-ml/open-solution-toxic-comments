@@ -17,6 +17,7 @@ neptune run \
 --config best_configs/hand_crafted_all_logreg.yaml \
 -- train_evaluate_predict_pipeline -p hand_crafted_all_logreg
 
+<<COMMENT
 neptune run \
 --config best_configs/char_vdcnn.yaml \
 -- train_evaluate_predict_pipeline -p char_vdcnn
@@ -59,6 +60,7 @@ neptune run \
 neptune run \
 --config best_configs/word2vec_dpcnn.yaml \
 -- train_evaluate_predict_pipeline -p word2vec_dpcnn
+COMMENT
 
 #Blend/copy single models
 neptune run \
@@ -69,6 +71,8 @@ bad_word_logreg \
 bad_word_count_logreg \
 tfidf_logreg \
 hand_crafted_all_logreg \
+
+<<COMMENT
 char_vdcnn \
 glove_gru \
 glove_lstm \
@@ -82,6 +86,7 @@ fasttext_gru \
 fasttext_lstm \
 fasttext_scnn \
 fasttext_dpcnn \
+COMMENT
 --blended_name catboost_ensemble
 
 #Train ensemble model
