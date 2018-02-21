@@ -145,6 +145,12 @@ class TextCounter(BaseTransformer):
     def transform(self, X):
         X = pd.DataFrame(X, columns=['text']).astype(str)
         X = X['text'].apply(self._transform)
+        X['caps_vs_length'] = X.apply(lambda row: float(row['upper_case_count'])/float(row['char_count']), axis=1)
+        X['num_symbols'] = X['text'].apply(lambda comment: sum(comment.count(w) for w in '*&$%'))
+        X['num_words'] = X['text'].apply(lambda comment: len(comment.split()))
+        X['num_unique_words'] = X['text'].apply(lambda comment: len(set(w for w in comment.split())))
+        X['words_vs_unique'] = X['num_unique_words'] / X['num_words']
+        X['mean_word_len'] = X['text'].apply(lambda x: np.mean([len(w) for w in str(x).split()]))
         return {'X': X}
     
     def _transform(self, x):
