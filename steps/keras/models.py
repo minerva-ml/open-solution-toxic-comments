@@ -6,6 +6,7 @@ from sklearn.externals import joblib
 from gensim.models import KeyedVectors
 
 from steps.base import BaseTransformer
+from .contrib import AttentionWeightedAverage
 
 
 class BasicClassifier(BaseTransformer):
@@ -50,7 +51,8 @@ class BasicClassifier(BaseTransformer):
             self.model.save(filepath)
 
     def load(self, filepath):
-        self.model = load_model(filepath)
+        self.model = load_model(filepath,
+                                custom_objects={'AttentionWeightedAverage': AttentionWeightedAverage})
         return self
 
 

@@ -1,4 +1,4 @@
-# GRU one layer no dense TOX-374 LB 0.9843
+# Bidirectional shallow GRU with concatenated average and max
 
 project-key: TOX
 
@@ -25,8 +25,8 @@ exclude:
 parameters:
   # Cloud Environment
 #  data_dir: /public/toxic_comments
-#  experiment_dir: /output/trained_pipelines/fasttext_gru_v1
-#  embedding_filepath: /public/models/fasttext/crawl-300d-2M.vec
+#  experiment_dir: /output/trained_pipelines/glove_lstm
+#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
   experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_gru_v1
@@ -47,80 +47,19 @@ parameters:
   all_lower_case: 1
   fill_na_with: ' '
 
-
-  # Glove Deep Pyramid Architecture
-#  filter_nr: 64
-#  kernel_size: 3
-#  repeat_block: 2
-#  dense_size: 256
-#  repeat_dense: 1
-#  trainable_embedding: 1
-#  word_embedding_size: 300
-#  char_embedding_size: None
-#  global_pooling: 1
-
-  # Glove Shallow CNN Architecture
-#  filter_nr: 256
-#  kernel_size: 6
-#  repeat_block: None
-#  dense_size: 256
-#  repeat_dense: 1
-#  trainable_embedding: 1
-#  word_embedding_size: 300
-#  char_embedding_size: None
-#  global_pooling: 1
-
-  # Char VDCNN Architecture
-#  filter_nr: 128
-#     value: [64, 128]
-#  kernel_size: 3
-#  repeat_block: 3
-#     value: [2, 3, 4, 5]
-#  global_pooling: 1
-#  trainable_embedding: 1
-#  dense_size: 256
-#     value: [256, 512, 1024]
-#  repeat_dense: 1
-#     value: [1, 2]
-#  char_embedding_size: 16
-#  word_embedding_size: None
-
-
-  # Glove LSTM Architecture
-#  filter_nr: 64
-#  kernel_size: None
-#  repeat_block: 2
-#  dense_size: 256
-#  repeat_dense: 2
-#  global_pooling: 1
-#  trainable_embedding: 0
-#  word_embedding_size: 300
-#  char_embedding_size: None
-
-  # Glove GRU Architecture
-  filter_nr: 256
+  # Architecture
+  filter_nr: 512
   kernel_size: None
   repeat_block: 1
   dense_size: 256
   repeat_dense: 0
-  global_pooling: 1
+  max_pooling: 1
+  mean_pooling: 1
+  weighted_average_attention: 0
+  concat_mode: 'concat'
   trainable_embedding: 0
   word_embedding_size: 300
   char_embedding_size: None
-
-  # Word LSTM Architecture
-#  filter_nr:
-#    value: [16, 64, 128]
-#  kernel_size: None
-#  repeat_block:
-#    value: [1, 2, 3]
-#  dense_size: 256
-#  repeat_dense: 2
-#  global_pooling: 1
-#  trainable_embedding: 1
-#  word_embedding_size:
-#    value: [64, 128, 300]
-#  char_embedding_size: None
 
   # General Architecture
   use_prelu: 1
@@ -153,10 +92,19 @@ parameters:
   patience: 5
 
   # Regularization
-  batch_norm_first: 1
+  batch_norm_first: 0
   use_batch_norm: 0
-  l2_reg_convo: 0.0001
-  l2_reg_dense: 0.0
-  dropout_lstm: 0.2
-  dropout_convo: 0.2
-  dropout_dense: 0.25
+  dropout_embedding: 0.2
+  rnn_dropout: 0.2
+  dense_dropout: 0.25
+  conv_dropout: 0.2
+  dropout_mode: 'spatial'
+  rnn_kernel_reg_l2: 0.00001
+  rnn_recurrent_reg_l2: 0.00001
+  rnn_bias_reg_l2: 0.0
+  dense_kernel_reg_l2: 0.0
+  dense_bias_reg_l2: 0.0
+  conv_kernel_reg_l2: 0.0
+  conv_bias_reg_l2: 0.0
+
+
