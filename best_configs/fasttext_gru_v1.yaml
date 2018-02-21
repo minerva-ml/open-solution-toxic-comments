@@ -3,7 +3,7 @@
 project-key: TOX
 
 name: toxic
-tags: [prepro, fasttext, gru, adam]
+tags: [fasttext, gru, adam]
 
 
 metric:
