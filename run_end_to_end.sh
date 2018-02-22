@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-: <<'comment'
 #Train single models
 neptune run \
 --config best_configs/count_logreg.yaml \
@@ -28,7 +27,6 @@ neptune run \
 neptune run \
 --config best_configs/word2vec_gru.yaml \
 -- train_evaluate_predict_pipeline -p word2vec_gru
-comment
 
 #Blend/copy single models
 neptune run \
