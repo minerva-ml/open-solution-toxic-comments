@@ -53,7 +53,7 @@ def count_features_logreg(config):
     normalizer = _count_features(config)
     xy_split = normalizer.get_step('xy_split')
 
-    logreg_count = Step(name='logreg_count',
+    count_logreg = Step(name='count_logreg',
                         transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
                         input_steps=[xy_split, normalizer],
                         adapter={'X': ([('normalizer', 'X')]),
@@ -63,8 +63,8 @@ def count_features_logreg(config):
 
     output = Step(name='output',
                   transformer=Dummy(),
-                  input_steps=[logreg_count],
-                  adapter={'y_pred': ([('logreg_count', 'prediction_probability')]),
+                  input_steps=[count_logreg],
+                  adapter={'y_pred': ([('count_logreg', 'prediction_probability')]),
                            },
                   cache_dirpath=config.env.cache_dirpath)
     return output
@@ -176,7 +176,7 @@ def glove_gru(config, is_train):
                                   },
                          cache_dirpath=config.env.cache_dirpath)
     else:
-        glove_gru = Step(name='glove_dpcnn',
+        glove_gru = Step(name='glove_gru',
                          transformer=WordCuDNNGRU(**config.gru_network),
                          input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                          adapter={'X': ([('word_tokenizer', 'X')]),
@@ -233,7 +233,7 @@ def glove_scnn(config, is_train):
     word_tokenizer = _word_tokenizer(preprocessed_input, config, is_train)
     glove_embeddings = _glove_embeddings(word_tokenizer, config)
     if is_train:
-        glove_lstm = Step(name='glove_lstm',
+        glove_scnn = Step(name='glove_scnn',
                           transformer=WordSCNN(**config.scnn_network),
                           overwrite_transformer=True,
                           input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
@@ -246,7 +246,7 @@ def glove_scnn(config, is_train):
                                    },
                           cache_dirpath=config.env.cache_dirpath)
     else:
-        glove_lstm = Step(name='glove_lstm',
+        glove_scnn = Step(name='glove_scnn',
                           transformer=WordSCNN(**config.scnn_network),
                           input_steps=[word_tokenizer, preprocessed_input, glove_embeddings],
                           adapter={'X': ([('word_tokenizer', 'X')]),
@@ -256,8 +256,8 @@ def glove_scnn(config, is_train):
                           cache_dirpath=config.env.cache_dirpath)
     output = Step(name='output',
                   transformer=Dummy(),
-                  input_steps=[glove_lstm],
-                  adapter={'y_pred': ([('glove_lstm', 'prediction_probability')]),
+                  input_steps=[glove_scnn],
+                  adapter={'y_pred': ([('glove_scnn', 'prediction_probability')]),
                            },
                   cache_dirpath=config.env.cache_dirpath)
     return output
@@ -575,26 +575,10 @@ def word2vec_scnn(config, is_train):
 def catboost_ensemble(config, is_train):
     single_model_outputs = [tfidf_logreg(config),
                             bad_word_logreg(config),
-                            bad_word_count_features_logreg(config),
                             count_features_logreg(config),
-                            hand_crafted_all_logreg(config),
-
-                            char_vdcnn(config, is_train=False),
-
                             glove_gru(config, is_train=False),
-                            glove_lstm(config, is_train=False),
-                            glove_dpcnn(config, is_train=False),
-                            glove_scnn(config, is_train=False),
-
                             fasttext_gru(config, is_train=False),
-                            fasttext_lstm(config, is_train=False),
-                            fasttext_dpcnn(config, is_train=False),
-                            fasttext_scnn(config, is_train=False),
-
                             word2vec_gru(config, is_train=False),
-                            word2vec_lstm(config, is_train=False),
-                            word2vec_dpcnn(config, is_train=False),
-                            word2vec_scnn(config, is_train=False),
                             ]
 
     output_mappings = [(output_step.name, 'prediction_probability') for output_step in single_model_outputs]
@@ -844,8 +828,8 @@ PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
              'word2vec_scnn': {'train': partial(word2vec_scnn, is_train=True),
                               'inference': partial(word2vec_scnn, is_train=False)},
 
-             'glove_gru': {'train': partial(word2vec_gru, is_train=True),
-                           'inference': partial(word2vec_gru, is_train=False)},
+             'glove_gru': {'train': partial(glove_gru, is_train=True),
+                           'inference': partial(glove_gru, is_train=False)},
              'glove_lstm': {'train': partial(glove_lstm, is_train=True),
                             'inference': partial(glove_lstm, is_train=False)},
              'glove_scnn': {'train': partial(glove_scnn, is_train=True),
