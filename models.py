@@ -16,7 +16,7 @@ from steps.utils import create_filepath
 
 class BasicClassifier(ClassifierXY):
     def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
+        return Adam(kwargs['lr'])
 
     def _build_loss(self, **kwargs):
         return 'binary_crossentropy'
@@ -32,9 +32,6 @@ class BasicClassifier(ClassifierXY):
 
 
 class CharVDCNN(BasicClassifier):
-    def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
-
     def _build_model(self, embedding_size, maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
                      max_pooling, mean_pooling, weighted_average_attention, concat_mode,
@@ -70,9 +67,6 @@ class PretrainedEmbeddingModel(BasicClassifier):
 
 
 class WordSCNN(PretrainedEmbeddingModel):
-    def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
-
     def _build_model(self, embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
                      max_pooling, mean_pooling, weighted_average_attention, concat_mode,
@@ -90,9 +84,6 @@ class WordSCNN(PretrainedEmbeddingModel):
 
 
 class WordDPCNN(PretrainedEmbeddingModel):
-    def _build_optimizer(self, **kwargs):
-        return SGD(**kwargs)
-
     def _build_model(self, embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
                      max_pooling, mean_pooling, weighted_average_attention, concat_mode,
@@ -113,26 +104,27 @@ class WordDPCNN(PretrainedEmbeddingModel):
 
 
 class WordCuDNNLSTM(PretrainedEmbeddingModel):
-    def _build_optimizer(self, **kwargs):
-        return Adam(kwargs['lr'])
-
-    def _build_model(self, embedding_matrix, embedding_size,
+    def _build_model(self, embedding_matrix, embedding_size, trainable_embedding,
                      maxlen, max_features,
-                     unit_nr, repeat_block, dropout_lstm,
-                     dense_size, repeat_dense, dropout_dense,
-                     l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling, batch_norm_first):
-        return cudnn_lstm(embedding_matrix, embedding_size,
+                     unit_nr, repeat_block,
+                     dense_size, repeat_dense,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+                     rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        return cudnn_lstm(embedding_matrix, embedding_size, trainable_embedding,
                           maxlen, max_features,
-                          unit_nr, repeat_block, dropout_lstm,
-                          dense_size, repeat_dense, dropout_dense,
-                          l2_reg_dense, use_prelu, use_batch_norm, trainable_embedding, global_pooling,
-                          batch_norm_first)
+                          unit_nr, repeat_block,
+                          dense_size, repeat_dense,
+                          max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                          dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+                          rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+                          dense_kernel_reg_l2, dense_bias_reg_l2,
+                          use_prelu, use_batch_norm, batch_norm_first)
 
 
 class WordCuDNNGRU(PretrainedEmbeddingModel):
-    def _build_optimizer(self, **kwargs):
-        return Adam(kwargs['lr'])
-
     def _build_model(self, embedding_matrix, embedding_size, trainable_embedding,
                      maxlen, max_features,
                      unit_nr, repeat_block,

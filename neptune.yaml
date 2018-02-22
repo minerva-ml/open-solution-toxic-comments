@@ -29,10 +29,10 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/dev_4
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/dev
   embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
   bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 1
+  overwrite: 0
   num_workers: -2
 
   # Preprocessing
@@ -99,10 +99,8 @@ parameters:
   dense_dropout: 0.5
   conv_dropout: 0.2
   dropout_mode: 'spatial'
-  rnn_kernel_reg_l2:
-    value: [0.0001,0.001]
-  rnn_recurrent_reg_l2:
-    value: [0.0001,0.001]
+  rnn_kernel_reg_l2: 0.0001
+  rnn_recurrent_reg_l2: 0.0001
   rnn_bias_reg_l2: 0.0
   dense_kernel_reg_l2: 0.0
   dense_bias_reg_l2: 0.0

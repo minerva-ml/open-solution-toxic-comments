@@ -3,14 +3,10 @@ import os
 from attrdict import AttrDict
 from deepsense import neptune
 
-from utils import read_yaml
+from utils import read_params
 
 ctx = neptune.Context()
-params = ctx.params
-
-if params.__class__.__name__ == 'OfflineContextParams':
-    neptune_config = read_yaml('neptune.yaml')
-    params = neptune_config.parameters
+params = read_params(ctx)
 
 X_COLUMNS = ['comment_text']
 Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']

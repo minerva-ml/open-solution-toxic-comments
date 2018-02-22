@@ -8,6 +8,15 @@ from attrdict import AttrDict
 from sklearn.metrics import roc_auc_score, log_loss
 
 
+def read_params(ctx):
+    if ctx.params.__class__.__name__ == 'OfflineContextParams':
+        neptune_config = read_yaml('neptune.yaml')
+        params = neptune_config.parameters
+    else:
+        params = ctx.params
+    return params
+
+
 def read_yaml(filepath):
     with open(filepath) as f:
         config = yaml.load(f)

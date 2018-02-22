@@ -37,7 +37,7 @@ parameters:
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
-  maxlen_words: 100
+  maxlen_words: 200
   char_ngram_max: 4
   drop_punctuation: 1
   drop_newline: 1

@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [char, vdcnn, sgd]
+tags: [char, vdcnn, adam]
 
 
 metric:
@@ -30,13 +30,13 @@ parameters:
   experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/char_vdcnn
   embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
   bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 1
+  overwrite: 0
   num_workers: -2
 
   # Preprocessing
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
-  maxlen_char: 2048
+  maxlen_char: 1000
   maxlen_words: 200
   char_ngram_max: 4
   drop_punctuation: 0
@@ -46,18 +46,18 @@ parameters:
   fill_na_with: ' '
 
   # Architecture
-  filter_nr: 32
+  filter_nr: 16
   kernel_size: 3
-  repeat_block: 3
+  repeat_block: 4
   dense_size: 256
-  repeat_dense: 1
+  repeat_dense: 2
   max_pooling: 1
   mean_pooling: 0
   weighted_average_attention: 0
   concat_mode: 'concat'
   trainable_embedding: 1
   word_embedding_size: None
-  char_embedding_size: 32
+  char_embedding_size: 16
 
   # General Architecture
   use_prelu: 1
@@ -79,27 +79,27 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 128
-  batch_size_inference: 128
-  lr: 0.001
+  batch_size_train: 512
+  batch_size_inference: 512
+  lr: 0.01
   momentum: 0.9
-  gamma: 0.7
-  patience: 5
+  gamma: 0.8
+  patience: 10
 
   # Regularization
   batch_norm_first: 1
   use_batch_norm: 1
-  dropout_embedding: 0.5
+  dropout_embedding: 0.0
   rnn_dropout: 0.5
-  dense_dropout: 0.5
-  conv_dropout: 0.2
+  dense_dropout: 0.0
+  conv_dropout: 0.0
   dropout_mode: 'spatial'
-  rnn_kernel_reg_l2: 0.0001
-  rnn_recurrent_reg_l2: 0.0001
-  rnn_bias_reg_l2: 0.0001
-  dense_kernel_reg_l2: 0.00001
-  dense_bias_reg_l2: 0.00001
-  conv_kernel_reg_l2: 0.00001
-  conv_bias_reg_l2: 0.00001
+  rnn_kernel_reg_l2: 0.0000
+  rnn_recurrent_reg_l2: 0.000
+  rnn_bias_reg_l2: 0.000
+  dense_kernel_reg_l2: 0.0000
+  dense_bias_reg_l2: 0.0000
+  conv_kernel_reg_l2: 0.0000
+  conv_bias_reg_l2: 0.0000
 
 

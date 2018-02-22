@@ -16,13 +16,13 @@ neptune run \
 -- train_evaluate_predict_pipeline -p tfidf_logreg
 
 neptune run \
---config best_configs/glove_gru.yaml \
--- train_evaluate_predict_pipeline -p glove_gru
-
-neptune run \
 --config best_configs/fasttext_gru.yaml \
 -- train_evaluate_predict_pipeline -p fasttext_gru
+comment
 
+neptune run \
+--config best_configs/glove_gru.yaml \
+-- train_evaluate_predict_pipeline -p glove_gru
 neptune run \
 --config best_configs/word2vec_gru.yaml \
 -- train_evaluate_predict_pipeline -p word2vec_gru

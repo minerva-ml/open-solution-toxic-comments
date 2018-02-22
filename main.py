@@ -7,10 +7,11 @@ from deepsense import neptune
 from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS
 from pipelines import PIPELINES
 from preprocessing import split_train_data
-from utils import init_logger, get_logger, read_yaml, read_data, multi_roc_auc_score, create_submission
+from utils import init_logger, get_logger, read_params, read_data, multi_roc_auc_score, create_submission
 
 logger = get_logger()
 ctx = neptune.Context()
+params = read_params(ctx)
 
 
 @click.group()
@@ -21,7 +22,6 @@ def action():
 @action.command()
 @click.option('-v', '--validation_size', help='percentage of training used for validation', default=0.1, required=False)
 def train_valid_split(validation_size):
-    params = ctx.params
     logger.info('preprocessing training data')
     split_train_data(data_dir=params.data_dir, validation_size=validation_size)
 
@@ -33,8 +33,6 @@ def train_pipeline(pipeline_name):
 
 
 def _train_pipeline(pipeline_name):
-    params = ctx.params
-
     if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
 
@@ -62,8 +60,6 @@ def evaluate_pipeline(pipeline_name):
 
 
 def _evaluate_pipeline(pipeline_name):
-    params = ctx.params
-
     valid = read_data(data_dir=params.data_dir, filename='valid_split.csv')
 
     data = {'input': {'meta': valid,
@@ -81,7 +77,8 @@ def _evaluate_pipeline(pipeline_name):
     y_true = valid[Y_COLUMNS].values
     y_pred = output['y_pred']
 
-    create_submission(params.experiment_dir, '{}_predictions_valid.csv'.format(pipeline_name), valid, y_pred, Y_COLUMNS, logger)
+    create_submission(params.experiment_dir, '{}_predictions_valid.csv'.format(pipeline_name), valid, y_pred, Y_COLUMNS,
+                      logger)
 
     score = multi_roc_auc_score(y_true, y_pred)
     logger.info('Score on validation is {}'.format(score))
@@ -95,8 +92,6 @@ def predict_pipeline(pipeline_name):
 
 
 def _predict_pipeline(pipeline_name):
-    params = ctx.params
-
     test = read_data(data_dir=params.data_dir, filename='test.csv')
 
     data = {'input': {'meta': test,
@@ -113,7 +108,8 @@ def _predict_pipeline(pipeline_name):
     output = pipeline.transform(data)
     y_pred = output['y_pred']
 
-    create_submission(params.experiment_dir, '{}_predictions_test.csv'.format(pipeline_name), test, y_pred, Y_COLUMNS, logger)
+    create_submission(params.experiment_dir, '{}_predictions_test.csv'.format(pipeline_name), test, y_pred, Y_COLUMNS,
+                      logger)
 
 
 @action.command()
@@ -149,8 +145,6 @@ def evaluate_predict_pipeline(pipeline_name):
 @click.argument('pipeline_names', nargs=-1)
 @click.option('-bn', '--blended_name', help='name of the new blended pipeline', required=True)
 def blend_pipelines(pipeline_names, blended_name):
-    params = ctx.params
-
     new_pipeline_dir = os.path.join(params.experiment_dir, blended_name, 'transformers')
     os.makedirs(new_pipeline_dir)
     for pipeline_name in pipeline_names:
