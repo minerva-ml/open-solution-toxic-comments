@@ -20,7 +20,7 @@ def tfidf_logreg(config):
                                  'y': ([('cleaning_output', 'y')]),
                                  },
                         cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='tfidf_logreg_output',
                   transformer=Dummy(),
                   input_steps=[tfidf_logreg],
                   adapter={'y_pred': ([('tfidf_logreg', 'prediction_probability')]),
@@ -40,7 +40,7 @@ def bad_word_logreg(config):
                                     'y': ([('cleaning_output', 'y')]),
                                     },
                            cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='bad_word_logreg_output',
                   transformer=Dummy(),
                   input_steps=[bad_word_logreg],
                   adapter={'y_pred': ([('bad_word_logreg', 'prediction_probability')]),
@@ -61,7 +61,7 @@ def count_features_logreg(config):
                                  },
                         cache_dirpath=config.env.cache_dirpath)
 
-    output = Step(name='output',
+    output = Step(name='count_logreg_output',
                   transformer=Dummy(),
                   input_steps=[count_logreg],
                   adapter={'y_pred': ([('count_logreg', 'prediction_probability')]),
@@ -85,7 +85,7 @@ def bad_word_count_features_logreg(config):
                                           },
                                  cache_dirpath=config.env.cache_dirpath)
 
-    output = Step(name='output',
+    output = Step(name='bad_word_count_features_logreg_output',
                   transformer=Dummy(),
                   input_steps=[bad_word_count_logreg],
                   adapter={'y_pred': ([('bad_word_count_logreg', 'prediction_probability')]),
@@ -117,7 +117,7 @@ def hand_crafted_all_logreg(config):
                                            },
                                   cache_dirpath=config.env.cache_dirpath)
 
-    output = Step(name='output',
+    output = Step(name='hand_crafted_all_logreg_output',
                   transformer=Dummy(),
                   input_steps=[all_handcrafted_logreg],
                   adapter={'y_pred': ([('all_handcrafted_logreg', 'prediction_probability')]),
@@ -149,7 +149,7 @@ def char_vdcnn(config, is_train):
                                 'y': ([('cleaning_output', 'y')]),
                                 },
                        cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='char_vdcnn_output',
                   transformer=Dummy(),
                   input_steps=[network],
                   adapter={'y_pred': ([('char_vdcnn', 'prediction_probability')]),
@@ -184,7 +184,7 @@ def glove_gru(config, is_train):
                                   'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                   },
                          cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='glove_gru_output',
                   transformer=Dummy(),
                   input_steps=[glove_gru],
                   adapter={'y_pred': ([('glove_gru', 'prediction_probability')]),
@@ -219,7 +219,7 @@ def glove_lstm(config, is_train):
                                    'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                    },
                           cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='glove_lstm_output',
                   transformer=Dummy(),
                   input_steps=[glove_lstm],
                   adapter={'y_pred': ([('glove_lstm', 'prediction_probability')]),
@@ -254,7 +254,7 @@ def glove_scnn(config, is_train):
                                    'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                    },
                           cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='glove_scnn_output',
                   transformer=Dummy(),
                   input_steps=[glove_scnn],
                   adapter={'y_pred': ([('glove_scnn', 'prediction_probability')]),
@@ -289,7 +289,7 @@ def glove_dpcnn(config, is_train):
                                     'embedding_matrix': ([('glove_embeddings', 'embeddings_matrix')]),
                                     },
                            cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='glove_dpcnn_output',
                   transformer=Dummy(),
                   input_steps=[glove_dpcnn],
                   adapter={'y_pred': ([('glove_dpcnn', 'prediction_probability')]),
@@ -324,7 +324,7 @@ def fasttext_lstm(config, is_train):
                                      'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
                                      },
                             cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='fasttext_lstm_output',
                   transformer=Dummy(),
                   input_steps=[fasttext_lstm],
                   adapter={'y_pred': ([('fasttext_lstm', 'prediction_probability')]),
@@ -358,7 +358,7 @@ def fasttext_gru(config, is_train):
                                      'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
                                      },
                             cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='fasttext_gru_output',
                   transformer=Dummy(),
                   input_steps=[fasttext_gru],
                   adapter={'y_pred': ([('fasttext_gru', 'prediction_probability')]),
@@ -392,7 +392,7 @@ def fasttext_dpcnn(config, is_train):
                                      'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
                                      },
                             cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='fasttext_dpcnn_output',
                   transformer=Dummy(),
                   input_steps=[fasttext_dpcnn],
                   adapter={'y_pred': ([('fasttext_dpcnn', 'prediction_probability')]),
@@ -426,7 +426,7 @@ def fasttext_scnn(config, is_train):
                                      'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
                                      },
                             cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='fasttext_scnn_output',
                   transformer=Dummy(),
                   input_steps=[fasttext_scnn],
                   adapter={'y_pred': ([('fasttext_scnn', 'prediction_probability')]),
@@ -460,7 +460,7 @@ def word2vec_gru(config, is_train):
                                      'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
                                      },
                             cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='word2vec_gru_output',
                   transformer=Dummy(),
                   input_steps=[word2vec_gru],
                   adapter={'y_pred': ([('word2vec_gru', 'prediction_probability')]),
@@ -494,7 +494,7 @@ def word2vec_lstm(config, is_train):
                                      'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
                                      },
                             cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='word2vec_lstm_output',
                   transformer=Dummy(),
                   input_steps=[word2vec_lstm],
                   adapter={'y_pred': ([('word2vec_lstm', 'prediction_probability')]),
@@ -529,7 +529,7 @@ def word2vec_dpcnn(config, is_train):
                                      'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
                                      },
                             cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='word2vec_dpcnn_output',
                   transformer=Dummy(),
                   input_steps=[word2vec_dpcnn],
                   adapter={'y_pred': ([('word2vec_dpcnn', 'prediction_probability')]),
@@ -564,7 +564,7 @@ def word2vec_scnn(config, is_train):
                                      'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
                                      },
                             cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
+    output = Step(name='word2vec_scnn_output',
                   transformer=Dummy(),
                   input_steps=[word2vec_scnn],
                   adapter={'y_pred': ([('word2vec_scnn', 'prediction_probability')]),
@@ -576,12 +576,13 @@ def catboost_ensemble(config, is_train):
     single_model_outputs = [tfidf_logreg(config),
                             bad_word_logreg(config),
                             count_features_logreg(config),
+                            char_vdcnn(config, is_train=False),
                             glove_gru(config, is_train=False),
                             fasttext_gru(config, is_train=False),
                             word2vec_gru(config, is_train=False),
                             ]
 
-    output_mappings = [(output_step.name, 'prediction_probability') for output_step in single_model_outputs]
+    output_mappings = [(output_step.name, 'y_pred') for output_step in single_model_outputs]
 
     label = single_model_outputs[0].get_step('xy_train')
 
@@ -589,7 +590,6 @@ def catboost_ensemble(config, is_train):
 
     catboost_ensemble = Step(name='catboost_ensemble',
                              transformer=CatboostClassifierMultilabel(**config.catboost_ensemble),
-                             overwrite_transformer=True,
                              input_steps=input_steps,
                              adapter={'X': (output_mappings, hstack_inputs),
                                       'y': ([('xy_train', 'y')])},
@@ -603,12 +603,8 @@ def catboost_ensemble(config, is_train):
 
     if is_train:
         for model_output in single_model_outputs:
-            clf_step = model_output.input_steps[0]
-            clf_step.cache_output = True
-
-        catboost_ensemble.overwrite_transformer = False
-        for step in catboost_ensemble.input_steps:
-            step.cache_output = False
+            model_output.cache_output = True
+        catboost_ensemble.overwrite_transformer = True
 
     return output
 
