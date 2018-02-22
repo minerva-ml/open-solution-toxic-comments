@@ -48,7 +48,7 @@ parameters:
   # Architecture
   filter_nr: 16
   kernel_size: 3
-  repeat_block: 4
+  repeat_block: 6
   dense_size: 256
   repeat_dense: 2
   max_pooling: 1
@@ -79,11 +79,11 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 512
-  batch_size_inference: 512
-  lr: 0.01
+  batch_size_train: 128
+  batch_size_inference: 128
+  lr: 0.001
   momentum: 0.9
-  gamma: 0.8
+  gamma: 0.7
   patience: 10
 
   # Regularization
@@ -101,5 +101,3 @@ parameters:
   dense_bias_reg_l2: 0.0000
   conv_kernel_reg_l2: 0.0000
   conv_bias_reg_l2: 0.0000
-
-

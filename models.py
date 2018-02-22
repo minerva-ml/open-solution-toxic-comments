@@ -6,7 +6,7 @@ from keras.layers import Input, Embedding, PReLU, Bidirectional, Lambda, \
     GlobalMaxPool1D, GlobalAveragePooling1D, MaxPooling1D
 from keras.layers.merge import add, concatenate
 from keras.models import Model, load_model
-from keras.optimizers import SGD, Adam, Adagrad, Adadelta
+from keras.optimizers import Adam, Nadam
 
 from steps.keras.callbacks import NeptuneMonitor, ReduceLR
 from steps.keras.models import ClassifierXY
@@ -16,7 +16,7 @@ from steps.utils import create_filepath
 
 class BasicClassifier(ClassifierXY):
     def _build_optimizer(self, **kwargs):
-        return Adam(kwargs['lr'])
+        return Adam(lr=kwargs['lr'])
 
     def _build_loss(self, **kwargs):
         return 'binary_crossentropy'
@@ -32,6 +32,9 @@ class BasicClassifier(ClassifierXY):
 
 
 class CharVDCNN(BasicClassifier):
+    # def _build_optimizer(self, **kwargs):
+    #     return Nadam(lr=kwargs['lr'], schedule_decay=0.0)
+
     def _build_model(self, embedding_size, maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
                      max_pooling, mean_pooling, weighted_average_attention, concat_mode,
