@@ -101,7 +101,7 @@ def train_evaluate_cv_pipeline(pipeline_name, model_level, validation_size):
         train.reset_index(inplace=True)
         size = train.shape[0]
     elif model_level == 'second':
-        X, y = read_predictions(prediction_dir=params.single_model_prediction_dir,
+        X, y = read_predictions(prediction_dir=params.single_model_predictions_dir,
                                 mode='valid', valid_columns=Y_COLUMNS)
         size = X.shape[0]
     else:
@@ -109,7 +109,9 @@ def train_evaluate_cv_pipeline(pipeline_name, model_level, validation_size):
 
     fold_scores = []
     cv = ShuffleSplit(size, n_iter=params.n_cv_splits, test_size=validation_size, random_state=1234)
-    for train_idx, valid_idx in cv:
+    for i,(train_idx, valid_idx) in enumerate(cv):
+        logger.info('Fold {} started'.format(i))
+
         if model_level == 'first':
             train_split = train.iloc[train_idx]
             valid_split = train.iloc[valid_idx]
@@ -152,6 +154,7 @@ def train_evaluate_cv_pipeline(pipeline_name, model_level, validation_size):
         y_pred = output['y_pred']
 
         score = multi_roc_auc_score(y_true, y_pred)
+        logger.info('Score on fold {} is {}'.format(i, score))
         fold_scores.append(score)
 
     mean_score = np.mean(score)
@@ -176,7 +179,7 @@ def _predict_pipeline(pipeline_name, model_level):
                           },
                 }
     elif model_level == 'second':
-        X, test = read_predictions(prediction_dir=params.single_model_prediction_dir, mode='test')
+        X, test = read_predictions(prediction_dir=params.single_model_predictions_dir, mode='test')
         data = {'input': {'X': X,
                           'y': None,
                           },
@@ -242,7 +245,7 @@ def blend_pipelines(pipeline_names, blended_name):
 @action.command()
 @click.argument('pipeline_names', nargs=-1)
 def prepare_single_model_predictions_dir(pipeline_names):
-    os.makedirs(params.single_model_predictions_dir)
+    os.makedirs(params.single_model_predictions_dir, exist_ok=True)
 
     valid_split_source = os.path.join(params.data_dir, 'valid_split.csv')
     valid_split_destination = os.path.join(params.single_model_predictions_dir, 'valid_split.csv')
@@ -255,11 +258,11 @@ def prepare_single_model_predictions_dir(pipeline_names):
     shutil.copy(sample_submit_source, sample_submit_destination)
 
     for pipeline_name in pipeline_names:
-        pipeline_dir = os.path.join(params.experiment_dir, pipeline_name, 'transformers')
+        pipeline_dir = os.path.join(params.experiment_dir, pipeline_name)
         for fold in ['valid', 'test']:
             fold_dirpath = os.path.join(params.single_model_predictions_dir, fold)
-            os.makedirs(fold_dirpath)
-            fold_filename = '{}_{}.csv'.format(pipeline_name, fold)
+            os.makedirs(fold_dirpath, exist_ok=True)
+            fold_filename = '{}_predictions_{}.csv'.format(pipeline_name, fold)
             source_filepath = os.path.join(pipeline_dir, fold_filename)
             destination_filepath = os.path.join(fold_dirpath, fold_filename)
             logger.info('copying {} from {} to {}'.format(fold, source_filepath, destination_filepath))

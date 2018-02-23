@@ -573,26 +573,9 @@ def word2vec_scnn(config, is_train):
     return output
 
 def catboost_ensemble(config, is_train):
-    single_model_outputs = [tfidf_logreg(config),
-                            bad_word_logreg(config),
-                            count_features_logreg(config),
-                            char_vdcnn(config, is_train=False),
-                            glove_gru(config, is_train=False),
-                            fasttext_gru(config, is_train=False),
-                            word2vec_gru(config, is_train=False),
-                            ]
-
-    output_mappings = [(output_step.name, 'y_pred') for output_step in single_model_outputs]
-
-    label = single_model_outputs[0].get_step('xy_train')
-
-    input_steps = single_model_outputs + [label]
-
     catboost_ensemble = Step(name='catboost_ensemble',
                              transformer=CatboostClassifierMultilabel(**config.catboost_ensemble),
-                             input_steps=input_steps,
-                             adapter={'X': (output_mappings, hstack_inputs),
-                                      'y': ([('xy_train', 'y')])},
+                             input_data=['input'],
                              cache_dirpath=config.env.cache_dirpath)
 
     output = Step(name='output',
@@ -602,8 +585,6 @@ def catboost_ensemble(config, is_train):
                   cache_dirpath=config.env.cache_dirpath)
 
     if is_train:
-        for model_output in single_model_outputs:
-            model_output.cache_output = True
         catboost_ensemble.overwrite_transformer = True
 
     return output
