@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+: <<'COMMENT'
 #Train single models
 neptune run \
 --config best_configs/count_logreg.yaml \
@@ -27,21 +28,21 @@ neptune run \
 neptune run \
 --config best_configs/word2vec_gru.yaml \
 -- train_evaluate_predict_pipeline -p word2vec_gru
+COMMENT
 
-#Blend/copy single models
+#Copy single model predictions for stacking
 neptune run \
 --config best_configs/setup.yaml \
--- blend_pipelines \
+-- prepare_single_model_predictions_dir \
 count_logreg \
 bad_word_logreg \
 tfidf_logreg \
 char_vdcnn \
 glove_gru \
 word2vec_gru \
-fasttext_gru \
---blended_name catboost_ensemble
+fasttext_gru
 
-#Train ensemble model
+#Train stacking model
 neptune run \
 --config best_configs/catboost_ensemble.yaml \
 -- train_evaluate_predict_pipeline -p catboost_ensemble

@@ -27,11 +27,13 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
+  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
   experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/char_vdcnn
   embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
   bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 0
   num_workers: -2
+  n_cv_splits: 5
 
   # Preprocessing
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
@@ -46,18 +48,23 @@ parameters:
   fill_na_with: ' '
 
   # Architecture
-  filter_nr: 16
+  filter_nr:
+    value: [16,32,64]
   kernel_size: 3
-  repeat_block: 6
+  repeat_block:
+    value: [2,4,6]
   dense_size: 256
-  repeat_dense: 2
+  repeat_dense:
+    value: [1,2]
   max_pooling: 1
-  mean_pooling: 0
+  mean_pooling:
+    value: [0,1]
   weighted_average_attention: 0
   concat_mode: 'concat'
   trainable_embedding: 1
   word_embedding_size: None
-  char_embedding_size: 16
+  char_embedding_size:
+    value: [16,32]
 
   # General Architecture
   use_prelu: 1
@@ -81,9 +88,9 @@ parameters:
   epochs_nr: 1000
   batch_size_train: 128
   batch_size_inference: 128
-  lr: 0.001
+  lr: 0.005
   momentum: 0.9
-  gamma: 0.7
+  gamma: 0.8
   patience: 10
 
   # Regularization
