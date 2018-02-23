@@ -67,7 +67,7 @@ def read_predictions(prediction_dir, mode='valid', valid_columns=None):
     elif mode == 'test':
         return X, sample_submission
     else:
-        raise NotImplementedError("""only 'first' and 'second' """)
+        raise NotImplementedError
 
 
 def create_submission(experiments_dir, filename, meta, predictions, columns, logger):

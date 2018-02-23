@@ -28,7 +28,7 @@ parameters:
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
   single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_scnn
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_scnn_dev
   embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
   bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 1
@@ -39,7 +39,7 @@ parameters:
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
-  maxlen_words: 100
+  maxlen_words: 200
   char_ngram_max: 4
   drop_punctuation: 1
   drop_newline: 1
@@ -49,12 +49,15 @@ parameters:
 
   # Architecture
   filter_nr: 256
-  kernel_size: 6
+  kernel_size:
+    value: [3,6]
   repeat_block: 1
   dense_size: 256
-  repeat_dense: 1
+  repeat_dense:
+    value: [1,2]
   max_pooling: 1
-  mean_pooling: 0
+  mean_pooling:
+    value: [0,1]
   weighted_average_attention: 0
   concat_mode: 'concat'
   trainable_embedding: 0
