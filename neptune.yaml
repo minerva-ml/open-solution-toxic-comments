@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [fasttext, lstm, adam]
+tags: [ensemble, catboost, predictions]
 
 
 metric:
@@ -23,15 +23,18 @@ exclude:
 parameters:
   # Cloud Environment
 #  data_dir: /public/toxic_comments
+#  single_model_prediction_dir: /public/toxic_comments/single_model_predictions_new
 #  experiment_dir: /output/trained_pipelines/glove_lstm
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_lstm_dev
+  single_model_prediction_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_new
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/catboost_ensemble
   embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
   bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 0
+  overwrite: 1
   num_workers: -2
+  n_cv_splits: 5
 
   # Preprocessing
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
@@ -39,24 +42,20 @@ parameters:
   maxlen_char: 512
   maxlen_words: 100
   char_ngram_max: 4
-  drop_punctuation: 1
+  drop_punctuation: 1 # Do I want to preprocess in that way for all models?
   drop_newline: 1
   drop_multispaces: 1
   all_lower_case: 1
   fill_na_with: ' '
 
   # Architecture
-  filter_nr:
-    value: [64,512]
+  filter_nr: 512
   kernel_size: None
-  repeat_block:
-    value: [1,2]
+  repeat_block: 1
   dense_size: 256
   repeat_dense: 0
-    value: [1,2]
   max_pooling: 1
-  mean_pooling:
-    value: [0,1]
+  mean_pooling: 1
   weighted_average_attention: 0
   concat_mode: 'concat'
   trainable_embedding: 0
@@ -67,18 +66,18 @@ parameters:
   use_prelu: 1
 
  # Log Reg Params
-  log_reg_c: 4.0
+  log_reg_c: 100
   log_reg_penalty: 'l2'
   max_iter: 1000
 
-  # Ensemble Catboost
+  # Ensemble Catboost 0.990757
   catboost__iterations: 500
   catboost__learning_rate: 0.02
-  catboost__depth: 6
-  catboost__l2_leaf_reg: 10
-  catboost__border_count: 100
-  catboost__model_size_reg: None # Todo: Explore
-  catboost__rsm: None # Todo: Explore
+  catboost__depth: 3
+  catboost__l2_leaf_reg: 5
+  catboost__border_count: 200
+  catboost__model_size_reg: 2.0 # Todo: Explore
+  catboost__rsm: 0.2 # Todo: Explore
   catboost__verbose: 0
 
   # Training schedule
@@ -93,17 +92,17 @@ parameters:
   # Regularization
   batch_norm_first: 0
   use_batch_norm: 0
-  dropout_embedding: 0.5
-  rnn_dropout: 0.5
-  dense_dropout: 0.5
-  conv_dropout: 0.5
+  dropout_embedding: 0.2
+  rnn_dropout: 0.2
+  dense_dropout: 0.25
+  conv_dropout: 0.2
   dropout_mode: 'spatial'
-  rnn_kernel_reg_l2: 0.0001
-  rnn_recurrent_reg_l2: 0.0001
-  rnn_bias_reg_l2: 0.0001
-  dense_kernel_reg_l2: 0.0001
-  dense_bias_reg_l2: 0.0001
-  conv_kernel_reg_l2: 0.0001
-  conv_bias_reg_l2: 0.0001
+  rnn_kernel_reg_l2: 0.00001
+  rnn_recurrent_reg_l2: 0.00001
+  rnn_bias_reg_l2: 0.0
+  dense_kernel_reg_l2: 0.0
+  dense_bias_reg_l2: 0.0
+  conv_kernel_reg_l2: 0.0
+  conv_bias_reg_l2: 0.0
 
 

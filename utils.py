@@ -1,6 +1,7 @@
 import logging
 import os
 
+import glob
 import numpy as np
 import pandas as pd
 import yaml
@@ -47,6 +48,26 @@ def read_data(data_dir, filename):
     meta_filepath = os.path.join(data_dir, filename)
     meta_data = pd.read_csv(meta_filepath)
     return meta_data
+
+
+def read_predictions(prediction_dir, mode='valid', valid_columns=None):
+    valid_labels = pd.read_csv(os.path.join(prediction_dir, 'valid_split.csv'))
+    sample_submission = pd.read_csv(os.path.join(prediction_dir, 'sample_submission.csv'))
+    predictions = []
+    for filepath in sorted(glob.glob('{}/{}/*'.format(prediction_dir, mode))):
+        prediction_single = pd.read_csv(filepath)
+        prediction_single.drop('id', axis=1, inplace=True)
+        predictions.append(prediction_single)
+
+    X = np.hstack(predictions)
+
+    if mode == 'valid':
+        y = valid_labels[valid_columns].values
+        return X, y
+    elif mode == 'test':
+        return X, sample_submission
+    else:
+        raise NotImplementedError("""only 'first' and 'second' """)
 
 
 def create_submission(experiments_dir, filename, meta, predictions, columns, logger):

@@ -23,11 +23,13 @@ exclude:
 parameters:
   # Cloud Environment
 #  data_dir: /public/toxic_comments
+#  single_model_prediction_dir: /public/toxic_comments/single_model_predictions_new
 #  experiment_dir: /output/trained_pipelines/glove_lstm
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/catboost_ensemble
+  single_model_prediction_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_new
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_lstm_dev
   embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
   bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 0
