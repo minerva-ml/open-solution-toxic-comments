@@ -49,15 +49,12 @@ parameters:
 
   # Architecture
   filter_nr: 256
-  kernel_size:
-    value: [3,6]
+  kernel_size: 3
   repeat_block: 1
   dense_size: 256
-  repeat_dense:
-    value: [1,2]
+  repeat_dense: 1
   max_pooling: 1
-  mean_pooling:
-    value: [0,1]
+  mean_pooling: 1
   weighted_average_attention: 0
   concat_mode: 'concat'
   trainable_embedding: 0

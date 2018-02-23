@@ -30,7 +30,7 @@ neptune run \
 -- train_evaluate_predict_pipeline -p word2vec_gru
 COMMENT
 
-#Blend/copy single models
+#Copy single model predictions for stacking
 neptune run \
 --config best_configs/setup.yaml \
 -- prepare_single_model_predictions_dir \
@@ -41,3 +41,8 @@ char_vdcnn \
 glove_gru \
 word2vec_gru \
 fasttext_gru
+
+#Train stacking model
+neptune run \
+--config best_configs/catboost_ensemble.yaml \
+-- train_evaluate_predict_pipeline -p catboost_ensemble
