@@ -67,14 +67,14 @@ parameters:
   log_reg_penalty: 'l2'
   max_iter: 1000
 
-  # Ensemble Catboost
+  # Ensemble Catboost 0.990757
   catboost__iterations: 500
   catboost__learning_rate: 0.02
-  catboost__depth: 6
-  catboost__l2_leaf_reg: 10
-  catboost__border_count: 100
-  catboost__model_size_reg: None # Todo: Explore
-  catboost__rsm: None # Todo: Explore
+  catboost__depth: 3
+  catboost__l2_leaf_reg: 5
+  catboost__border_count: 200
+  catboost__model_size_reg: 2.0 # Todo: Explore
+  catboost__rsm: 0.2 # Todo: Explore
   catboost__verbose: 0
 
   # Training schedule

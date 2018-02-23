@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [char, vdcnn, adam]
+tags: [fasttext, lstm, adam]
 
 
 metric:
@@ -27,7 +27,7 @@ parameters:
 #  embedding_filepath: /public/models/glove/glove.840B.300d.txt
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/char_vdcnn
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_lstm_dev
   embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
   bad_words_filepath: external_data/compiled_bad_words.txt
   overwrite: 0
@@ -36,34 +36,38 @@ parameters:
   # Preprocessing
   max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
-  maxlen_char: 1000
-  maxlen_words: 200
+  maxlen_char: 512
+  maxlen_words: 100
   char_ngram_max: 4
-  drop_punctuation: 0
-  drop_newline: 0
-  drop_multispaces: 0
-  all_lower_case: 0
+  drop_punctuation: 1
+  drop_newline: 1
+  drop_multispaces: 1
+  all_lower_case: 1
   fill_na_with: ' '
 
   # Architecture
-  filter_nr: 64
-  kernel_size: 3
-  repeat_block: 4
+  filter_nr:
+    value: [64,512]
+  kernel_size: None
+  repeat_block:
+    value: [1,2]
   dense_size: 256
-  repeat_dense: 1
+  repeat_dense: 0
+    value: [1,2]
   max_pooling: 1
-  mean_pooling: 0
+  mean_pooling:
+    value: [0,1]
   weighted_average_attention: 0
   concat_mode: 'concat'
-  trainable_embedding: 1
-  word_embedding_size: None
-  char_embedding_size: 16
+  trainable_embedding: 0
+  word_embedding_size: 300
+  char_embedding_size: None
 
   # General Architecture
   use_prelu: 1
 
  # Log Reg Params
-  log_reg_c: 100
+  log_reg_c: 4.0
   log_reg_penalty: 'l2'
   max_iter: 1000
 
@@ -87,17 +91,19 @@ parameters:
   patience: 5
 
   # Regularization
-  batch_norm_first: 1
-  use_batch_norm: 1
-  dropout_embedding: 0.0
+  batch_norm_first: 0
+  use_batch_norm: 0
+  dropout_embedding: 0.5
   rnn_dropout: 0.5
-  dense_dropout: 0.1
-  conv_dropout: 0.1
+  dense_dropout: 0.5
+  conv_dropout: 0.5
   dropout_mode: 'spatial'
-  rnn_kernel_reg_l2: 0.0000
-  rnn_recurrent_reg_l2: 0.000
-  rnn_bias_reg_l2: 0.000
-  dense_kernel_reg_l2: 0.0000001
-  dense_bias_reg_l2: 0.0000001
-  conv_kernel_reg_l2: 0.0000001
-  conv_bias_reg_l2: 0.0000001
+  rnn_kernel_reg_l2: 0.0001
+  rnn_recurrent_reg_l2: 0.0001
+  rnn_bias_reg_l2: 0.0001
+  dense_kernel_reg_l2: 0.0001
+  dense_bias_reg_l2: 0.0001
+  conv_kernel_reg_l2: 0.0001
+  conv_bias_reg_l2: 0.0001
+
+

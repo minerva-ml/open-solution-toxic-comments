@@ -193,8 +193,8 @@ def dpcnn(embedding_matrix, embedding_size, trainable_embedding, maxlen, max_fea
 
     input_text = Input(shape=(maxlen,))
     if embedding_matrix is not None:
-        embedding = Embedding(max_features, embedding_size, weights=[embedding_matrix], trainable=trainable_embedding)(
-            input_text)
+        embedding = Embedding(max_features, embedding_size,
+                              weights=[embedding_matrix], trainable=trainable_embedding)(input_text)
     else:
         embedding = Embedding(max_features, embedding_size)(input_text)
 
