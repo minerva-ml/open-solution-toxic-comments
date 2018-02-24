@@ -33,7 +33,7 @@ parameters:
   embedding_filepath: None
 
   bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 0
+  overwrite: 1
   num_workers: 4
   n_cv_splits: 5
 
