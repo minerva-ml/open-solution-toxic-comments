@@ -41,12 +41,14 @@ class WordListFilter(BaseTransformer):
 
 
 class TextCleaner(BaseTransformer):
-    def __init__(self, drop_punctuation, drop_newline, drop_multispaces, all_lower_case, fill_na_with):
+    def __init__(self, drop_punctuation, drop_newline, drop_multispaces,
+                 all_lower_case, fill_na_with, deduplication_threshold):
         self.drop_punctuation = drop_punctuation
         self.drop_newline = drop_newline
         self.drop_multispaces = drop_multispaces
         self.all_lower_case = all_lower_case
         self.fill_na_with = fill_na_with
+        self.deduplication_threshold = deduplication_threshold
 
     def transform(self, X):
         X = pd.DataFrame(X, columns=['text']).astype(str)
@@ -64,6 +66,8 @@ class TextCleaner(BaseTransformer):
             x = self._remove_newline(x)
         if self.drop_multispaces:
             x = self._substitute_multiple_spaces(x)
+        if self.deduplication_threshold is not None:
+            x = self._deduplicate(x)
         return x
 
     def _lower(self, x):
@@ -79,6 +83,18 @@ class TextCleaner(BaseTransformer):
 
     def _substitute_multiple_spaces(self, x):
         return ' '.join(x.split())
+
+    def _deduplicate(self,x):
+        word_list = x.split()
+        num_words = len(word_list)
+        if num_words ==0:
+            return x
+        else:
+            num_unique_words = len(set(word_list))
+            unique_ratio = num_words/num_unique_words
+            if unique_ratio > self.deduplication_threshold:
+                x = ' '.join(x.split()[:num_unique_words])
+            return x
 
     def load(self, filepath):
         params = joblib.load(filepath)
