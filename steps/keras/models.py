@@ -27,7 +27,7 @@ class BasicClassifier(BaseTransformer):
         model = self._build_model(**model_params)
         optimizer = self._build_optimizer(**optimizer_params)
         loss = self._build_loss()
-        model.compile(optimizer=optimizer, loss=loss, metrics=['acc', ])
+        model.compile(optimizer=optimizer, loss=loss)
         return model
 
     def _create_callbacks(self, **kwargs):

@@ -90,9 +90,10 @@ def _evaluate_pipeline(pipeline_name):
 
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
-@click.option('-m', '--model_level', help='first or second level', default='second', required=True)
+@click.option('-m', '--model_level', help='first or second level', default='second', required=False)
+@click.option('-s', '--stacking_mode', help='mode of stacking, flat or rnn', default='flat', required=False)
 @click.option('-v', '--validation_size', help='percentage of training used for validation', default=0.1, required=False)
-def train_evaluate_cv_pipeline(pipeline_name, model_level, validation_size):
+def train_evaluate_cv_pipeline(pipeline_name, model_level, stacking_mode, validation_size):
     if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
 
@@ -102,14 +103,14 @@ def train_evaluate_cv_pipeline(pipeline_name, model_level, validation_size):
         size = train.shape[0]
     elif model_level == 'second':
         X, y = read_predictions(prediction_dir=params.single_model_predictions_dir,
-                                mode='valid', valid_columns=Y_COLUMNS)
+                                mode='valid', valid_columns=Y_COLUMNS, stacking_mode=stacking_mode)
         size = X.shape[0]
     else:
         raise NotImplementedError("""only 'first' and 'second' """)
 
     fold_scores = []
     cv = ShuffleSplit(size, n_iter=params.n_cv_splits, test_size=validation_size, random_state=1234)
-    for i,(train_idx, valid_idx) in enumerate(cv):
+    for i, (train_idx, valid_idx) in enumerate(cv):
         logger.info('Fold {} started'.format(i))
 
         if model_level == 'first':
@@ -137,6 +138,8 @@ def train_evaluate_cv_pipeline(pipeline_name, model_level, validation_size):
 
             data_train = {'input': {'X': X_train,
                                     'y': y_train,
+                                    'X_valid': X_valid,
+                                    'y_valid': y_valid
                                     },
                           }
             data_valid = {'input': {'X': X_valid,
@@ -156,7 +159,6 @@ def train_evaluate_cv_pipeline(pipeline_name, model_level, validation_size):
         score = multi_roc_auc_score(y_true, y_pred)
         logger.info('Score on fold {} is {}'.format(i, score))
         fold_scores.append(score)
-
     mean_score = np.mean(fold_scores)
 
     logger.info('Score on validation is {}'.format(mean_score))
@@ -166,11 +168,12 @@ def train_evaluate_cv_pipeline(pipeline_name, model_level, validation_size):
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 @click.option('-m', '--model_level', help='first or second level', default='first', required=True)
-def predict_pipeline(pipeline_name, model_level):
-    _predict_pipeline(pipeline_name, model_level)
+@click.option('-s', '--stacking_mode', help='mode of stacking, flat or rnn', default='flat', required=False)
+def predict_pipeline(pipeline_name, model_level, stacking_mode):
+    _predict_pipeline(pipeline_name, model_level, stacking_mode)
 
 
-def _predict_pipeline(pipeline_name, model_level):
+def _predict_pipeline(pipeline_name, model_level, stacking_mode):
     if model_level == 'first':
         test = read_data(data_dir=params.data_dir, filename='test.csv')
         data = {'input': {'meta': test,
@@ -179,7 +182,8 @@ def _predict_pipeline(pipeline_name, model_level):
                           },
                 }
     elif model_level == 'second':
-        X, test = read_predictions(prediction_dir=params.single_model_predictions_dir, mode='test')
+        X, test = read_predictions(prediction_dir=params.single_model_predictions_dir,
+                                   mode='test', stacking_mode=stacking_mode)
         data = {'input': {'X': X,
                           'y': None,
                           },
