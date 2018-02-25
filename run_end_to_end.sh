@@ -76,3 +76,8 @@ fasttext_gru \
 fasttext_lstm \
 fasttext_dpcnn \
 fasttext_scnn
+
+# Model stacking
+neptune run \
+--config best_configs/catboost_ensemble.yaml \
+-- train_evaluate_predict_pipeline -p catboost_ensemble

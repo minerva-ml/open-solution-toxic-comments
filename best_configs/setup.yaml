@@ -48,6 +48,7 @@ parameters:
   drop_multispaces: None
   all_lower_case: None
   fill_na_with: None
+  deduplication_threshold: None
 
   # Architecture
   filter_nr: None
