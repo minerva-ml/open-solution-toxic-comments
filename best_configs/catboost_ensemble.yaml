@@ -72,19 +72,14 @@ parameters:
   log_reg_penalty: None
   max_iter: None
 
-  # Ensemble Catboost 0.990757
+  # Ensemble Catboost 0.990657
   catboost__iterations: 500
   catboost__learning_rate: 0.02
-  catboost__depth: 
-      value: [3,5]
-  catboost__l2_leaf_reg: 
-      value: [1,5,10]
-  catboost__border_count: 
-      value: [100,200]
-  catboost__model_size_reg:
-      value: [0.25,2.0]
-  catboost__rsm: 
-      value: [0.25,1.25]
+  catboost__depth: 3
+  catboost__l2_leaf_reg: 1
+  catboost__border_count: 100
+  catboost__model_size_reg: 0.25
+  catboost__rsm: 1.25
   catboost__verbose: 0
 
   # Training schedule
