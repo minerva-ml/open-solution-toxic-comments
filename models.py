@@ -27,7 +27,7 @@ class BasicClassifier(ClassifierXY):
         checkpoint_filepath = kwargs['model_checkpoint']['filepath']
         create_filepath(checkpoint_filepath)
         model_checkpoint = ModelCheckpoint(**kwargs['model_checkpoint'])
-        neptune = NeptuneMonitor()
+        neptune = NeptuneMonitor(**kwargs['neptune_monitor'])
         return [neptune, lr_scheduler, early_stopping, model_checkpoint]
 
 
@@ -146,6 +146,39 @@ class WordCuDNNGRU(PretrainedEmbeddingModel):
                          rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
                          dense_kernel_reg_l2, dense_bias_reg_l2,
                          use_prelu, use_batch_norm, batch_norm_first)
+
+
+class StackerGru(BasicClassifier):
+    def _build_model(self, unit_nr, repeat_block,
+                     dense_size, repeat_dense,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+                     rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        input_predictions = Input(shape=(6, 16))
+
+        x = _dropout(dropout_embedding, dropout_mode)(input_predictions)
+
+        for _ in range(repeat_block):
+            x = _cudnn_gru_block(unit_nr=unit_nr, return_sequences=True, bidirectional=True,
+                                 kernel_reg_l2=rnn_kernel_reg_l2,
+                                 recurrent_reg_l2=rnn_recurrent_reg_l2,
+                                 bias_reg_l2=rnn_bias_reg_l2,
+                                 use_batch_norm=use_batch_norm, batch_norm_first=batch_norm_first,
+                                 dropout=rnn_dropout, dropout_mode=dropout_mode, use_prelu=use_prelu)(x)
+
+        predictions = _classification_block(dense_size=dense_size, repeat_dense=repeat_dense,
+                                            max_pooling=max_pooling,
+                                            mean_pooling=mean_pooling,
+                                            weighted_average_attention=weighted_average_attention,
+                                            concat_mode=concat_mode,
+                                            dropout=dense_dropout,
+                                            kernel_reg_l2=dense_kernel_reg_l2, bias_reg_l2=dense_bias_reg_l2,
+                                            use_prelu=use_prelu, use_batch_norm=use_batch_norm,
+                                            batch_norm_first=batch_norm_first)(x)
+        model = Model(inputs=input_predictions, outputs=predictions)
+        return model
 
 
 def scnn(embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,

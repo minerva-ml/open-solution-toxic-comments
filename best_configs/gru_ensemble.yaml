@@ -1,0 +1,110 @@
+project-key: TOX
+
+name: toxic
+tags: [ensemble, gru, predictions]
+
+
+metric:
+  channel: 'Final Validation Score ROC_AUC'
+  goal: maximize
+
+#Comment out if not in Cloud Environment
+#pip-requirements-file: requirements.txt
+
+exclude:
+  - output
+  - imgs
+  - neptune.log
+  - offline_job.log
+  - .git
+  - .idea
+  - .ipynb_checkpoints
+
+parameters:
+  # Cloud Environment
+#  data_dir: /public/toxic_comments
+#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
+#  experiment_dir: /output/trained_pipelines/gru_stacker_ensemble
+#  embedding_filepath: None
+  # Local Environment
+  data_dir: /mnt/ml-team/minerva/toxic/data
+  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/gru_stacker_ensemble
+  embedding_filepath: None
+
+  bad_words_filepath: None
+  overwrite: 1
+  num_workers: 4
+  n_cv_splits: 5
+
+  # Preprocessing
+  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_word: None
+  maxlen_char: None
+  maxlen_words: None
+  char_ngram_max: None
+  drop_punctuation: None # Do I want to preprocess in that way for all models?
+  drop_newline: None
+  drop_multispaces: None
+  all_lower_case: None
+  fill_na_with: None
+  deduplication_threshold: None
+
+  # Architecture
+  filter_nr: 128
+  kernel_size: None
+  repeat_block: 1
+  dense_size: 256
+  repeat_dense: 0
+  max_pooling: 1
+  mean_pooling: 1
+  weighted_average_attention: 0
+  concat_mode:  'concat'
+  trainable_embedding: None
+  word_embedding_size: None
+  char_embedding_size: None
+
+  # General Architecture
+  use_prelu: None
+
+ # Log Reg Params
+  log_reg_c: None
+  log_reg_penalty: None
+  max_iter: None
+
+  # Ensemble Catboost 0.990657
+  catboost__iterations: 500
+  catboost__learning_rate: 0.02
+  catboost__depth: 3
+  catboost__l2_leaf_reg: 1
+  catboost__border_count: 100
+  catboost__model_size_reg: 0.25
+  catboost__rsm: 1.25
+  catboost__verbose: 0
+
+  # Training schedule
+  epochs_nr: 1000
+  batch_size_train: 64
+  batch_size_inference: 64
+  lr: 0.002
+  momentum: None
+  gamma: 0.8
+  patience: 10
+
+  # Regularization
+  batch_norm_first: 0
+  use_batch_norm: 0
+  dropout_embedding: 0.1
+  rnn_dropout: 0.25
+  dense_dropout: 0.25
+  conv_dropout: None
+  dropout_mode: 'simple'
+  rnn_kernel_reg_l2: 0.000001
+  rnn_recurrent_reg_l2: 0.000001
+  rnn_bias_reg_l2: 0.000001
+  dense_kernel_reg_l2: 0.000001
+  dense_bias_reg_l2: 0.000001
+  conv_kernel_reg_l2: None
+  conv_bias_reg_l2: None
+
+

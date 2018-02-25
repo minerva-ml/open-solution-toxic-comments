@@ -50,7 +50,7 @@ def read_data(data_dir, filename):
     return meta_data
 
 
-def read_predictions(prediction_dir, mode='valid', valid_columns=None):
+def read_predictions(prediction_dir, mode='valid', valid_columns=None, stacking_mode='flat'):
     valid_labels = pd.read_csv(os.path.join(prediction_dir, 'valid_split.csv'))
     sample_submission = pd.read_csv(os.path.join(prediction_dir, 'sample_submission.csv'))
     predictions = []
@@ -59,7 +59,12 @@ def read_predictions(prediction_dir, mode='valid', valid_columns=None):
         prediction_single.drop('id', axis=1, inplace=True)
         predictions.append(prediction_single)
 
-    X = np.hstack(predictions)
+    if stacking_mode == 'flat':
+        X = np.hstack(predictions)
+    elif stacking_mode == 'rnn':
+        X = np.stack(predictions, axis=2)
+    else:
+        raise NotImplementedError("""only stacking_mode options 'flat' and 'rnn' are supported""")
 
     if mode == 'valid':
         y = valid_labels[valid_columns].values

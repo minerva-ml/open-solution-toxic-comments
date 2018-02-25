@@ -1,7 +1,7 @@
 from functools import partial
 
-from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM
-from steps.base import Step, Dummy, hstack_inputs, sparse_hstack_inputs, to_tuple_inputs
+from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM, StackerGru
+from steps.base import Step, Dummy, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter
@@ -304,26 +304,26 @@ def fasttext_lstm(config, is_train):
     fasttext_embeddings = _fasttext_embeddings(word_tokenizer, config)
     if is_train:
         fasttext_lstm = Step(name='fasttext_lstm',
-                            transformer=WordCuDNNLSTM(**config.lstm_network),
-                            overwrite_transformer=True,
-                            input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
-                                     'validation_data': (
-                                         [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
-                                         to_tuple_inputs),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                             transformer=WordCuDNNLSTM(**config.lstm_network),
+                             overwrite_transformer=True,
+                             input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
+                             adapter={'X': ([('word_tokenizer', 'X')]),
+                                      'y': ([('cleaning_output', 'y')]),
+                                      'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
+                                      'validation_data': (
+                                          [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
+                                          to_tuple_inputs),
+                                      },
+                             cache_dirpath=config.env.cache_dirpath)
     else:
         fasttext_lstm = Step(name='fasttext_lstm',
-                            transformer=WordCuDNNLSTM(**config.lstm_network),
-                            input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                             transformer=WordCuDNNLSTM(**config.lstm_network),
+                             input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
+                             adapter={'X': ([('word_tokenizer', 'X')]),
+                                      'y': ([('cleaning_output', 'y')]),
+                                      'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
+                                      },
+                             cache_dirpath=config.env.cache_dirpath)
     output = Step(name='fasttext_lstm_output',
                   transformer=Dummy(),
                   input_steps=[fasttext_lstm],
@@ -331,6 +331,7 @@ def fasttext_lstm(config, is_train):
                            },
                   cache_dirpath=config.env.cache_dirpath)
     return output
+
 
 def fasttext_gru(config, is_train):
     preprocessed_input = _preprocessing(config, is_train)
@@ -366,32 +367,33 @@ def fasttext_gru(config, is_train):
                   cache_dirpath=config.env.cache_dirpath)
     return output
 
+
 def fasttext_dpcnn(config, is_train):
     preprocessed_input = _preprocessing(config, is_train)
     word_tokenizer = _word_tokenizer(preprocessed_input, config, is_train)
     fasttext_embeddings = _fasttext_embeddings(word_tokenizer, config)
     if is_train:
         fasttext_dpcnn = Step(name='fasttext_dpcnn',
-                            transformer=WordDPCNN(**config.dpcnn_network),
-                            overwrite_transformer=True,
-                            input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
-                                     'validation_data': (
-                                         [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
-                                         to_tuple_inputs),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                              transformer=WordDPCNN(**config.dpcnn_network),
+                              overwrite_transformer=True,
+                              input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
+                              adapter={'X': ([('word_tokenizer', 'X')]),
+                                       'y': ([('cleaning_output', 'y')]),
+                                       'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
+                                       'validation_data': (
+                                           [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
+                                           to_tuple_inputs),
+                                       },
+                              cache_dirpath=config.env.cache_dirpath)
     else:
         fasttext_dpcnn = Step(name='fasttext_dpcnn',
-                            transformer=WordDPCNN(**config.dpcnn_network),
-                            input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                              transformer=WordDPCNN(**config.dpcnn_network),
+                              input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
+                              adapter={'X': ([('word_tokenizer', 'X')]),
+                                       'y': ([('cleaning_output', 'y')]),
+                                       'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
+                                       },
+                              cache_dirpath=config.env.cache_dirpath)
     output = Step(name='fasttext_dpcnn_output',
                   transformer=Dummy(),
                   input_steps=[fasttext_dpcnn],
@@ -400,32 +402,33 @@ def fasttext_dpcnn(config, is_train):
                   cache_dirpath=config.env.cache_dirpath)
     return output
 
+
 def fasttext_scnn(config, is_train):
     preprocessed_input = _preprocessing(config, is_train)
     word_tokenizer = _word_tokenizer(preprocessed_input, config, is_train)
     fasttext_embeddings = _fasttext_embeddings(word_tokenizer, config)
     if is_train:
         fasttext_scnn = Step(name='fasttext_scnn',
-                            transformer=WordSCNN(**config.scnn_network),
-                            overwrite_transformer=True,
-                            input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
-                                     'validation_data': (
-                                         [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
-                                         to_tuple_inputs),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                             transformer=WordSCNN(**config.scnn_network),
+                             overwrite_transformer=True,
+                             input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
+                             adapter={'X': ([('word_tokenizer', 'X')]),
+                                      'y': ([('cleaning_output', 'y')]),
+                                      'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
+                                      'validation_data': (
+                                          [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
+                                          to_tuple_inputs),
+                                      },
+                             cache_dirpath=config.env.cache_dirpath)
     else:
         fasttext_scnn = Step(name='fasttext_scnn',
-                            transformer=WordSCNN(**config.scnn_network),
-                            input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                             transformer=WordSCNN(**config.scnn_network),
+                             input_steps=[word_tokenizer, preprocessed_input, fasttext_embeddings],
+                             adapter={'X': ([('word_tokenizer', 'X')]),
+                                      'y': ([('cleaning_output', 'y')]),
+                                      'embedding_matrix': ([('fasttext_embeddings', 'embeddings_matrix')]),
+                                      },
+                             cache_dirpath=config.env.cache_dirpath)
     output = Step(name='fasttext_scnn_output',
                   transformer=Dummy(),
                   input_steps=[fasttext_scnn],
@@ -433,6 +436,7 @@ def fasttext_scnn(config, is_train):
                            },
                   cache_dirpath=config.env.cache_dirpath)
     return output
+
 
 def word2vec_gru(config, is_train):
     preprocessed_input = _preprocessing(config, is_train)
@@ -468,32 +472,33 @@ def word2vec_gru(config, is_train):
                   cache_dirpath=config.env.cache_dirpath)
     return output
 
+
 def word2vec_lstm(config, is_train):
     preprocessed_input = _preprocessing(config, is_train)
     word_tokenizer = _word_tokenizer(preprocessed_input, config, is_train)
     word2vec_embeddings = _word2vec_embeddings(word_tokenizer, config)
     if is_train:
         word2vec_lstm = Step(name='word2vec_lstm',
-                            transformer=WordCuDNNLSTM(**config.lstm_network),
-                            overwrite_transformer=True,
-                            input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
-                                     'validation_data': (
-                                         [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
-                                         to_tuple_inputs),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                             transformer=WordCuDNNLSTM(**config.lstm_network),
+                             overwrite_transformer=True,
+                             input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
+                             adapter={'X': ([('word_tokenizer', 'X')]),
+                                      'y': ([('cleaning_output', 'y')]),
+                                      'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
+                                      'validation_data': (
+                                          [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
+                                          to_tuple_inputs),
+                                      },
+                             cache_dirpath=config.env.cache_dirpath)
     else:
         word2vec_lstm = Step(name='word2vec_lstm',
-                            transformer=WordCuDNNLSTM(**config.lstm_network),
-                            input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                             transformer=WordCuDNNLSTM(**config.lstm_network),
+                             input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
+                             adapter={'X': ([('word_tokenizer', 'X')]),
+                                      'y': ([('cleaning_output', 'y')]),
+                                      'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
+                                      },
+                             cache_dirpath=config.env.cache_dirpath)
     output = Step(name='word2vec_lstm_output',
                   transformer=Dummy(),
                   input_steps=[word2vec_lstm],
@@ -509,26 +514,26 @@ def word2vec_dpcnn(config, is_train):
     word2vec_embeddings = _word2vec_embeddings(word_tokenizer, config)
     if is_train:
         word2vec_dpcnn = Step(name='word2vec_dpcnn',
-                            transformer=WordDPCNN(**config.dpcnn_network),
-                            overwrite_transformer=True,
-                            input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
-                                     'validation_data': (
-                                         [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
-                                         to_tuple_inputs),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                              transformer=WordDPCNN(**config.dpcnn_network),
+                              overwrite_transformer=True,
+                              input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
+                              adapter={'X': ([('word_tokenizer', 'X')]),
+                                       'y': ([('cleaning_output', 'y')]),
+                                       'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
+                                       'validation_data': (
+                                           [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
+                                           to_tuple_inputs),
+                                       },
+                              cache_dirpath=config.env.cache_dirpath)
     else:
         word2vec_dpcnn = Step(name='word2vec_dpcnn',
-                            transformer=WordDPCNN(**config.dpcnn_network),
-                            input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                              transformer=WordDPCNN(**config.dpcnn_network),
+                              input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
+                              adapter={'X': ([('word_tokenizer', 'X')]),
+                                       'y': ([('cleaning_output', 'y')]),
+                                       'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
+                                       },
+                              cache_dirpath=config.env.cache_dirpath)
     output = Step(name='word2vec_dpcnn_output',
                   transformer=Dummy(),
                   input_steps=[word2vec_dpcnn],
@@ -544,26 +549,26 @@ def word2vec_scnn(config, is_train):
     word2vec_embeddings = _word2vec_embeddings(word_tokenizer, config)
     if is_train:
         word2vec_scnn = Step(name='word2vec_scnn',
-                            transformer=WordSCNN(**config.scnn_network),
-                            overwrite_transformer=True,
-                            input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
-                                     'validation_data': (
-                                         [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
-                                         to_tuple_inputs),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                             transformer=WordSCNN(**config.scnn_network),
+                             overwrite_transformer=True,
+                             input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
+                             adapter={'X': ([('word_tokenizer', 'X')]),
+                                      'y': ([('cleaning_output', 'y')]),
+                                      'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
+                                      'validation_data': (
+                                          [('word_tokenizer', 'X_valid'), ('cleaning_output', 'y_valid')],
+                                          to_tuple_inputs),
+                                      },
+                             cache_dirpath=config.env.cache_dirpath)
     else:
         word2vec_scnn = Step(name='word2vec_scnn',
-                            transformer=WordSCNN(**config.scnn_network),
-                            input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
-                            adapter={'X': ([('word_tokenizer', 'X')]),
-                                     'y': ([('cleaning_output', 'y')]),
-                                     'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
-                                     },
-                            cache_dirpath=config.env.cache_dirpath)
+                             transformer=WordSCNN(**config.scnn_network),
+                             input_steps=[word_tokenizer, preprocessed_input, word2vec_embeddings],
+                             adapter={'X': ([('word_tokenizer', 'X')]),
+                                      'y': ([('cleaning_output', 'y')]),
+                                      'embedding_matrix': ([('word2vec_embeddings', 'embeddings_matrix')]),
+                                      },
+                             cache_dirpath=config.env.cache_dirpath)
     output = Step(name='word2vec_scnn_output',
                   transformer=Dummy(),
                   input_steps=[word2vec_scnn],
@@ -571,6 +576,7 @@ def word2vec_scnn(config, is_train):
                            },
                   cache_dirpath=config.env.cache_dirpath)
     return output
+
 
 def catboost_ensemble(config, is_train):
     catboost_ensemble = Step(name='catboost_ensemble',
@@ -586,6 +592,38 @@ def catboost_ensemble(config, is_train):
 
     if is_train:
         catboost_ensemble.overwrite_transformer = True
+
+    return output
+
+
+def gru_stacker_ensemble(config, is_train):
+    if is_train:
+        gru_stacker_ensemble = Step(name='gru_stacker_ensemble',
+                                    transformer=StackerGru(**config.gru_stacker),
+                                    input_data=['input'],
+                                    adapter={'X': ([('input', 'X')]),
+                                             'y': ([('input', 'y')]),
+                                             'validation_data': (
+                                                 [('input', 'X_valid'), ('input', 'y_valid')],
+                                                 to_tuple_inputs),
+                                             },
+                                    cache_dirpath=config.env.cache_dirpath)
+    else:
+        gru_stacker_ensemble = Step(name='gru_stacker_ensemble',
+                                    transformer=StackerGru(**config.gru_stacker),
+                                    input_data=['input'],
+                                    adapter={'X': ([('input', 'X')]),
+                                             'y': ([('input', 'y')]),
+                                             },
+                                    cache_dirpath=config.env.cache_dirpath)
+    output = Step(name='output',
+                  transformer=Dummy(),
+                  input_steps=[gru_stacker_ensemble],
+                  adapter={'y_pred': ([('gru_stacker_ensemble', 'prediction_probability')])},
+                  cache_dirpath=config.env.cache_dirpath)
+
+    if is_train:
+        gru_stacker_ensemble.overwrite_transformer = True
 
     return output
 
@@ -790,20 +828,20 @@ def _count_features(config):
 PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
                               'inference': partial(fasttext_gru, is_train=False)},
              'fasttext_lstm': {'train': partial(fasttext_lstm, is_train=True),
-                              'inference': partial(fasttext_lstm, is_train=False)},
+                               'inference': partial(fasttext_lstm, is_train=False)},
              'fasttext_dpcnn': {'train': partial(fasttext_dpcnn, is_train=True),
-                              'inference': partial(fasttext_dpcnn, is_train=False)},
+                                'inference': partial(fasttext_dpcnn, is_train=False)},
              'fasttext_scnn': {'train': partial(fasttext_scnn, is_train=True),
-                                'inference': partial(fasttext_scnn, is_train=False)},
+                               'inference': partial(fasttext_scnn, is_train=False)},
 
              'word2vec_gru': {'train': partial(word2vec_gru, is_train=True),
                               'inference': partial(word2vec_gru, is_train=False)},
              'word2vec_lstm': {'train': partial(word2vec_lstm, is_train=True),
-                              'inference': partial(word2vec_lstm, is_train=False)},
+                               'inference': partial(word2vec_lstm, is_train=False)},
              'word2vec_dpcnn': {'train': partial(word2vec_dpcnn, is_train=True),
-                              'inference': partial(word2vec_dpcnn, is_train=False)},
+                                'inference': partial(word2vec_dpcnn, is_train=False)},
              'word2vec_scnn': {'train': partial(word2vec_scnn, is_train=True),
-                              'inference': partial(word2vec_scnn, is_train=False)},
+                               'inference': partial(word2vec_scnn, is_train=False)},
 
              'glove_gru': {'train': partial(glove_gru, is_train=True),
                            'inference': partial(glove_gru, is_train=False)},
@@ -825,8 +863,10 @@ PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
                               'inference': count_features_logreg},
              'bad_word_count_logreg': {'train': bad_word_count_features_logreg,
                                        'inference': bad_word_count_features_logreg},
-             'hand_crafted_all_logreg':{'train': hand_crafted_all_logreg,
-                                       'inference': hand_crafted_all_logreg},
+             'hand_crafted_all_logreg': {'train': hand_crafted_all_logreg,
+                                         'inference': hand_crafted_all_logreg},
              'catboost_ensemble': {'train': partial(catboost_ensemble, is_train=True),
                                    'inference': partial(catboost_ensemble, is_train=False)},
+             'gru_stacker_ensemble': {'train': partial(gru_stacker_ensemble, is_train=True),
+                                      'inference': partial(gru_stacker_ensemble, is_train=False)},
              }
