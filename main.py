@@ -157,7 +157,7 @@ def train_evaluate_cv_pipeline(pipeline_name, model_level, validation_size):
         logger.info('Score on fold {} is {}'.format(i, score))
         fold_scores.append(score)
 
-    mean_score = np.mean(score)
+    mean_score = np.mean(fold_scores)
 
     logger.info('Score on validation is {}'.format(mean_score))
     ctx.channel_send('Final Validation Score ROC_AUC', 0, mean_score)

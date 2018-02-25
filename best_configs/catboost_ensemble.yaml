@@ -35,7 +35,7 @@ parameters:
   bad_words_filepath: None
   overwrite: 1
   num_workers: 4
-  n_cv_splits: 5
+  n_cv_splits: 10
 
   # Preprocessing
   max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
@@ -75,11 +75,16 @@ parameters:
   # Ensemble Catboost 0.990757
   catboost__iterations: 500
   catboost__learning_rate: 0.02
-  catboost__depth: 3
-  catboost__l2_leaf_reg: 5
-  catboost__border_count: 200
-  catboost__model_size_reg: 2.0 # Todo: Explore
-  catboost__rsm: 0.2 # Todo: Explore
+  catboost__depth: 
+      value: [3,5]
+  catboost__l2_leaf_reg: 
+      value: [1,5,10]
+  catboost__border_count: 
+      value: [100,200]
+  catboost__model_size_reg:
+      value: [0.25,2.0]
+  catboost__rsm: 
+      value: [0.25,1.25]
   catboost__verbose: 0
 
   # Training schedule
