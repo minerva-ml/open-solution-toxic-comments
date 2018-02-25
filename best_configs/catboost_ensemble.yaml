@@ -23,86 +23,88 @@ exclude:
 parameters:
   # Cloud Environment
 #  data_dir: /public/toxic_comments
-#  single_model_prediction_dir: /public/toxic_comments/single_model_predictions_new
-#  experiment_dir: /output/trained_pipelines/glove_lstm
-#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
+#  experiment_dir: /output/trained_pipelines/catboost_ensemble
+#  embedding_filepath: None
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
   single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/catboost_ensemble_dev
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
-  bad_words_filepath: external_data/compiled_bad_words.txt
-  overwrite: 0
-  num_workers: -2
-  n_cv_splits: 5
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/catboost_ensemble
+  embedding_filepath: None
+
+  bad_words_filepath: None
+  overwrite: 1
+  num_workers: 4
+  n_cv_splits: 10
 
   # Preprocessing
-  max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
-  max_features_word: 100000
-  maxlen_char: 512
-  maxlen_words: 100
-  char_ngram_max: 4
-  drop_punctuation: 1 # Do I want to preprocess in that way for all models?
-  drop_newline: 1
-  drop_multispaces: 1
-  all_lower_case: 1
-  fill_na_with: ' '
+  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_word: None
+  maxlen_char: None
+  maxlen_words: None
+  char_ngram_max: None
+  drop_punctuation: None # Do I want to preprocess in that way for all models?
+  drop_newline: None
+  drop_multispaces: None
+  all_lower_case: None
+  fill_na_with: None
+  deduplication_threshold: None
 
   # Architecture
-  filter_nr: 512
+  filter_nr: None
   kernel_size: None
-  repeat_block: 1
-  dense_size: 256
-  repeat_dense: 0
-  max_pooling: 1
-  mean_pooling: 1
-  weighted_average_attention: 0
-  concat_mode: 'concat'
-  trainable_embedding: 0
-  word_embedding_size: 300
+  repeat_block: None
+  dense_size: None
+  repeat_dense: None
+  max_pooling: None
+  mean_pooling: None
+  weighted_average_attention: None
+  concat_mode:  None
+  trainable_embedding: None
+  word_embedding_size: None
   char_embedding_size: None
 
   # General Architecture
-  use_prelu: 1
+  use_prelu: None
 
  # Log Reg Params
-  log_reg_c: 100
-  log_reg_penalty: 'l2'
-  max_iter: 1000
+  log_reg_c: None
+  log_reg_penalty: None
+  max_iter: None
 
-  # Ensemble Catboost 0.990757
+  # Ensemble Catboost 0.990657
   catboost__iterations: 500
   catboost__learning_rate: 0.02
   catboost__depth: 3
-  catboost__l2_leaf_reg: 5
-  catboost__border_count: 200
-  catboost__model_size_reg: 2.0 # Todo: Explore
-  catboost__rsm: 0.2 # Todo: Explore
+  catboost__l2_leaf_reg: 1
+  catboost__border_count: 100
+  catboost__model_size_reg: 0.25
+  catboost__rsm: 1.25
   catboost__verbose: 0
 
   # Training schedule
-  epochs_nr: 1000
-  batch_size_train: 128
-  batch_size_inference: 128
-  lr: 0.001
-  momentum: 0.9
-  gamma: 0.7
-  patience: 5
+  epochs_nr: None
+  batch_size_train: None
+  batch_size_inference: None
+  lr: None
+  momentum: None
+  gamma: None
+  patience: None
 
   # Regularization
-  batch_norm_first: 0
-  use_batch_norm: 0
-  dropout_embedding: 0.2
-  rnn_dropout: 0.2
-  dense_dropout: 0.25
-  conv_dropout: 0.2
-  dropout_mode: 'spatial'
-  rnn_kernel_reg_l2: 0.00001
-  rnn_recurrent_reg_l2: 0.00001
-  rnn_bias_reg_l2: 0.0
-  dense_kernel_reg_l2: 0.0
-  dense_bias_reg_l2: 0.0
-  conv_kernel_reg_l2: 0.0
-  conv_bias_reg_l2: 0.0
+  batch_norm_first: None
+  use_batch_norm: None
+  dropout_embedding: None
+  rnn_dropout: None
+  dense_dropout: None
+  conv_dropout: None
+  dropout_mode: None
+  rnn_kernel_reg_l2: None
+  rnn_recurrent_reg_l2: None
+  rnn_bias_reg_l2: None
+  dense_kernel_reg_l2: None
+  dense_bias_reg_l2: None
+  conv_kernel_reg_l2: None
+  conv_bias_reg_l2: None
 
 

@@ -9,9 +9,6 @@ neptune run \
 --config best_configs/bad_word_logreg.yaml \
 -- train_evaluate_predict_pipeline -p bad_word_logreg
 neptune run \
---config best_configs/bad_word_count_logreg.yaml \
--- train_evaluate_predict_pipeline -p bad_word_count_logreg
-neptune run \
 --config best_configs/tfidf_logreg.yaml \
 -- train_evaluate_predict_pipeline -p tfidf_logreg
 
@@ -80,8 +77,10 @@ fasttext_lstm \
 fasttext_dpcnn \
 fasttext_scnn
 
-
-#Train stacking model
+# Model stacking
 neptune run \
 --config best_configs/catboost_ensemble.yaml \
--- train_evaluate_predict_pipeline -p catboost_ensemble
+-- train_evaluate_cv_pipeline --model_level second --pipeline_name catboost_ensemble
+neptune run \
+--config best_configs/catboost_ensemble.yaml \
+-- predict_pipeline --pipeline_name catboost_ensemble
