@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [fasttext, lstm, adam]
+tags: [glove, lstm, adam]
 
 
 metric:
@@ -29,18 +29,18 @@ parameters:
 
   # Local Environment
 #  data_dir:                     /path/to/toxic/data
-#  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
+#  embedding_filepath:           /path/to/embedding i.e. ~/glove/glove.840B.300d.txt
 #  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
-#  experiment_dir:               /my/working/directory i.e. ~/toxic/experiments
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/glove_lstm
 
   bad_words_filepath: external_data/compiled_bad_words.txt
 
   overwrite: 0
-  num_workers: -2
+  num_workers: 4
   n_cv_splits: 5
 
   # Preprocessing
-  max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_char: 100
   max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 200
@@ -80,8 +80,8 @@ parameters:
   catboost__depth: 6
   catboost__l2_leaf_reg: 10
   catboost__border_count: 100
-  catboost__model_size_reg: None # Todo: Explore
-  catboost__rsm: None # Todo: Explore
+  catboost__model_size_reg: None
+  catboost__rsm: None
   catboost__verbose: 0
 
   # Training schedule

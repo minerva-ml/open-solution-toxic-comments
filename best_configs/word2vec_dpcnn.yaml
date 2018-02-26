@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-#pip-requirements-file: requirements.txt
+pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,15 +22,16 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir: /public/toxic_comments
-#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
-#  experiment_dir: /output/trained_pipelines/word2vec_dpcnn
-#  embedding_filepath: /public/models/word2vec/GoogleNews-vectors-negative300.bin
+  data_dir:                     /public/toxic_comments
+  embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+  experiment_dir:               /output/trained_pipelines/word2vec_dpcnn
+
   # Local Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/word2vec_dpcnn
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/word2vec/GoogleNews-vectors-negative300.bin
+#  data_dir:                     /path/to/toxic/data
+#  embedding_filepath:           /path/to/embedding i.e. ~/word2vec/GoogleNews-vectors-negative300.bin
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/word2vec_dpcnn
 
   bad_words_filepath: None
   overwrite: 1
@@ -38,7 +39,7 @@ parameters:
   n_cv_splits: 5
 
   # Preprocessing
-  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_char: None
   max_features_word: 100000
   maxlen_char: None
   maxlen_words: 200
@@ -106,5 +107,3 @@ parameters:
   dense_bias_reg_l2: 0.00001
   conv_kernel_reg_l2: 0.00001
   conv_bias_reg_l2: 0.00001
-
-
