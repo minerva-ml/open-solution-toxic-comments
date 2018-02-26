@@ -42,7 +42,7 @@ $ neptune login
 
 start experiment
 ```bash
-$ neptune send --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config neptune.yaml -- train_evaluate_predict_pipeline --pipeline_name char_vdcnn
+$ neptune send --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium -- train_evaluate_predict_pipeline --pipeline_name char_vdcnn
 ```
 **Happy Training :)**
 
