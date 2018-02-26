@@ -232,22 +232,6 @@ def evaluate_predict_pipeline(pipeline_name, model_level):
 
 @action.command()
 @click.argument('pipeline_names', nargs=-1)
-@click.option('-bn', '--blended_name', help='name of the new blended pipeline', required=True)
-def blend_pipelines(pipeline_names, blended_name):
-    new_pipeline_dir = os.path.join(params.experiment_dir, blended_name, 'transformers')
-    os.makedirs(new_pipeline_dir)
-    for pipeline_name in pipeline_names:
-        if pipeline_name is not None:
-            pipeline_dir = os.path.join(params.experiment_dir, pipeline_name, 'transformers')
-            for transformer_name in os.listdir(pipeline_dir):
-                source_filepath = os.path.join(pipeline_dir, transformer_name)
-                destination_filepath = os.path.join(new_pipeline_dir, transformer_name)
-                logger.info('copying transformer from {} to {}'.format(source_filepath, destination_filepath))
-                shutil.copy(source_filepath, destination_filepath)
-
-
-@action.command()
-@click.argument('pipeline_names', nargs=-1)
 def prepare_single_model_predictions_dir(pipeline_names):
     os.makedirs(params.single_model_predictions_dir, exist_ok=True)
 
