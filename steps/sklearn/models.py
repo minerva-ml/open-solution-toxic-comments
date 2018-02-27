@@ -26,13 +26,13 @@ class MultilabelEstimator(BaseTransformer):
             estimators.append((i, self.estimator(**kwargs)))
         return estimators
 
-    def fit(self, X, y):
+    def fit(self, X, y, **kwargs):
         for i, estimator in self.estimators:
             logger.info('fitting estimator {}'.format(i))
             estimator.fit(X, y[:, i])
         return self
 
-    def transform(self, X, y=None):
+    def transform(self, X, y=None, **kwargs):
         predictions = []
         for i, estimator in self.estimators:
             prediction = estimator.predict_proba(X)
@@ -91,8 +91,8 @@ class RandomForestMultilabel(MultilabelEstimator):
     def estimator(self):
         return RandomForestClassifier
 
+
 class CatboostClassifierMultilabel(MultilabelEstimator):
     @property
     def estimator(self):
         return CatBoostClassifier
-
