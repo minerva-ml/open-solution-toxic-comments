@@ -5,12 +5,12 @@ from keras.layers import Input, Embedding, PReLU, Bidirectional, Lambda, \
     CuDNNLSTM, CuDNNGRU, Conv1D, Dense, BatchNormalization, Dropout, SpatialDropout1D, \
     GlobalMaxPool1D, GlobalAveragePooling1D, MaxPooling1D
 from keras.layers.merge import add, concatenate
-from keras.models import Model, load_model
-from keras.optimizers import Adam, Nadam
+from keras.models import Model
+from keras.optimizers import Adam
 
 from steps.keras.callbacks import NeptuneMonitor, ReduceLR
-from steps.keras.models import ClassifierXY
 from steps.keras.contrib import AttentionWeightedAverage
+from steps.keras.models import ClassifierXY
 from steps.utils import create_filepath
 
 
@@ -32,9 +32,6 @@ class BasicClassifier(ClassifierXY):
 
 
 class CharVDCNN(BasicClassifier):
-    # def _build_optimizer(self, **kwargs):
-    #     return Nadam(lr=kwargs['lr'], schedule_decay=0.0)
-
     def _build_model(self, embedding_size, maxlen, max_features,
                      filter_nr, kernel_size, repeat_block, dense_size, repeat_dense,
                      max_pooling, mean_pooling, weighted_average_attention, concat_mode,

@@ -140,7 +140,8 @@ class GloveEmbeddingsMatrix(EmbeddingsMatrix):
             if i >= self.max_features:
                 continue
             embedding_vector = embeddings_index.get(word)
-            if embedding_vector is not None: embedding_matrix[i] = embedding_vector
+            if embedding_vector is not None:
+                embedding_matrix[i] = embedding_vector
         return embedding_matrix
 
 
@@ -189,5 +190,6 @@ class FastTextEmbeddingsMatrix(EmbeddingsMatrix):
             if i >= self.max_features:
                 continue
             embedding_vector = embeddings_index.get(word)
-            if embedding_vector is not None: embedding_matrix[i] = embedding_vector
+            if embedding_vector is not None:
+                embedding_matrix[i] = embedding_vector
         return embedding_matrix
