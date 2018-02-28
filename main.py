@@ -202,13 +202,14 @@ def _predict_pipeline(pipeline_name, model_level, stacking_mode):
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 @click.option('-m', '--model_level', help='first or second level', default='first', required=True)
-def train_evaluate_predict_pipeline(pipeline_name, model_level):
+@click.option('-s', '--stacking_mode', help='mode of stacking, flat or rnn', default='flat', required=False)
+def train_evaluate_predict_pipeline(pipeline_name, model_level, stacking_mode):
     logger.info('training')
     _train_pipeline(pipeline_name)
     logger.info('evaluating')
     _evaluate_pipeline(pipeline_name)
     logger.info('predicting')
-    _predict_pipeline(pipeline_name, model_level)
+    _predict_pipeline(pipeline_name, model_level, stacking_mode)
 
 
 @action.command()
@@ -223,11 +224,12 @@ def train_evaluate_pipeline(pipeline_name):
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 @click.option('-m', '--model_level', help='first or second level', default='first', required=True)
-def evaluate_predict_pipeline(pipeline_name, model_level):
+@click.option('-s', '--stacking_mode', help='mode of stacking, flat or rnn', default='flat', required=False)
+def evaluate_predict_pipeline(pipeline_name, model_level, stacking_mode):
     logger.info('evaluating')
     _evaluate_pipeline(pipeline_name)
     logger.info('predicting')
-    _predict_pipeline(pipeline_name, model_level)
+    _predict_pipeline(pipeline_name, model_level, stacking_mode)
 
 
 @action.command()
