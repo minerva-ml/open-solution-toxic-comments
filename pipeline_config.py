@@ -10,6 +10,8 @@ params = read_params(ctx)
 
 X_COLUMNS = ['comment_text']
 Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
+CV_LABELS = ['toxic']
+
 
 SOLUTION_CONFIG = AttrDict({
     'env': {'cache_dirpath': params.experiment_dir},
