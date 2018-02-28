@@ -54,7 +54,7 @@ def _train_pipeline(pipeline_name):
     pipeline = PIPELINES[pipeline_name]['train'](SOLUTION_CONFIG)
     output = pipeline.fit_transform(data)
 
-
+#Todo: average predictions vs predictions on valid
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 def evaluate_pipeline(pipeline_name):
