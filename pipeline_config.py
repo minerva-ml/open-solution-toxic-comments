@@ -350,5 +350,7 @@ SOLUTION_CONFIG = AttrDict({
                          'subsample': params.xgboost__subsample,
                          'reg_lambda': params.xgboost__reg_lambda,
                          'reg_alpha': params.xgboost__reg_alpha,
-                         'n_jobs': params.num_workers}
+                         'n_jobs': params.num_workers},
+    'clipper': {'lower': eval(params.clipper__lower),
+                'upper': eval(params.clipper__upper)}
 })

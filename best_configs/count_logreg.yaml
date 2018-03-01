@@ -101,6 +101,10 @@ parameters:
   xgboost__reg_lambda: None
   xgboost__reg_alpha: None
 
+  # Postprocessing
+  clipper__lower: None
+  clipper__upper: None
+
   # Training schedule
   epochs_nr: None
   batch_size_train: None
