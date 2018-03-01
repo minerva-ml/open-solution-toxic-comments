@@ -3,10 +3,10 @@ import shutil
 
 import click
 import numpy as np
-from sklearn.cross_validation import ShuffleSplit
+from sklearn.model_selection import StratifiedKFold
 from deepsense import neptune
 
-from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS
+from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS, CV_LABELS
 from pipelines import PIPELINES
 from preprocessing import split_train_data
 from utils import init_logger, get_logger, read_params, read_data, read_predictions, multi_roc_auc_score, \
@@ -23,10 +23,9 @@ def action():
 
 
 @action.command()
-@click.option('-v', '--validation_size', help='percentage of training used for validation', default=0.1, required=False)
-def train_valid_split(validation_size):
+def train_valid_split():
     logger.info('preprocessing training data')
-    split_train_data(data_dir=params.data_dir, validation_size=validation_size)
+    split_train_data(data_dir=params.data_dir, target_columns=CV_LABELS, n_splits=params.n_cv_splits)
 
 
 @action.command()
@@ -54,7 +53,6 @@ def _train_pipeline(pipeline_name):
 
     pipeline = PIPELINES[pipeline_name]['train'](SOLUTION_CONFIG)
     output = pipeline.fit_transform(data)
-
 
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
@@ -92,25 +90,25 @@ def _evaluate_pipeline(pipeline_name):
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 @click.option('-m', '--model_level', help='first or second level', default='second', required=False)
 @click.option('-s', '--stacking_mode', help='mode of stacking, flat or rnn', default='flat', required=False)
-@click.option('-v', '--validation_size', help='percentage of training used for validation', default=0.1, required=False)
-def train_evaluate_cv_pipeline(pipeline_name, model_level, stacking_mode, validation_size):
+def train_evaluate_cv_pipeline(pipeline_name, model_level, stacking_mode):
     if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
 
     if model_level == 'first':
         train = read_data(data_dir=params.data_dir, filename='train.csv')
         train.reset_index(inplace=True)
-        size = train.shape[0]
+        cv_label = train[CV_LABELS].value
     elif model_level == 'second':
         X, y = read_predictions(prediction_dir=params.single_model_predictions_dir,
                                 mode='valid', valid_columns=Y_COLUMNS, stacking_mode=stacking_mode)
-        size = X.shape[0]
+        cv_label = y[:, 0]
     else:
         raise NotImplementedError("""only 'first' and 'second' """)
 
     fold_scores = []
-    cv = ShuffleSplit(size, n_iter=params.n_cv_splits, test_size=validation_size, random_state=1234)
-    for i, (train_idx, valid_idx) in enumerate(cv):
+    cv = StratifiedKFold(n_splits=params.n_cv_splits, shuffle=True, random_state=1234)
+    cv.get_n_splits(cv_label)
+    for i, (train_idx, valid_idx) in enumerate(cv.split(cv_label, cv_label)):
         logger.info('Fold {} started'.format(i))
 
         if model_level == 'first':
@@ -202,13 +200,14 @@ def _predict_pipeline(pipeline_name, model_level, stacking_mode):
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 @click.option('-m', '--model_level', help='first or second level', default='first', required=True)
-def train_evaluate_predict_pipeline(pipeline_name, model_level):
+@click.option('-s', '--stacking_mode', help='mode of stacking, flat or rnn', default='flat', required=False)
+def train_evaluate_predict_pipeline(pipeline_name, model_level, stacking_mode):
     logger.info('training')
     _train_pipeline(pipeline_name)
     logger.info('evaluating')
     _evaluate_pipeline(pipeline_name)
     logger.info('predicting')
-    _predict_pipeline(pipeline_name, model_level)
+    _predict_pipeline(pipeline_name, model_level, stacking_mode)
 
 
 @action.command()
@@ -223,11 +222,12 @@ def train_evaluate_pipeline(pipeline_name):
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 @click.option('-m', '--model_level', help='first or second level', default='first', required=True)
-def evaluate_predict_pipeline(pipeline_name, model_level):
+@click.option('-s', '--stacking_mode', help='mode of stacking, flat or rnn', default='flat', required=False)
+def evaluate_predict_pipeline(pipeline_name, model_level, stacking_mode):
     logger.info('evaluating')
     _evaluate_pipeline(pipeline_name)
     logger.info('predicting')
-    _predict_pipeline(pipeline_name, model_level)
+    _predict_pipeline(pipeline_name, model_level, stacking_mode)
 
 
 @action.command()

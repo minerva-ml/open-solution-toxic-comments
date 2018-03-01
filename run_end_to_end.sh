@@ -83,4 +83,4 @@ neptune run \
 -- train_evaluate_cv_pipeline --model_level second --pipeline_name catboost_ensemble
 neptune run \
 --config best_configs/catboost_ensemble.yaml \
--- predict_pipeline --pipeline_name catboost_ensemble
+-- predict_pipeline --model_level second --pipeline_name catboost_ensemble
