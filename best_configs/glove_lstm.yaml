@@ -94,7 +94,7 @@ parameters:
   xgboost__n_estimators: None
   xgboost__learning_rate: None
   xgboost__max_depth: None
-  xgboost__min_child_weight:
+  xgboost__min_child_weight: None
   xgboost__gamma: None
   xgboost__subsample: None
   xgboost__colsample_bytree: None
