@@ -3,13 +3,14 @@ import os
 from attrdict import AttrDict
 from deepsense import neptune
 
-from utils import read_params
+from utils import read_params, multi_roc_auc_score
 
 ctx = neptune.Context()
 params = read_params(ctx)
 
 X_COLUMNS = ['comment_text']
 Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
+CV_LABELS = ['toxic']
 
 SOLUTION_CONFIG = AttrDict({
     'env': {'cache_dirpath': params.experiment_dir},
