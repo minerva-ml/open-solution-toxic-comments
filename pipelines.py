@@ -5,7 +5,7 @@ from steps.base import Step, Dummy, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter
-from steps.sklearn.models import LogisticRegressionMultilabel, CatboostClassifierMultilabel
+from steps.sklearn.models import LogisticRegressionMultilabel, CatboostClassifierMultilabel, XGBoostClassifierMultilabel
 from stacking import Blender
 
 
@@ -616,6 +616,24 @@ def catboost_ensemble(config, is_train):
     return output
 
 
+def xgboost_ensemble(config, is_train):
+    xgboost_ensemble = Step(name='xgboost_ensemble',
+                            transformer=XGBoostClassifierMultilabel(**config.xgboost_ensemble),
+                            input_data=['input'],
+                            cache_dirpath=config.env.cache_dirpath)
+
+    output = Step(name='output',
+                  transformer=Dummy(),
+                  input_steps=[xgboost_ensemble],
+                  adapter={'y_pred': ([('xgboost_ensemble', 'prediction_probability')])},
+                  cache_dirpath=config.env.cache_dirpath)
+
+    if is_train:
+        xgboost_ensemble.overwrite_transformer = True
+
+    return output
+
+
 def gru_stacker_ensemble(config, is_train):
     if is_train:
         gru_stacker_ensemble = Step(name='gru_stacker_ensemble',
@@ -889,6 +907,8 @@ PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
                                   'inference': partial(blender_ensemble, is_train=False)},
              'catboost_ensemble': {'train': partial(catboost_ensemble, is_train=True),
                                    'inference': partial(catboost_ensemble, is_train=False)},
+             'xgboost_ensemble': {'train': partial(xgboost_ensemble, is_train=True),
+                                  'inference': partial(xgboost_ensemble, is_train=False)},
              'gru_stacker_ensemble': {'train': partial(gru_stacker_ensemble, is_train=True),
                                       'inference': partial(gru_stacker_ensemble, is_train=False)},
              }

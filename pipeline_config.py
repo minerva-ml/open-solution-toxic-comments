@@ -337,5 +337,16 @@ SOLUTION_CONFIG = AttrDict({
                          'min': False,
                          'method': params.blender__method,
                          'runs': params.blender__runs,
-                         'maxiter': params.blender__maxiter}
+                         'maxiter': params.blender__maxiter},
+    'xgboost_ensemble': {'objective': params.xgboost__objective,
+                         'eval_metric': params.xgboost__eval_metric,
+                         'n_estimators': params.xgboost__n_estimators,
+                         'learning_rate': params.xgboost__learning_rate,
+                         'max_depth': params.xgboost__max_depth,
+                         'min_child_weight': params.xgboost__min_child_weight,
+                         'colsample_bytree': params.xgboost__colsample_bytree,
+                         'colsample_bylevel': params.xgboost__colsample_bylevel,
+                         'gamma': params.xgboost__gamma,
+                         'reg_lambda': params.xgboost__reg_lambda,
+                         'n_jobs': params.num_workers}
 })

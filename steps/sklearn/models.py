@@ -4,6 +4,7 @@ from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
 from catboost import CatBoostClassifier
+from xgboost import XGBClassifier
 
 from steps.base import BaseTransformer
 from steps.utils import get_logger
@@ -96,3 +97,9 @@ class CatboostClassifierMultilabel(MultilabelEstimator):
     @property
     def estimator(self):
         return CatBoostClassifier
+
+
+class XGBoostClassifierMultilabel(MultilabelEstimator):
+    @property
+    def estimator(self):
+        return XGBClassifier
