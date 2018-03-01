@@ -1,3 +1,4 @@
+from tqdm import tqdm
 from scipy.optimize import minimize
 import numpy as np
 from sklearn.externals import joblib
@@ -25,9 +26,9 @@ class Blender(BaseTransformer):
         return f
 
     def fit(self, X, y):
-        self.nr_models = y.shape[-1]
+        self.nr_models = X.shape[-1]
         res_list = []
-        for k in range(self.runs):
+        for _ in tqdm(range(self.runs)):
             starting_values = np.random.uniform(size=(1, self.nr_models))
 
             bounds = [(0, 1)] * self.nr_models
@@ -43,7 +44,7 @@ class Blender(BaseTransformer):
         self.best_weights = self.best_run['x'].reshape(1, self.nr_models) / self.nr_models
         return self
 
-    def transform(self, X):
+    def transform(self, X, y=None):
         predictions = np.sum(X * self.best_weights, axis=-1)
         return {'predictions': predictions}
 
