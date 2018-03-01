@@ -6,7 +6,7 @@ from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter
 from steps.sklearn.models import LogisticRegressionMultilabel, CatboostClassifierMultilabel, XGBoostClassifierMultilabel
-from stacking import Blender
+from postprocessing import Blender
 
 
 def tfidf_logreg(config):

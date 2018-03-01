@@ -57,3 +57,26 @@ class Blender(BaseTransformer):
     def save(self, filepath):
         joblib.dump({'best_weights': self.best_weights,
                      'best_run': self.best_run}, filepath)
+
+
+class Clipper(BaseTransformer):
+    def __init__(self, lower, upper):
+        self.lower = lower
+        self.upper = upper
+
+    def transform(self, predictions):
+        if self.lower is not None:
+            predictions = np.where(predictions < self.lower, 0, predictions)
+        if self.upper is not None:
+            predictions = np.where(predictions > self.lower, 1, predictions)
+        return {'predictions': predictions}
+
+    def load(self, filepath):
+        obj = joblib.load(filepath)
+        self.lower = obj['lower']
+        self.upper = obj['upper']
+        return self
+
+    def save(self, filepath):
+        joblib.dump({'lower': self.lower,
+                     'upper': self.upper}, filepath)
