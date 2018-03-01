@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [count_features, logreg]
+tags: [ensemble, blender, predictions]
 
 
 metric:
@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-pip-requirements-file: requirements.txt
+#pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -23,33 +23,33 @@ exclude:
 parameters:
   # Cloud Environment
   data_dir:                     /public/toxic_comments
-  embedding_filepath:           None
+  embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
   single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
-  experiment_dir:               /output/trained_pipelines/count_logreg
+  experiment_dir:               /output/trained_pipelines/blender_ensemble
 
   # Local Environment
 #  data_dir:                     /path/to/toxic/data
-#  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
+#  embedding_filepath:           /path/to/embedding i.e. ~/word2vec/GoogleNews-vectors-negative300.bin
 #  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
-#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/count_logreg
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/blender_ensemble
 
   bad_words_filepath: None
   overwrite: 1
   num_workers: 4
-  n_cv_splits: 5
+  n_cv_splits: 10
 
   # Preprocessing
-  max_features_char: 100000
-  max_features_word: 100000
-  maxlen_char: 512
-  maxlen_words: 100
-  char_ngram_max: 4
-  drop_punctuation: 0
-  drop_newline: 0
-  drop_multispaces: 0
-  all_lower_case: 0
-  fill_na_with: ' '
-  deduplication_threshold: 10
+  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_word: None
+  maxlen_char: None
+  maxlen_words: None
+  char_ngram_max: None
+  drop_punctuation: None # Do I want to preprocess in that way for all models?
+  drop_newline: None
+  drop_multispaces: None
+  all_lower_case: None
+  fill_na_with: None
+  deduplication_threshold: None
 
   # Architecture
   filter_nr: None
@@ -69,9 +69,9 @@ parameters:
   use_prelu: None
 
  # Log Reg Params
-  log_reg_c: 4.0
-  log_reg_penalty: 'l2'
-  max_iter: 1000
+  log_reg_c: None
+  log_reg_penalty: None
+  max_iter: None
 
   # Ensemble Catboost
   catboost__iterations: None
@@ -84,9 +84,9 @@ parameters:
   catboost__verbose: None
 
   # Ensemble Blender
-  blender__method: None
-  blender__runs: None
-  blender__maxiter: None
+  blender__method: 'L-BFGS-B'
+  blender__runs: 100
+  blender__maxiter: 10e8
 
   # Ensemble XGBoost
   xgboost__objective: None
@@ -125,3 +125,5 @@ parameters:
   dense_bias_reg_l2: None
   conv_kernel_reg_l2: None
   conv_bias_reg_l2: None
+
+

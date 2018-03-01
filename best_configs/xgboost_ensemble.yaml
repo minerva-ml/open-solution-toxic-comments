@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [count_features, logreg]
+tags: [ensemble, xgboost, predictions]
 
 
 metric:
@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-pip-requirements-file: requirements.txt
+#pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -23,33 +23,32 @@ exclude:
 parameters:
   # Cloud Environment
   data_dir:                     /public/toxic_comments
-  embedding_filepath:           None
+  embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
   single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
-  experiment_dir:               /output/trained_pipelines/count_logreg
+  experiment_dir:               /output/trained_pipelines/xgboost_ensemble
 
   # Local Environment
 #  data_dir:                     /path/to/toxic/data
-#  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
+#  embedding_filepath:           /path/to/embedding i.e. ~/word2vec/GoogleNews-vectors-negative300.bin
 #  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
-#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/count_logreg
-
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/xgboost_ensemble
   bad_words_filepath: None
   overwrite: 1
   num_workers: 4
-  n_cv_splits: 5
+  n_cv_splits: 10
 
   # Preprocessing
-  max_features_char: 100000
-  max_features_word: 100000
-  maxlen_char: 512
-  maxlen_words: 100
-  char_ngram_max: 4
-  drop_punctuation: 0
-  drop_newline: 0
-  drop_multispaces: 0
-  all_lower_case: 0
-  fill_na_with: ' '
-  deduplication_threshold: 10
+  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_word: None
+  maxlen_char: None
+  maxlen_words: None
+  char_ngram_max: None
+  drop_punctuation: None # Do I want to preprocess in that way for all models?
+  drop_newline: None
+  drop_multispaces: None
+  all_lower_case: None
+  fill_na_with: None
+  deduplication_threshold: None
 
   # Architecture
   filter_nr: None
@@ -69,9 +68,9 @@ parameters:
   use_prelu: None
 
  # Log Reg Params
-  log_reg_c: 4.0
-  log_reg_penalty: 'l2'
-  max_iter: 1000
+  log_reg_c: None
+  log_reg_penalty: None
+  max_iter: None
 
   # Ensemble Catboost
   catboost__iterations: None
@@ -89,17 +88,17 @@ parameters:
   blender__maxiter: None
 
   # Ensemble XGBoost
-  xgboost__objective: None
-  xgboost__eval_metric: None
-  xgboost__n_estimators: None
-  xgboost__learning_rate: None
-  xgboost__max_depth: None
-  xgboost__min_child_weight: None
-  xgboost__gamma: None
-  xgboost__subsample: None
-  xgboost__colsample_bytree: None
-  xgboost__reg_lambda: None
-  xgboost__reg_alpha: None
+  xgboost__objective: 'binary:logistic'
+  xgboost__eval_metric: 'auc'
+  xgboost__n_estimators: 1000
+  xgboost__learning_rate: 0.005
+  xgboost__max_depth: 3
+  xgboost__min_child_weight: 1
+  xgboost__gamma: 0.05
+  xgboost__subsample: 0.8
+  xgboost__colsample_bytree: 0.5
+  xgboost__reg_lambda: 0.0 #0.5
+  xgboost__reg_alpha: 1.0
 
   # Training schedule
   epochs_nr: None
@@ -125,3 +124,5 @@ parameters:
   dense_bias_reg_l2: None
   conv_kernel_reg_l2: None
   conv_bias_reg_l2: None
+
+

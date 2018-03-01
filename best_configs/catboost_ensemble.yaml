@@ -83,6 +83,24 @@ parameters:
   catboost__rsm: 1.25
   catboost__verbose: 0
 
+  # Ensemble Blender
+  blender__method: None
+  blender__runs: None
+  blender__maxiter: None
+
+  # Ensemble XGBoost
+  xgboost__objective: None
+  xgboost__eval_metric: None
+  xgboost__n_estimators: None
+  xgboost__learning_rate: None
+  xgboost__max_depth: None
+  xgboost__min_child_weight: None
+  xgboost__gamma: None
+  xgboost__subsample: None
+  xgboost__colsample_bytree: None
+  xgboost__reg_lambda: None
+  xgboost__reg_alpha: None
+
   # Training schedule
   epochs_nr: None
   batch_size_train: None

@@ -54,7 +54,7 @@ def _train_pipeline(pipeline_name):
     pipeline = PIPELINES[pipeline_name]['train'](SOLUTION_CONFIG)
     output = pipeline.fit_transform(data)
 
-#Todo: average predictions vs predictions on valid
+
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 def evaluate_pipeline(pipeline_name):
@@ -162,6 +162,116 @@ def train_evaluate_cv_pipeline(pipeline_name, model_level, stacking_mode):
 
     logger.info('Score on validation is {}'.format(mean_score))
     ctx.channel_send('Final Validation Score ROC_AUC', 0, mean_score)
+
+
+@action.command()
+@click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
+@click.option('-m', '--model_level', help='first or second level', default='second', required=False)
+@click.option('-s', '--stacking_mode', help='mode of stacking, flat or rnn', default='flat', required=False)
+@click.option('-i', '--inference_mode', help='inference mode, average or last', default='average', required=False)
+def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, stacking_mode, inference_mode):
+    if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
+        shutil.rmtree(params.experiment_dir)
+
+    if model_level == 'first':
+        train = read_data(data_dir=params.data_dir, filename='train.csv')
+        train.reset_index(inplace=True)
+        cv_label = train[CV_LABELS].value
+
+        test = read_data(data_dir=params.data_dir, filename='test.csv')
+        test.reset_index(inplace=True)
+    elif model_level == 'second':
+        X, y = read_predictions(prediction_dir=params.single_model_predictions_dir,
+                                mode='valid', valid_columns=Y_COLUMNS, stacking_mode=stacking_mode)
+        cv_label = y[:,0]
+
+        X_test, test = read_predictions(prediction_dir=params.single_model_predictions_dir,
+                                        mode='test', stacking_mode=stacking_mode)
+
+    else:
+        raise NotImplementedError("""only 'first' and 'second' """)
+
+    fold_scores, test_predictions_by_fold = [], []
+    cv = StratifiedKFold(n_splits=params.n_cv_splits, shuffle=True, random_state=1234)
+    cv.get_n_splits(cv_label)
+    for i, (train_idx, valid_idx) in enumerate(cv.split(cv_label, cv_label)):
+        logger.info('Fold {} started'.format(i))
+
+        if model_level == 'first':
+            train_split = train.iloc[train_idx]
+            valid_split = train.iloc[valid_idx]
+            y_true = valid_split[Y_COLUMNS].values
+
+            data_train = {'input': {'meta': train_split,
+                                    'meta_valid': valid_split,
+                                    'train_mode': True,
+                                    },
+                          }
+            data_valid = {'input': {'meta': valid_split,
+                                    'meta_valid': None,
+                                    'train_mode': False,
+                                    }
+                          }
+
+            data_test = {'input': {'meta': test,
+                                   'meta_valid': None,
+                                   'train_mode': False,
+                                   }
+                         }
+        elif model_level == 'second':
+            X_train = X[train_idx]
+            y_train = y[train_idx]
+            X_valid = X[valid_idx]
+            y_valid = y[valid_idx]
+
+            y_true = y_valid
+
+            data_train = {'input': {'X': X_train,
+                                    'y': y_train,
+                                    'X_valid': X_valid,
+                                    'y_valid': y_valid
+                                    },
+                          }
+            data_valid = {'input': {'X': X_valid,
+                                    'y': y_valid,
+                                    }
+                          }
+
+            data_test = {'input': {'X': X_test,
+                                   'y': None,
+                                   }
+                         }
+        else:
+            raise NotImplementedError("""only 'first' and 'second' """)
+
+        pipeline = PIPELINES[pipeline_name]['train'](SOLUTION_CONFIG)
+        output = pipeline.fit_transform(data_train)
+
+        pipeline = PIPELINES[pipeline_name]['inference'](SOLUTION_CONFIG)
+        output_valid = pipeline.transform(data_valid)
+        y_valid_pred = output_valid['y_pred']
+
+        score = multi_roc_auc_score(y_true, y_valid_pred)
+        logger.info('Score on fold {} is {}'.format(i, score))
+        fold_scores.append(score)
+
+        output_test = pipeline.transform(data_test)
+        y_test_pred = output_test['y_pred']
+        test_predictions_by_fold.append(y_test_pred)
+
+    mean_score = np.mean(fold_scores)
+    logger.info('Score on validation is {}'.format(mean_score))
+    ctx.channel_send('Final Validation Score ROC_AUC', 0, mean_score)
+
+    if inference_mode == 'average':
+        test_predictions_by_fold = np.stack(test_predictions_by_fold, axis=-1)
+        test_prediction = np.mean(test_predictions_by_fold, axis=-1)
+    elif inference_mode == 'last':
+        test_prediction = test_predictions_by_fold[-1]
+    else:
+        raise NotImplementedError("""only options 'average' and 'last' are supported""")
+    create_submission(params.experiment_dir, '{}_predictions_test.csv'.format(pipeline_name),
+                      test, test_prediction, Y_COLUMNS, logger)
 
 
 @action.command()
