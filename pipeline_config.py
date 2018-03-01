@@ -333,9 +333,4 @@ SOLUTION_CONFIG = AttrDict({
                           'border_count': params.catboost__border_count,
                           'verbose': bool(params.catboost__verbose),
                           },
-    'blender_ensemble': {'func': multi_roc_auc_score,
-                         'min': False,
-                         'method': params.blender__method,
-                         'runs': params.blender__runs,
-                         'maxiter': params.blender__maxiter}
 })

@@ -6,7 +6,6 @@ from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter
 from steps.sklearn.models import LogisticRegressionMultilabel, CatboostClassifierMultilabel
-from stacking import Blender
 
 
 def tfidf_logreg(config):
@@ -579,25 +578,6 @@ def word2vec_scnn(config, is_train):
     return output
 
 
-def blender_ensemble(config, is_train):
-    blender_ensemble = Step(name='blender_ensemble',
-                            transformer=Blender(**config.blender_ensemble),
-                            input_data=['input'],
-                            adapter={'X': ([('input', 'X')]), 'y': ([('input', 'y')])},
-                            cache_dirpath=config.env.cache_dirpath)
-
-    output = Step(name='output',
-                  transformer=Dummy(),
-                  input_steps=[blender_ensemble],
-                  adapter={'y_pred': ([('blender_ensemble', 'predictions')])},
-                  cache_dirpath=config.env.cache_dirpath)
-
-    if is_train:
-        blender_ensemble.overwrite_transformer = True
-
-    return output
-
-
 def catboost_ensemble(config, is_train):
     catboost_ensemble = Step(name='catboost_ensemble',
                              transformer=CatboostClassifierMultilabel(**config.catboost_ensemble),
@@ -885,8 +865,6 @@ PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
                                        'inference': bad_word_count_features_logreg},
              'hand_crafted_all_logreg': {'train': hand_crafted_all_logreg,
                                          'inference': hand_crafted_all_logreg},
-             'blender_ensemble': {'train': partial(blender_ensemble, is_train=True),
-                                  'inference': partial(blender_ensemble, is_train=False)},
              'catboost_ensemble': {'train': partial(catboost_ensemble, is_train=True),
                                    'inference': partial(catboost_ensemble, is_train=False)},
              'gru_stacker_ensemble': {'train': partial(gru_stacker_ensemble, is_train=True),
