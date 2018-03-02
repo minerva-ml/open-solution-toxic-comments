@@ -42,7 +42,7 @@ def translate_data(data_dir, filename, filename_translated):
     meta['comment_text_english'] = meta.apply(_translate_non_english, axis=1)
     meta_translated_filepath = os.path.join(data_dir, filename_translated)
     logger.info('saving translated to{}'.format(meta_translated_filepath))
-    meta.to_csv(meta, meta_translated_filepath, index=None)
+    meta.to_csv(meta_translated_filepath, index=None)
 
 
 def _safe_detect(text):
