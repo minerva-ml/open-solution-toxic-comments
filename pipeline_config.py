@@ -8,7 +8,7 @@ from utils import read_params, multi_roc_auc_score
 ctx = neptune.Context()
 params = read_params(ctx)
 
-X_COLUMNS = ['comment_text']
+X_COLUMNS = ['comment_text_english']
 Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 CV_LABELS = ['toxic']
 
@@ -351,6 +351,6 @@ SOLUTION_CONFIG = AttrDict({
                          'reg_lambda': params.xgboost__reg_lambda,
                          'reg_alpha': params.xgboost__reg_alpha,
                          'n_jobs': params.num_workers},
-    'clipper': {'lower': eval(params.clipper__lower),
-                'upper': eval(params.clipper__upper)}
+    # 'clipper': {'lower': eval(params.clipper__lower),
+    #             'upper': eval(params.clipper__upper)}
 })
