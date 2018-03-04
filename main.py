@@ -44,8 +44,8 @@ def _train_pipeline(pipeline_name):
     if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
 
-    train = read_data(data_dir=params.data_dir, filename='train_translated_split.csv')
-    valid = read_data(data_dir=params.data_dir, filename='valid_translated_split.csv')
+    train = read_data(data_dir=params.data_dir, filename='train_split_translated.csv')
+    valid = read_data(data_dir=params.data_dir, filename='valid_split_translated.csv')
 
     data = {'input': {'meta': train,
                       'meta_valid': valid,
@@ -68,7 +68,7 @@ def evaluate_pipeline(pipeline_name):
 
 
 def _evaluate_pipeline(pipeline_name):
-    valid = read_data(data_dir=params.data_dir, filename='valid_translated_split.csv')
+    valid = read_data(data_dir=params.data_dir, filename='valid_split_translated.csv')
 
     data = {'input': {'meta': valid,
                       'meta_valid': None,
@@ -352,8 +352,8 @@ def evaluate_predict_pipeline(pipeline_name, model_level, stacking_mode):
 def prepare_single_model_predictions_dir(pipeline_names):
     os.makedirs(params.single_model_predictions_dir, exist_ok=True)
 
-    valid_split_source = os.path.join(params.data_dir, 'valid_translated_split.csv')
-    valid_split_destination = os.path.join(params.single_model_predictions_dir, 'valid_translated_split.csv')
+    valid_split_source = os.path.join(params.data_dir, 'valid_split_translated.csv')
+    valid_split_destination = os.path.join(params.single_model_predictions_dir, 'valid_split_translated.csv')
     logger.info('copying valid_split from {} to {}'.format(valid_split_source, valid_split_destination))
     shutil.copy(valid_split_source, valid_split_destination)
 
