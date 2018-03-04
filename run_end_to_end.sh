@@ -79,8 +79,5 @@ fasttext_scnn
 
 # Model stacking
 neptune run \
---config best_configs/catboost_ensemble.yaml \
--- train_evaluate_cv_pipeline --model_level second --pipeline_name catboost_ensemble
-neptune run \
---config best_configs/catboost_ensemble.yaml \
--- predict_pipeline --model_level second --pipeline_name catboost_ensemble
+--config best_configs/xgboost_ensemble.yaml \
+-- train_evaluate_predict_cv_pipeline --model_level second --pipeline_name xgboost_ensemble

@@ -8,7 +8,7 @@ from utils import read_params, multi_roc_auc_score
 ctx = neptune.Context()
 params = read_params(ctx)
 
-X_COLUMNS = ['comment_text']
+X_COLUMNS = ['comment_text_english']
 Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 CV_LABELS = ['toxic']
 
