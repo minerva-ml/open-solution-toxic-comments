@@ -22,15 +22,16 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir: /public/toxic_comments
-#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
-#  experiment_dir: /output/trained_pipelines/xgboost_ensemble
-#  embedding_filepath: None
+  data_dir:                     /public/toxic_comments
+  embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+  experiment_dir:               /output/trained_pipelines/blender_ensemble
+
   # Local Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/blender_ensemble_dev
-  embedding_filepath: None
+#  data_dir:                     /path/to/toxic/data
+#  embedding_filepath:           /path/to/embedding i.e. ~/word2vec/GoogleNews-vectors-negative300.bin
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/blender_ensemble
 
   bad_words_filepath: None
   overwrite: 1
@@ -72,6 +73,38 @@ parameters:
   log_reg_penalty: None
   max_iter: None
 
+  # Ensemble Catboost
+  catboost__iterations: None
+  catboost__learning_rate: None
+  catboost__depth: None
+  catboost__l2_leaf_reg: None
+  catboost__border_count: None
+  catboost__model_size_reg: None
+  catboost__rsm: None
+  catboost__verbose: None
+
+  # Ensemble Blender
+  blender__method: 'L-BFGS-B'
+  blender__runs: 100
+  blender__maxiter: 10e8
+
+  # Ensemble XGBoost
+  xgboost__objective: None
+  xgboost__eval_metric: None
+  xgboost__n_estimators: None
+  xgboost__learning_rate: None
+  xgboost__max_depth: None
+  xgboost__min_child_weight: None
+  xgboost__gamma: None
+  xgboost__subsample: None
+  xgboost__colsample_bytree: None
+  xgboost__reg_lambda: None
+  xgboost__reg_alpha: None
+
+  # Postprocessing
+  clipper__lower: None
+  clipper__upper: None
+
   # Training schedule
   epochs_nr: None
   batch_size_train: None
@@ -97,34 +130,4 @@ parameters:
   conv_kernel_reg_l2: None
   conv_bias_reg_l2: None
 
-  # Ensemble Catboost
-  catboost__iterations: 500
-  catboost__learning_rate: 0.02
-  catboost__depth: 3
-  catboost__l2_leaf_reg: 1
-  catboost__border_count: 100
-  catboost__model_size_reg: 0.25
-  catboost__rsm: 1.25
-  catboost__verbose: 0
 
-  # Ensemble Blender
-  blender__method: 'L-BFGS-B'
-  blender__runs: 100
-  blender__maxiter: 10e8
-
-  # Ensemble XGBoost
-  xgboost__objective: None
-  xgboost__eval_metric: None
-  xgboost__n_estimators: None
-  xgboost__learning_rate: None
-  xgboost__max_depth: None
-  xgboost__min_child_weight: None
-  xgboost__gamma: None
-  xgboost__subsample: None
-  xgboost__colsample_bytree: None
-  xgboost__reg_lambda: None
-  xgboost__reg_alpha: None
-
-  # Postprocessing
-  clipper__lower: None
-  clipper__upper: None

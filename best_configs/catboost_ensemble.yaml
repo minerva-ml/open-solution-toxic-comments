@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-#pip-requirements-file: requirements.txt
+pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,15 +22,16 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir: /public/toxic_comments
-#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
-#  experiment_dir: /output/trained_pipelines/catboost_ensemble
-#  embedding_filepath: None
+  data_dir:                     /public/toxic_comments
+  embedding_filepath:           None
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+  experiment_dir:               /output/trained_pipelines/catboost_ensemble
+
   # Local Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/catboost_ensemble
-  embedding_filepath: None
+#  data_dir:                     /path/to/toxic/data
+#  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/catboost_ensemble
 
   bad_words_filepath: None
   overwrite: 1
@@ -38,12 +39,12 @@ parameters:
   n_cv_splits: 10
 
   # Preprocessing
-  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_char: None
   max_features_word: None
   maxlen_char: None
   maxlen_words: None
   char_ngram_max: None
-  drop_punctuation: None # Do I want to preprocess in that way for all models?
+  drop_punctuation: None
   drop_newline: None
   drop_multispaces: None
   all_lower_case: None
@@ -71,31 +72,6 @@ parameters:
   log_reg_c: None
   log_reg_penalty: None
   max_iter: None
-
-  # Training schedule
-  epochs_nr: None
-  batch_size_train: None
-  batch_size_inference: None
-  lr: None
-  momentum: None
-  gamma: None
-  patience: None
-
-  # Regularization
-  batch_norm_first: None
-  use_batch_norm: None
-  dropout_embedding: None
-  rnn_dropout: None
-  dense_dropout: None
-  conv_dropout: None
-  dropout_mode: None
-  rnn_kernel_reg_l2: None
-  rnn_recurrent_reg_l2: None
-  rnn_bias_reg_l2: None
-  dense_kernel_reg_l2: None
-  dense_bias_reg_l2: None
-  conv_kernel_reg_l2: None
-  conv_bias_reg_l2: None
 
   # Ensemble Catboost
   catboost__iterations: 500
@@ -128,3 +104,28 @@ parameters:
   # Postprocessing
   clipper__lower: None
   clipper__upper: None
+
+  # Training schedule
+  epochs_nr: None
+  batch_size_train: None
+  batch_size_inference: None
+  lr: None
+  momentum: None
+  gamma: None
+  patience: None
+
+  # Regularization
+  batch_norm_first: None
+  use_batch_norm: None
+  dropout_embedding: None
+  rnn_dropout: None
+  dense_dropout: None
+  conv_dropout: None
+  dropout_mode: None
+  rnn_kernel_reg_l2: None
+  rnn_recurrent_reg_l2: None
+  rnn_bias_reg_l2: None
+  dense_kernel_reg_l2: None
+  dense_bias_reg_l2: None
+  conv_kernel_reg_l2: None
+  conv_bias_reg_l2: None
