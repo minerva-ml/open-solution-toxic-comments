@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-pip-requirements-file: requirements.txt
+#pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,16 +22,15 @@ exclude:
 
 parameters:
   # Cloud Environment
-  data_dir:                     /public/toxic_comments
-  embedding_filepath:           /public/models/fasttext/crawl-300d-2M.vec
-  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
-  experiment_dir:               /output/trained_pipelines/fasttext_dpcnn
-
+#  data_dir: /public/toxic_comments
+#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
+#  experiment_dir: /output/trained_pipelines/fasttext_dpcnn
+#  embedding_filepath: /public/models/fasttext/crawl-300d-2M.vec
   # Local Environment
-#  data_dir:                     /path/to/toxic/data
-#  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
-#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
-#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/fasttext_dpcnn
+  data_dir: /mnt/ml-team/minerva/toxic/data
+  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_dpcnn
+  embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
 
   bad_words_filepath: None
   overwrite: 1
@@ -39,7 +38,7 @@ parameters:
   n_cv_splits: 5
 
   # Preprocessing
-  max_features_char: None
+  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: None
   maxlen_words: 200
@@ -83,28 +82,6 @@ parameters:
   catboost__rsm: None
   catboost__verbose: None
 
-  # Ensemble Blender
-  blender__method: None
-  blender__runs: None
-  blender__maxiter: None
-
-  # Ensemble XGBoost
-  xgboost__objective: None
-  xgboost__eval_metric: None
-  xgboost__n_estimators: None
-  xgboost__learning_rate: None
-  xgboost__max_depth: None
-  xgboost__min_child_weight: None
-  xgboost__gamma: None
-  xgboost__subsample: None
-  xgboost__colsample_bytree: None
-  xgboost__reg_lambda: None
-  xgboost__reg_alpha: None
-
-  # Postprocessing
-  clipper__lower: None
-  clipper__upper: None
-
   # Training schedule
   epochs_nr: 1000
   batch_size_train: 128
@@ -129,3 +106,5 @@ parameters:
   dense_bias_reg_l2: 0.00001
   conv_kernel_reg_l2: 0.00001
   conv_bias_reg_l2: 0.00001
+
+
