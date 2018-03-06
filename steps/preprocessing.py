@@ -1,14 +1,20 @@
 import re
 import string
-
 import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
 from sklearn.feature_extraction import text
 import sklearn.preprocessing as sk_prep
-
+from nltk.tokenize import word_tokenize
+from nltk.tokenize import TweetTokenizer
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.corpus import stopwords
 from .base import BaseTransformer
 
+lem = WordNetLemmatizer()
+tokenizer=TweetTokenizer()
+eng_stopwords = set(stopwords.words("english"))
+APPO = {"aren't": 'are not', "can't": 'cannot', "couldn't": 'could not', "didn't": 'did not', "doesn't": 'does not', "don't": 'do not', "hadn't": 'had not', "hasn't": 'has not', "haven't": 'have not', "he'd": 'he would', "he'll": 'he will', "he's": 'he is', "i'd": 'I had', "i'll": 'I will', "i'm": 'I am', "isn't": 'is not', "it's": 'it is', "it'll": 'it will', "i've": 'I have', "let's": 'let us', "mightn't": 'might not', "mustn't": 'must not', "shan't": 'shall not', "she'd": 'she would', "she'll": 'she will', "she's": 'she is', "shouldn't": 'should not', "that's": 'that is', "there's": 'there is', "they'd": 'they would', "they'll": 'they will', "they're": 'they are', "they've": 'they have', "we'd": 'we would', "we're": 'we are', "weren't": 'were not', "we've": 'we have', "what'll": 'what will', "what're": 'what are', "what's": 'what is', "what've": 'what have', "where's": 'where is', "who'd": 'who would', "who'll": 'who will', "who're": 'who are', "who's": 'who is', "who've": 'who have', "won't": 'will not', "wouldn't": 'would not', "you'd": 'you would', "you'll": 'you will', "you're": 'you are', "you've": 'you have', "'re": ' are', "wasn't": 'was not', "we'll": ' will'}
 
 class WordListFilter(BaseTransformer):
     def __init__(self, word_list_filepath):
@@ -42,13 +48,15 @@ class WordListFilter(BaseTransformer):
 
 class TextCleaner(BaseTransformer):
     def __init__(self, drop_punctuation, drop_newline, drop_multispaces,
-                 all_lower_case, fill_na_with, deduplication_threshold):
+                 all_lower_case, fill_na_with, deduplication_threshold, anonymize, apostophes):
         self.drop_punctuation = drop_punctuation
         self.drop_newline = drop_newline
         self.drop_multispaces = drop_multispaces
         self.all_lower_case = all_lower_case
         self.fill_na_with = fill_na_with
         self.deduplication_threshold = deduplication_threshold
+        self.anonymize = anonymize
+        self.apostophes = apostophes
 
     def transform(self, X):
         X = pd.DataFrame(X, columns=['text']).astype(str)
@@ -68,6 +76,25 @@ class TextCleaner(BaseTransformer):
             x = self._substitute_multiple_spaces(x)
         if self.deduplication_threshold is not None:
             x = self._deduplicate(x)
+        if self.anonymize:
+            x = self._anonymize(x)
+        if self.apostophes:
+            x = self._apostophes(x)
+        return x
+
+    def _apostophes(self,x):
+        words=tokenizer.tokenize(x)
+        words=[APPO[word] if word in APPO else word for word in words]
+        words=[lem.lemmatize(word, "v") for word in words]
+        words = [w for w in words if not w in eng_stopwords]
+        clean_sent=" ".join(words)
+        return(clean_sent)   
+
+    def _anonymize(self,x):
+        # remove leaky elements like ip,user
+        x=re.sub("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"," ",x)
+        #removing usernames
+        x=re.sub("\[\[.*\]"," ",x)        
         return x
 
     def _lower(self, x):
