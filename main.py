@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.model_selection import StratifiedKFold
 from deepsense import neptune
 
-from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS, CV_LABELS
+from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS, CV_LABELS, ID_LABEL
 from pipelines import PIPELINES
 from preprocessing import split_train_data, translate_data
 from utils import init_logger, get_logger, read_params, read_data, read_predictions, multi_roc_auc_score, \
@@ -168,28 +168,24 @@ def evaluate_predict_pipeline(pipeline_name, model_level, stacking_mode):
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
 @click.option('-m', '--model_level', help='first or second level', default='second', required=False)
-@click.option('-s', '--stacking_mode', help='mode of stacking, flat or rnn', default='flat', required=False)
-def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, stacking_mode):
+def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
     if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
 
     if model_level == 'first':
         train = read_data(data_dir=params.data_dir, filename='train_translated.csv')
-        train.reset_index(drop=True, inplace=True)
-        cv_label = train[CV_LABELS].values
         test = read_data(data_dir=params.data_dir, filename='test_translated.csv')
-        test.reset_index(drop=True, inplace=True)
     elif model_level == 'second':
-        train = read_predictions(prediction_dir=params.single_model_predictions_dir,
-                                 mode='valid', valid_columns=Y_COLUMNS, stacking_mode=stacking_mode)
-        cv_label = train[CV_LABELS].values
-        test = read_predictions(prediction_dir=params.single_model_predictions_dir,
-                                mode='test', stacking_mode=stacking_mode)
+        train, test = read_predictions(prediction_dir=params.single_model_predictions_dir)
     else:
         raise NotImplementedError("""only 'first' and 'second' """)
 
+    train.reset_index(drop=True, inplace=True)
+    test.reset_index(drop=True, inplace=True)
+
     fold_scores, valid_predictions_out_of_fold, test_predictions_by_fold = [], [], []
     if model_level == 'first':
+        cv_label = train[CV_LABELS].values
         cv = StratifiedKFold(n_splits=params.n_cv_splits, shuffle=True, random_state=1234)
         cv.get_n_splits(cv_label)
         for i, (train_idx, valid_idx) in enumerate(cv.split(cv_label, cv_label)):
@@ -243,8 +239,9 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, stacking_mode
             save_submission(test_submission, params.experiment_dir,
                             '{}_predictions_test_fold{}.csv'.format(pipeline_name, i), logger)
 
-            subprocess.call('rm -rf {}/transformers'.format(params.experiment_dir), shell=True)
-
+            if i + 1 != params.n_cv_splits:
+                subprocess.call('rm -rf {}/transformers'.format(params.experiment_dir), shell=True)
+                
         mean_score = np.mean(fold_scores)
         logger.info('Score on validation is {}'.format(mean_score))
         ctx.channel_send('Final Validation Score ROC_AUC', 0, mean_score)
@@ -271,12 +268,14 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, stacking_mode
             valid_split = train[train['fold_id'] == i]
             test_split = test[test['fold_id'] == i]
 
-            X_train = train_split.drop(Y_COLUMNS)
+            columns_to_drop_train = Y_COLUMNS + ID_LABEL + ['fold_id']
+            X_train = train_split.drop(columns_to_drop_train, axis=1).values
             y_train = train_split[Y_COLUMNS].values
-            X_valid = valid_split.drop(Y_COLUMNS)
+            X_valid = valid_split.drop(columns_to_drop_train, axis=1).values
             y_valid = valid_split[Y_COLUMNS].values
 
-            X_test = test_split.drop(Y_COLUMNS)
+            columns_to_drop_test = ID_LABEL + ['fold_id']
+            X_test = test_split.drop(columns_to_drop_test, axis=1).values
 
             data_train = {'input': {'X': X_train,
                                     'y': y_train,
@@ -320,7 +319,8 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, stacking_mode
             save_submission(test_submission, params.experiment_dir,
                             '{}_predictions_test_fold{}.csv'.format(pipeline_name, i), logger)
 
-            subprocess.call('rm -rf {}/transformers'.format(params.experiment_dir), shell=True)
+            if i + 1 != params.n_cv_splits:
+                subprocess.call('rm -rf {}/transformers'.format(params.experiment_dir), shell=True)
 
         mean_score = np.mean(fold_scores)
         logger.info('Score on validation is {}'.format(mean_score))
@@ -351,10 +351,12 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, stacking_mode
 def prepare_single_model_predictions_dir(pipeline_names):
     os.makedirs(params.single_model_predictions_dir, exist_ok=True)
 
-    valid_split_source = os.path.join(params.data_dir, 'valid_split_translated.csv')
-    valid_split_destination = os.path.join(params.single_model_predictions_dir, 'valid_split_translated.csv')
-    logger.info('copying valid_split from {} to {}'.format(valid_split_source, valid_split_destination))
-    shutil.copy(valid_split_source, valid_split_destination)
+    train_labels_source = os.path.join(params.data_dir, 'train_translated.csv')
+    train_labels_destination = os.path.join(params.single_model_predictions_dir, 'labels.csv')
+    logger.info('copying train from {} to {}'.format(train_labels_source, train_labels_destination))
+    train = pd.read_csv(train_labels_source)
+    train_labels = train[ID_LABEL + Y_COLUMNS]
+    train_labels.to_csv(train_labels_destination, index=None)
 
     sample_submit_source = os.path.join(params.data_dir, 'sample_submission.csv')
     sample_submit_destination = os.path.join(params.single_model_predictions_dir, 'sample_submission.csv')
@@ -363,13 +365,14 @@ def prepare_single_model_predictions_dir(pipeline_names):
 
     for pipeline_name in pipeline_names:
         pipeline_dir = os.path.join(params.experiment_dir, pipeline_name)
-        for fold in ['valid', 'test']:
-            fold_dirpath = os.path.join(params.single_model_predictions_dir, fold)
-            os.makedirs(fold_dirpath, exist_ok=True)
-            fold_filename = '{}_predictions_{}.csv'.format(pipeline_name, fold)
-            source_filepath = os.path.join(pipeline_dir, fold_filename)
-            destination_filepath = os.path.join(fold_dirpath, fold_filename)
-            logger.info('copying {} from {} to {}'.format(fold, source_filepath, destination_filepath))
+
+        train_predictions_filename = '{}_predictions_train_oof.csv'.format(pipeline_name)
+        test_predictions_filename = '{}_predictions_test_oof.csv'.format(pipeline_name)
+
+        for filename in [train_predictions_filename, test_predictions_filename]:
+            source_filepath = os.path.join(pipeline_dir, filename)
+            destination_filepath = os.path.join(params.single_model_predictions_dir, filename)
+            logger.info('copying from {} to {}'.format(source_filepath, destination_filepath))
             shutil.copy(source_filepath, destination_filepath)
 
 

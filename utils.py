@@ -1,5 +1,6 @@
 import logging
 import os
+from functools import reduce
 
 import glob
 import numpy as np
@@ -50,29 +51,28 @@ def read_data(data_dir, filename):
     return meta_data
 
 
-def read_predictions(prediction_dir, mode='valid', valid_columns=None, stacking_mode='flat'):
-    valid_labels = pd.read_csv(os.path.join(prediction_dir, 'valid_split.csv'))
-    sample_submission = pd.read_csv(os.path.join(prediction_dir, 'sample_submission.csv'))
-    predictions = []
-    for filepath in sorted(glob.glob('{}/{}/*'.format(prediction_dir, mode))):
-        prediction_single = pd.read_csv(filepath)
-        prediction_single.drop('id', axis=1, inplace=True)
-        predictions.append(prediction_single)
+def read_predictions(prediction_dir, concat_mode='concat'):
+    labels = pd.read_csv(os.path.join(prediction_dir, 'labels.csv'))
 
-    if stacking_mode == 'flat':
-        X = np.hstack(predictions)
-    elif stacking_mode == 'rnn':
-        X = np.stack(predictions, axis=2)
-    else:
-        raise NotImplementedError("""only stacking_mode options 'flat' and 'rnn' are supported""")
+    filepaths_train, filepaths_test = [], []
+    for filepath in sorted(glob.glob('{}/*'.format(prediction_dir))):
+        if filepath.endswith('predictions_train_oof.csv'):
+            filepaths_train.append(filepath)
+        elif filepath.endswith('predictions_test_oof.csv'):
+            filepaths_test.append(filepath)
 
-    if mode == 'valid':
-        y = valid_labels[valid_columns].values
-        return X, y
-    elif mode == 'test':
-        return X, sample_submission
-    else:
-        raise NotImplementedError
+    train_dfs = []
+    for filepath in filepaths_train:
+        train_dfs.append(pd.read_csv(filepath))
+    train_dfs = reduce(lambda df1, df2: pd.merge(df1, df2, on=['id', 'fold_id']), train_dfs)
+    train_dfs = pd.merge(train_dfs, labels, on=['id'])
+
+    test_dfs = []
+    for filepath in filepaths_test:
+        test_dfs.append(pd.read_csv(filepath))
+    test_dfs = reduce(lambda df1, df2: pd.merge(df1, df2, on=['id', 'fold_id']), test_dfs)
+
+    return train_dfs, test_dfs
 
 
 def create_submission_df(meta, predictions, columns):
