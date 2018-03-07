@@ -51,6 +51,8 @@ parameters:
   all_lower_case: 1
   fill_na_with: ' '
   deduplication_threshold: 10
+  anonymize: 1
+  apostophes: 1
   
   # Architecture
   filter_nr: 512
