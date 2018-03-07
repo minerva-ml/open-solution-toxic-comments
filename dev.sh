@@ -2,6 +2,16 @@
 
 #Train single models
 neptune run \
+--config best_configs/bad_word_logreg.yaml \
+-- train_evaluate_predict_cv_pipeline -p bad_word_logreg -m first
+neptune run \
+--config best_configs/count_logreg.yaml \
+-- train_evaluate_predict_cv_pipeline -p count_logreg -m first
+neptune run \
+--config best_configs/tfidf_logreg.yaml \
+-- train_evaluate_predict_cv_pipeline -p tfidf_logreg -m first
+
+neptune run \
 --config best_configs/char_vdcnn.yaml \
 -- train_evaluate_predict_cv_pipeline -p char_vdcnn -m first
 neptune run \

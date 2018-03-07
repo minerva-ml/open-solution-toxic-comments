@@ -37,7 +37,7 @@ parameters:
   bad_words_filepath: None
   overwrite: 1
   num_workers: 4
-  n_cv_splits: 5
+  n_cv_splits: 10
 
   # Preprocessing
   max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
