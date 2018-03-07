@@ -23,7 +23,7 @@ SOLUTION_CONFIG = AttrDict({
                      'fill_na_with': params.fill_na_with,
                      'deduplication_threshold': params.deduplication_threshold,
                      'anonymize': bool(params.anonymize),
-                     'apostophes': bool(params.apostophes)
+                     'apostophes': bool(params.apostrophes)
                      },
     'bad_word_filter': {'word_list_filepath': params.bad_words_filepath},
     'char_tokenizer': {'char_level': True,
