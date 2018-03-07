@@ -52,8 +52,8 @@ parameters:
   fill_na_with: ' '
   deduplication_threshold: 10
   anonymize: 1
-  apostophes: 1
-  
+  apostrophes: 1
+
   # Architecture
   filter_nr: 512
   kernel_size: None
