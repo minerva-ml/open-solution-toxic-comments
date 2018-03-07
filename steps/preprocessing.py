@@ -50,7 +50,7 @@ class WordListFilter(BaseTransformer):
 
 class TextCleaner(BaseTransformer):
     def __init__(self, drop_punctuation, drop_newline, drop_multispaces,
-                 all_lower_case, fill_na_with, deduplication_threshold, anonymize, apostophes):
+                 all_lower_case, fill_na_with, deduplication_threshold, anonymize, apostrophes):
         self.drop_punctuation = drop_punctuation
         self.drop_newline = drop_newline
         self.drop_multispaces = drop_multispaces
@@ -58,7 +58,7 @@ class TextCleaner(BaseTransformer):
         self.fill_na_with = fill_na_with
         self.deduplication_threshold = deduplication_threshold
         self.anonymize = anonymize
-        self.apostophes = apostophes
+        self.apostrophes = apostrophes
 
     def transform(self, X):
         X = pd.DataFrame(X, columns=['text']).astype(str)
@@ -80,11 +80,11 @@ class TextCleaner(BaseTransformer):
             x = self._deduplicate(x)
         if self.anonymize:
             x = self._anonymize(x)
-        if self.apostophes:
-            x = self._apostophes(x)
+        if self.apostrophes:
+            x = self._apostrophes(x)
         return x
 
-    def _apostophes(self,x):
+    def _apostrophes(self,x):
         words=tokenizer.tokenize(x)
         words=[APPO[word] if word in APPO else word for word in words]
         words=[lem.lemmatize(word, "v") for word in words]
