@@ -52,13 +52,17 @@ parameters:
   deduplication_threshold: None
 
   # Architecture
-  filter_nr: 64
+  filter_nr:
+    value: [32,64,128]
   kernel_size: None
-  repeat_block: 1
+  repeat_block:
+    value: [1,2]
   dense_size: 256
-  repeat_dense: 0
+  repeat_dense:
+    value: [0,1]
   max_pooling: 1
-  mean_pooling: 0
+  mean_pooling:
+    value: [0,1]
   weighted_average_attention: 0
   concat_mode:  'concat'
   trainable_embedding: None
@@ -107,8 +111,8 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 256
-  batch_size_inference: 256
+  batch_size_train: 32
+  batch_size_inference: 32
   lr: 0.01
   momentum: None
   gamma: 0.7
@@ -117,9 +121,9 @@ parameters:
   # Regularization
   batch_norm_first: 0
   use_batch_norm: 0
-  dropout_embedding: 0.25
-  rnn_dropout: 0.5
-  dense_dropout: 0.5
+  dropout_embedding: 0.1
+  rnn_dropout: 0.25
+  dense_dropout: 0.25
   conv_dropout: None
   dropout_mode: 'simple'
   rnn_kernel_reg_l2: 0.00001

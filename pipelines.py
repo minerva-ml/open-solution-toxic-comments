@@ -1,7 +1,7 @@
 from functools import partial
 
 from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM, StackerRNN
-from steps.base import Step, Dummy, sparse_hstack_inputs, to_tuple_inputs
+from steps.base import Step, Dummy, sparse_hstack_inputs, to_tuple_inputs, hstack_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter, \
@@ -658,6 +658,36 @@ def xgboost_ensemble(config, is_train):
     return output
 
 
+def xgboost_with_features_ensemble(config, is_train):
+    count_feature_extractor = _count_features(config)
+
+    minmax_scaler = Step(name='minmax_scaler',
+                         transformer=MinMaxScaler(),
+                         input_data=['input'],
+                         adapter={'X': ([('input', 'X')])},
+                         cache_dirpath=config.env.cache_dirpath)
+
+    xgboost_ensemble = Step(name='xgboost_ensemble',
+                            transformer=XGBoostClassifierMultilabel(**config.xgboost_ensemble),
+                            input_data=['input'],
+                            input_steps=[minmax_scaler],
+                            adapter={'X': ([('minmax_scaler', 'X'),
+                                            (count_feature_extractor.name, 'X')], hstack_inputs),
+                                     'y': ([('input', 'y')])},
+                            cache_dirpath=config.env.cache_dirpath)
+
+    output = Step(name='output',
+                  transformer=Dummy(),
+                  input_steps=[xgboost_ensemble],
+                  adapter={'y_pred': ([('xgboost_ensemble', 'prediction_probability')])},
+                  cache_dirpath=config.env.cache_dirpath)
+
+    if is_train:
+        xgboost_ensemble.overwrite_transformer = True
+
+    return output
+
+
 def rnn_ensemble(config, is_train):
     if is_train:
         minmax_scaler = Step(name='minmax_scaler',
@@ -962,4 +992,6 @@ PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
                                   'inference': partial(xgboost_ensemble, is_train=False)},
              'rnn_ensemble': {'train': partial(rnn_ensemble, is_train=True),
                               'inference': partial(rnn_ensemble, is_train=False)},
+             'xgboost_with_features_ensemble': {'train': partial(xgboost_with_features_ensemble, is_train=True),
+                                                'inference': partial(xgboost_with_features_ensemble, is_train=False)},
              }

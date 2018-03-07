@@ -28,7 +28,7 @@ parameters:
 #  embedding_filepath: /public/models/word2vec/GoogleNews-vectors-negative300.bin
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
+  single_model_predictions_dir: None
   experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/word2vec_gru
   embedding_filepath: /mnt/ml-team/minerva/pretrained/word2vec/GoogleNews-vectors-negative300.bin
 
@@ -72,16 +72,6 @@ parameters:
   log_reg_penalty: None
   max_iter: None
 
-  # Ensemble Catboost
-  catboost__iterations: None
-  catboost__learning_rate: None
-  catboost__depth: None
-  catboost__l2_leaf_reg: None
-  catboost__border_count: None
-  catboost__model_size_reg: None
-  catboost__rsm: None
-  catboost__verbose: None
-
   # Training schedule
   epochs_nr: 1000
   batch_size_train: 128
@@ -107,4 +97,34 @@ parameters:
   conv_kernel_reg_l2: None
   conv_bias_reg_l2: None
 
+  # Postprocessing
+  clipper__lower: None
+  clipper__upper: None
 
+  # Ensemble Catboost
+  catboost__iterations: None
+  catboost__learning_rate: None
+  catboost__depth: None
+  catboost__l2_leaf_reg: None
+  catboost__border_count: None
+  catboost__model_size_reg: None
+  catboost__rsm: None
+  catboost__verbose: None
+
+  # Ensemble XGBoost
+  xgboost__objective: None
+  xgboost__eval_metric: None
+  xgboost__n_estimators: None
+  xgboost__learning_rate: None
+  xgboost__max_depth: None
+  xgboost__min_child_weight: None
+  xgboost__gamma: None
+  xgboost__subsample: None
+  xgboost__colsample_bytree: None
+  xgboost__reg_lambda: None
+  xgboost__reg_alpha: None
+
+  # Ensemble Blender
+  blender__method: None
+  blender__runs: None
+  blender__maxiter: None

@@ -75,15 +75,25 @@ def read_predictions(prediction_dir, mode='valid', valid_columns=None, stacking_
         raise NotImplementedError
 
 
-def create_submission(experiments_dir, filename, meta, predictions, columns, logger):
+def create_submission_df(meta, predictions, columns):
+    meta.reset_index(drop=True, inplace=True)
     submission = meta[['id']]
     predictions_ = pd.DataFrame(predictions, columns=columns)
     submission = pd.concat([submission, predictions_], axis=1)
+    return submission
+
+
+def save_submission(submission, experiments_dir, filename, logger):
     logger.info('submission head \n\n {}'.format(submission.head()))
 
     submission_filepath = os.path.join(experiments_dir, filename)
     submission.to_csv(submission_filepath, index=None)
     logger.info('submission saved to {}'.format(submission_filepath))
+
+
+def create_submission(experiments_dir, filename, meta, predictions, columns, logger):
+    submission_df = create_submission_df(meta, predictions, columns)
+    save_submission(submission_df, experiments_dir, filename, logger)
 
 
 def multi_log_loss(y_true, y_pred):
