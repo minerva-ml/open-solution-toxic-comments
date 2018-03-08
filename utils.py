@@ -86,9 +86,10 @@ def _clean_columns(df, keep_colnames):
     return new_colnames
 
 def create_submission_df(meta, predictions, columns):
-    meta.reset_index(drop=True, inplace=True)
     submission = meta[['id']]
     predictions_ = pd.DataFrame(predictions, columns=columns)
+    submission.reset_index(drop=True, inplace=True)
+    predictions_.reset_index(drop=True, inplace=True)
     submission = pd.concat([submission, predictions_], axis=1)
     return submission
 
