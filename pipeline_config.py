@@ -11,6 +11,7 @@ params = read_params(ctx)
 X_COLUMNS = ['comment_text_english']
 Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 CV_LABELS = ['toxic']
+ID_LABEL = ['id']
 
 SOLUTION_CONFIG = AttrDict({
     'env': {'cache_dirpath': params.experiment_dir},
@@ -94,7 +95,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {'multi_run': True},
         },
     },
     'scnn_network': {
@@ -140,7 +141,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {'multi_run': True},
         },
     },
     'lstm_network': {
@@ -185,7 +186,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {'multi_run': True},
         },
     },
     'gru_network': {
@@ -230,7 +231,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {'multi_run': True},
         },
     },
     'char_vdcnn_network': {
@@ -274,7 +275,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {'multi_run': True},
         },
     },
     'gru_stacker': {
@@ -326,11 +327,11 @@ SOLUTION_CONFIG = AttrDict({
                                        'n_jobs': params.num_workers,
                                        },
     'catboost_ensemble': {'label_nr': 6,
-                          'iterations': params.catboost__iterations,
-                          'learning_rate': params.catboost__learning_rate,
-                          'depth': params.catboost__depth,
-                          'l2_leaf_reg': params.catboost__l2_leaf_reg,
-                          'border_count': params.catboost__border_count,
+#                           'iterations': params.catboost__iterations,
+#                           'learning_rate': params.catboost__learning_rate,
+#                           'depth': params.catboost__depth,
+#                           'l2_leaf_reg': params.catboost__l2_leaf_reg,
+#                           'border_count': params.catboost__border_count,
                           'verbose': bool(params.catboost__verbose),
                           },
     'blender_ensemble': {'func': multi_roc_auc_score,

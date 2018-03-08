@@ -15,7 +15,7 @@ class NeptuneMonitor(Callback):
 
     def _get_suffix(self):
         if self.multi_run:
-            suffix = str(random.getrandbits(8))
+            suffix = str(random.getrandbits(64))
         else:
             suffix = ''
         return suffix

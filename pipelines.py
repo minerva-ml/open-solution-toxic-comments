@@ -1,10 +1,11 @@
 from functools import partial
 
-from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM, StackerGru
+from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM, StackerRNN
 from steps.base import Step, Dummy, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
-from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter
+from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter, \
+    MinMaxScaler, MinMaxScalerMultilabel
 from steps.sklearn.models import LogisticRegressionMultilabel, CatboostClassifierMultilabel, XGBoostClassifierMultilabel
 from postprocessing import Blender
 
@@ -580,10 +581,17 @@ def word2vec_scnn(config, is_train):
 
 
 def blender_ensemble(config, is_train):
+    minmax_scaler = Step(name='minmax_scaler',
+                         transformer=MinMaxScalerMultilabel(),
+                         input_data=['input'],
+                         adapter={'X': ([('input', 'X')])},
+                         cache_dirpath=config.env.cache_dirpath)
+
     blender_ensemble = Step(name='blender_ensemble',
                             transformer=Blender(**config.blender_ensemble),
                             input_data=['input'],
-                            adapter={'X': ([('input', 'X')]), 'y': ([('input', 'y')])},
+                            input_steps=[minmax_scaler],
+                            adapter={'X': ([('minmax_scaler', 'X')]), 'y': ([('input', 'y')])},
                             cache_dirpath=config.env.cache_dirpath)
 
     output = Step(name='output',
@@ -598,10 +606,44 @@ def blender_ensemble(config, is_train):
     return output
 
 
+def logreg_ensemble(config, is_train):
+    minmax_scaler = Step(name='minmax_scaler',
+                         transformer=MinMaxScaler(),
+                         input_data=['input'],
+                         adapter={'X': ([('input', 'X')])},
+                         cache_dirpath=config.env.cache_dirpath)
+
+    logreg_ensemble = Step(name='logreg_ensemble',
+                           transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
+                           input_data=['input'],
+                           input_steps=[minmax_scaler],
+                           adapter={'X': ([('minmax_scaler', 'X')]), 'y': ([('input', 'y')])},
+                           cache_dirpath=config.env.cache_dirpath)
+
+    output = Step(name='output',
+                  transformer=Dummy(),
+                  input_steps=[logreg_ensemble],
+                  adapter={'y_pred': ([('logreg_ensemble', 'prediction_probability')])},
+                  cache_dirpath=config.env.cache_dirpath)
+
+    if is_train:
+        logreg_ensemble.overwrite_transformer = True
+
+    return output
+
+
 def catboost_ensemble(config, is_train):
+    minmax_scaler = Step(name='minmax_scaler',
+                         transformer=MinMaxScaler(),
+                         input_data=['input'],
+                         adapter={'X': ([('input', 'X')])},
+                         cache_dirpath=config.env.cache_dirpath)
+
     catboost_ensemble = Step(name='catboost_ensemble',
                              transformer=CatboostClassifierMultilabel(**config.catboost_ensemble),
                              input_data=['input'],
+                             input_steps=[minmax_scaler],
+                             adapter={'X': ([('minmax_scaler', 'X')]), 'y': ([('input', 'y')])},
                              cache_dirpath=config.env.cache_dirpath)
 
     output = Step(name='output',
@@ -617,9 +659,17 @@ def catboost_ensemble(config, is_train):
 
 
 def xgboost_ensemble(config, is_train):
+    minmax_scaler = Step(name='minmax_scaler',
+                         transformer=MinMaxScaler(),
+                         input_data=['input'],
+                         adapter={'X': ([('input', 'X')])},
+                         cache_dirpath=config.env.cache_dirpath)
+
     xgboost_ensemble = Step(name='xgboost_ensemble',
                             transformer=XGBoostClassifierMultilabel(**config.xgboost_ensemble),
                             input_data=['input'],
+                            input_steps=[minmax_scaler],
+                            adapter={'X': ([('minmax_scaler', 'X')]), 'y': ([('input', 'y')])},
                             cache_dirpath=config.env.cache_dirpath)
 
     output = Step(name='output',
@@ -634,34 +684,61 @@ def xgboost_ensemble(config, is_train):
     return output
 
 
-def gru_stacker_ensemble(config, is_train):
+def rnn_ensemble(config, is_train):
     if is_train:
-        gru_stacker_ensemble = Step(name='gru_stacker_ensemble',
-                                    transformer=StackerGru(**config.gru_stacker),
+        minmax_scaler = Step(name='minmax_scaler',
+                             transformer=MinMaxScalerMultilabel(),
+                             input_data=['input'],
+                             adapter={'X': ([('input', 'X')])},
+                             cache_dirpath=config.env.cache_dirpath)
+
+        minmax_scaler_valid_ = Step(name='minmax_scaler',
+                                    transformer=MinMaxScalerMultilabel(),
                                     input_data=['input'],
-                                    adapter={'X': ([('input', 'X')]),
+                                    adapter={'X': ([('input', 'X_valid')])},
+                                    cache_dirpath=config.env.cache_dirpath)
+
+        minmax_scaler_valid = Step(name='minmax_scaler_valid',
+                                   transformer=Dummy(),
+                                   input_steps=[minmax_scaler_valid_],
+                                   adapter={'X_valid': ([('minmax_scaler', 'X')]),
+                                            },
+                                   cache_dirpath=config.env.cache_dirpath)
+
+        rnn_stacker_ensemble = Step(name='rnn_stacker_ensemble',
+                                    transformer=StackerRNN(**config.gru_stacker),
+                                    input_data=['input'],
+                                    input_steps=[minmax_scaler, minmax_scaler_valid],
+                                    adapter={'X': ([('minmax_scaler', 'X')]),
                                              'y': ([('input', 'y')]),
                                              'validation_data': (
-                                                 [('input', 'X_valid'), ('input', 'y_valid')],
+                                                 [('minmax_scaler_valid', 'X_valid'), ('input', 'y_valid')],
                                                  to_tuple_inputs),
                                              },
                                     cache_dirpath=config.env.cache_dirpath)
     else:
-        gru_stacker_ensemble = Step(name='gru_stacker_ensemble',
-                                    transformer=StackerGru(**config.gru_stacker),
+        minmax_scaler = Step(name='minmax_scaler',
+                             transformer=MinMaxScalerMultilabel(),
+                             input_data=['input'],
+                             adapter={'X': ([('input', 'X')])},
+                             cache_dirpath=config.env.cache_dirpath)
+
+        rnn_stacker_ensemble = Step(name='rnn_stacker_ensemble',
+                                    transformer=StackerRNN(**config.gru_stacker),
                                     input_data=['input'],
-                                    adapter={'X': ([('input', 'X')]),
+                                    input_steps=[minmax_scaler],
+                                    adapter={'X': ([('minmax_scaler', 'X')]),
                                              'y': ([('input', 'y')]),
                                              },
                                     cache_dirpath=config.env.cache_dirpath)
     output = Step(name='output',
                   transformer=Dummy(),
-                  input_steps=[gru_stacker_ensemble],
-                  adapter={'y_pred': ([('gru_stacker_ensemble', 'prediction_probability')])},
+                  input_steps=[rnn_stacker_ensemble],
+                  adapter={'y_pred': ([('rnn_stacker_ensemble', 'prediction_probability')])},
                   cache_dirpath=config.env.cache_dirpath)
 
     if is_train:
-        gru_stacker_ensemble.overwrite_transformer = True
+        rnn_stacker_ensemble.overwrite_transformer = True
 
     return output
 
@@ -905,10 +982,12 @@ PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
                                          'inference': hand_crafted_all_logreg},
              'blender_ensemble': {'train': partial(blender_ensemble, is_train=True),
                                   'inference': partial(blender_ensemble, is_train=False)},
+             'logreg_ensemble': {'train': partial(logreg_ensemble, is_train=True),
+                                 'inference': partial(logreg_ensemble, is_train=False)},
              'catboost_ensemble': {'train': partial(catboost_ensemble, is_train=True),
                                    'inference': partial(catboost_ensemble, is_train=False)},
              'xgboost_ensemble': {'train': partial(xgboost_ensemble, is_train=True),
                                   'inference': partial(xgboost_ensemble, is_train=False)},
-             'gru_stacker_ensemble': {'train': partial(gru_stacker_ensemble, is_train=True),
-                                      'inference': partial(gru_stacker_ensemble, is_train=False)},
+             'rnn_ensemble': {'train': partial(rnn_ensemble, is_train=True),
+                              'inference': partial(rnn_ensemble, is_train=False)},
              }

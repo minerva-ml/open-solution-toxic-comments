@@ -36,10 +36,10 @@ parameters:
   bad_words_filepath: None
   overwrite: 1
   num_workers: 4
-  n_cv_splits: 5
+  n_cv_splits: 10
 
   # Preprocessing
-  max_features_char: 100
+  max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: None
   maxlen_char: 1000
   maxlen_words: None
@@ -73,38 +73,6 @@ parameters:
   log_reg_penalty: None
   max_iter: None
 
-  # Ensemble Catboost
-  catboost__iterations: None
-  catboost__learning_rate: None
-  catboost__depth: None
-  catboost__l2_leaf_reg: None
-  catboost__border_count: None
-  catboost__model_size_reg: None
-  catboost__rsm: None
-  catboost__verbose: None
-
-  # Ensemble Blender
-  blender__method: None
-  blender__runs: None
-  blender__maxiter: None
-
-  # Ensemble XGBoost
-  xgboost__objective: None
-  xgboost__eval_metric: None
-  xgboost__n_estimators: None
-  xgboost__learning_rate: None
-  xgboost__max_depth: None
-  xgboost__min_child_weight: None
-  xgboost__gamma: None
-  xgboost__subsample: None
-  xgboost__colsample_bytree: None
-  xgboost__reg_lambda: None
-  xgboost__reg_alpha: None
-
-  # Postprocessing
-  clipper__lower: None
-  clipper__upper: None
-
   # Training schedule
   epochs_nr: 1000
   batch_size_train: 128
@@ -129,3 +97,35 @@ parameters:
   dense_bias_reg_l2: 0.00001
   conv_kernel_reg_l2: 0.00001
   conv_bias_reg_l2: 0.00001
+
+  # Postprocessing
+  clipper__lower: None
+  clipper__upper: None
+
+  # Ensemble Catboost
+  catboost__iterations: None
+  catboost__learning_rate: None
+  catboost__depth: None
+  catboost__l2_leaf_reg: None
+  catboost__border_count: None
+  catboost__model_size_reg: None
+  catboost__rsm: None
+  catboost__verbose: None
+
+  # Ensemble XGBoost
+  xgboost__objective: None
+  xgboost__eval_metric: None
+  xgboost__n_estimators: None
+  xgboost__learning_rate: None
+  xgboost__max_depth: None
+  xgboost__min_child_weight: None
+  xgboost__gamma: None
+  xgboost__subsample: None
+  xgboost__colsample_bytree: None
+  xgboost__reg_lambda: None
+  xgboost__reg_alpha: None
+
+  # Ensemble Blender
+  blender__method: None
+  blender__runs: None
+  blender__maxiter: None
