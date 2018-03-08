@@ -278,7 +278,7 @@ SOLUTION_CONFIG = AttrDict({
             'neptune_monitor': {'multi_run': True},
         },
     },
-    'gru_stacker': {
+    'rnn_stacker': {
         'architecture_config': {'model_params': {'unit_nr': params.filter_nr,
                                                  'repeat_block': params.repeat_block,
                                                  'max_pooling': bool(params.max_pooling),

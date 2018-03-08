@@ -1,13 +1,13 @@
 from functools import partial
 
 from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM, StackerRNN
+from postprocessing import Blender
 from steps.base import Step, Dummy, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter, \
     MinMaxScaler, MinMaxScalerMultilabel
 from steps.sklearn.models import LogisticRegressionMultilabel, CatboostClassifierMultilabel, XGBoostClassifierMultilabel
-from postprocessing import Blender
 
 
 def tfidf_logreg(config):
@@ -706,7 +706,7 @@ def rnn_ensemble(config, is_train):
                                    cache_dirpath=config.env.cache_dirpath)
 
         rnn_stacker_ensemble = Step(name='rnn_stacker_ensemble',
-                                    transformer=StackerRNN(**config.gru_stacker),
+                                    transformer=StackerRNN(**config.rnn_stacker),
                                     input_data=['input'],
                                     input_steps=[minmax_scaler, minmax_scaler_valid],
                                     adapter={'X': ([('minmax_scaler', 'X')]),
@@ -724,7 +724,7 @@ def rnn_ensemble(config, is_train):
                              cache_dirpath=config.env.cache_dirpath)
 
         rnn_stacker_ensemble = Step(name='rnn_stacker_ensemble',
-                                    transformer=StackerRNN(**config.gru_stacker),
+                                    transformer=StackerRNN(**config.rnn_stacker),
                                     input_data=['input'],
                                     input_steps=[minmax_scaler],
                                     adapter={'X': ([('minmax_scaler', 'X')]),
