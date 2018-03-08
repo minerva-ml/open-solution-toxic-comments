@@ -77,3 +77,4 @@ fasttext_scnn
 neptune run \
 --config best_configs/xgboost_ensemble.yaml \
 -- train_evaluate_predict_cv_pipeline -p xgboost_ensemble -m second
+

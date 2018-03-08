@@ -149,7 +149,7 @@ class Word2VecEmbeddingsMatrix(EmbeddingsMatrix):
     def _get_embedding_matrix(self, tokenizer):
         model = KeyedVectors.load_word2vec_format(self.pretrained_filepath, binary=True)
 
-        emb_mean, emb_std = model.wv.syn0.mean(), model.wv.syn0.std()
+        emb_mean, emb_std = model.syn0.mean(), model.syn0.std()
 
         word_index = tokenizer.word_index
         nb_words = min(self.max_features, len(word_index))
