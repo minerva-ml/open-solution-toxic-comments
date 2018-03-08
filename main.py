@@ -221,6 +221,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
             y_valid_pred = output_valid['y_pred']
             valid_oof_submission = create_submission_df(valid_split, y_valid_pred, Y_COLUMNS)
             valid_oof_submission['fold_id'] = i
+            valid_oof_submission.reset_index(drop=True, inplace=True)
             valid_predictions_out_of_fold.append(valid_oof_submission)
             logger.info('Saving fold {} oof predictions'.format(i))
             save_submission(valid_oof_submission, params.experiment_dir,
@@ -234,6 +235,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
             y_test_pred = output_test['y_pred']
             test_submission = create_submission_df(test, y_test_pred, Y_COLUMNS)
             test_submission['fold_id'] = i
+            test_submission.reset_index(drop=True, inplace=True)
             test_predictions_by_fold.append(test_submission)
             logger.info('Saving fold {} test predictions'.format(i))
             save_submission(test_submission, params.experiment_dir,
@@ -302,6 +304,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
             output_valid = pipeline.transform(data_valid)
             y_valid_pred = output_valid['y_pred']
             valid_oof_submission = create_submission_df(valid_split, y_valid_pred, Y_COLUMNS)
+            valid_oof_submission.reset_index(drop=True, inplace=True)
             valid_predictions_out_of_fold.append(valid_oof_submission)
             logger.info('Saving fold {} oof predictions'.format(i))
             save_submission(valid_oof_submission, params.experiment_dir,
@@ -314,6 +317,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
             output_test = pipeline.transform(data_test)
             y_test_pred = output_test['y_pred']
             test_submission = create_submission_df(test, y_test_pred, Y_COLUMNS)
+            test_submission.reset_index(drop=True, inplace=True)
             test_predictions_by_fold.append(test_submission)
             logger.info('Saving fold {} test predictions'.format(i))
             save_submission(test_submission, params.experiment_dir,
