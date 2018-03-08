@@ -95,7 +95,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': True},
+            'neptune_monitor': {},
         },
     },
     'scnn_network': {
@@ -141,7 +141,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': True},
+            'neptune_monitor': {},
         },
     },
     'lstm_network': {
@@ -186,7 +186,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': True},
+            'neptune_monitor': {},
         },
     },
     'gru_network': {
@@ -231,7 +231,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': True},
+            'neptune_monitor': {},
         },
     },
     'char_vdcnn_network': {
@@ -275,7 +275,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': True},
+            'neptune_monitor': {},
         },
     },
     'rnn_stacker': {
@@ -316,7 +316,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': True},
+            'neptune_monitor': {},
         },
     },
     'logistic_regression_multilabel': {'label_nr': 6,
