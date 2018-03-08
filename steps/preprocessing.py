@@ -15,6 +15,8 @@ from .base import BaseTransformer
 
 lem = WordNetLemmatizer()
 tokenizer=TweetTokenizer()
+nltk.download('wordnet')
+nltk.download('stopwords')
 eng_stopwords = set(stopwords.words("english"))
 APPO = {"aren't": 'are not', "can't": 'cannot', "couldn't": 'could not', "didn't": 'did not', "doesn't": 'does not', "don't": 'do not', "hadn't": 'had not', "hasn't": 'has not', "haven't": 'have not', "he'd": 'he would', "he'll": 'he will', "he's": 'he is', "i'd": 'I had', "i'll": 'I will', "i'm": 'I am', "isn't": 'is not', "it's": 'it is', "it'll": 'it will', "i've": 'I have', "let's": 'let us', "mightn't": 'might not', "mustn't": 'must not', "shan't": 'shall not', "she'd": 'she would', "she'll": 'she will', "she's": 'she is', "shouldn't": 'should not', "that's": 'that is', "there's": 'there is', "they'd": 'they would', "they'll": 'they will', "they're": 'they are', "they've": 'they have', "we'd": 'we would', "we're": 'we are', "weren't": 'were not', "we've": 'we have', "what'll": 'what will', "what're": 'what are', "what's": 'what is', "what've": 'what have', "where's": 'where is', "who'd": 'who would', "who'll": 'who will', "who're": 'who are', "who's": 'who is', "who've": 'who have', "won't": 'will not', "wouldn't": 'would not', "you'd": 'you would', "you'll": 'you will', "you're": 'you are', "you've": 'you have', "'re": ' are', "wasn't": 'was not', "we'll": ' will'}
 
@@ -50,7 +52,7 @@ class WordListFilter(BaseTransformer):
 
 class TextCleaner(BaseTransformer):
     def __init__(self, drop_punctuation, drop_newline, drop_multispaces,
-                 all_lower_case, fill_na_with, deduplication_threshold, anonymize, apostrophes):
+                 all_lower_case, fill_na_with, deduplication_threshold, anonymize, apostrophes, use_stopwords):
         self.drop_punctuation = drop_punctuation
         self.drop_newline = drop_newline
         self.drop_multispaces = drop_multispaces
@@ -59,6 +61,7 @@ class TextCleaner(BaseTransformer):
         self.deduplication_threshold = deduplication_threshold
         self.anonymize = anonymize
         self.apostrophes = apostrophes
+        self.use_stopwords = use_stopwords
 
     def transform(self, X):
         X = pd.DataFrame(X, columns=['text']).astype(str)
@@ -82,6 +85,14 @@ class TextCleaner(BaseTransformer):
             x = self._anonymize(x)
         if self.apostrophes:
             x = self._apostrophes(x)
+        if self.use_stopwords:
+            x = self._use_stopwords(x)            
+        return x
+
+    def _use_stopwords(self,x):
+        words=tokenizer.tokenize(x)
+        words = [w for w in words if not w in eng_stopwords]
+        x = " ".join(words)
         return x
 
     def _apostrophes(self,x):
@@ -89,8 +100,8 @@ class TextCleaner(BaseTransformer):
         words=[APPO[word] if word in APPO else word for word in words]
         words=[lem.lemmatize(word, "v") for word in words]
         words = [w for w in words if not w in eng_stopwords]
-        clean_sent=" ".join(words)
-        return(clean_sent)   
+        x = " ".join(words)
+        return x
 
     def _anonymize(self,x):
         # remove leaky elements like ip,user

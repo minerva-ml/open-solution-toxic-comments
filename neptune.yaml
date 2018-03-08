@@ -53,6 +53,7 @@ parameters:
   deduplication_threshold: 10
   anonymize: 1
   apostrophes: 1
+  use_stopwords: 1
 
   # Architecture
   filter_nr: 512
