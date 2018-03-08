@@ -241,7 +241,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
 
             if i + 1 != params.n_cv_splits:
                 subprocess.call('rm -rf {}/transformers'.format(params.experiment_dir), shell=True)
-                
+
         mean_score = np.mean(fold_scores)
         logger.info('Score on validation is {}'.format(mean_score))
         ctx.channel_send('Final Validation Score ROC_AUC', 0, mean_score)
@@ -268,11 +268,11 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
             valid_split = train[train['fold_id'] == i]
             test_split = test[test['fold_id'] == i]
 
+            y_train = train_split[Y_COLUMNS].values
+            y_valid = valid_split[Y_COLUMNS].values
             columns_to_drop_train = Y_COLUMNS + ID_LABEL + ['fold_id']
             X_train = train_split.drop(columns_to_drop_train, axis=1).values
-            y_train = train_split[Y_COLUMNS].values
             X_valid = valid_split.drop(columns_to_drop_train, axis=1).values
-            y_valid = valid_split[Y_COLUMNS].values
 
             columns_to_drop_test = ID_LABEL + ['fold_id']
             X_test = test_split.drop(columns_to_drop_test, axis=1).values
