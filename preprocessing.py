@@ -7,6 +7,7 @@ from sklearn.model_selection import StratifiedKFold
 
 from utils import get_logger
 
+RANDOM_STATE = 1234
 logger = get_logger()
 
 
@@ -20,7 +21,7 @@ def split_train_data(data_dir, filename, target_columns, n_splits):
     meta_data = pd.read_csv(meta_train_filepath).reset_index(drop=True)
     logger.info('splitting data')
     targets = meta_data[target_columns].values
-    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=1234)
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=RANDOM_STATE)
     skf.get_n_splits(targets)
     for train_idx, valid_idx in skf.split(targets, targets):
         meta_train = meta_data.iloc[train_idx]

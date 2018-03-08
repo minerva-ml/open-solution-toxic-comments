@@ -1,7 +1,7 @@
-from tqdm import tqdm
-from scipy.optimize import minimize
 import numpy as np
+from scipy.optimize import minimize
 from sklearn.externals import joblib
+from tqdm import tqdm
 
 from steps.base import BaseTransformer
 
@@ -22,7 +22,6 @@ class Blender(BaseTransformer):
                 return -1.0 * self.func(y, weighted_predictions)
             else:
                 return self.func(y, weighted_predictions)
-
         return f
 
     def fit(self, X, y):
@@ -68,7 +67,7 @@ class Clipper(BaseTransformer):
         if self.lower is not None:
             predictions = np.where(predictions < self.lower, 0, predictions)
         if self.upper is not None:
-            predictions = np.where(predictions > self.lower, 1, predictions)
+            predictions = np.where(predictions > self.upper, 1, predictions)
         return {'predictions': predictions}
 
     def load(self, filepath):
