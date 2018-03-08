@@ -8,7 +8,7 @@ metric:
   channel: 'Final Validation Score ROC_AUC'
   goal: maximize
 
-#Comment out if not in Cloud Environment
+# Comment out if not in Cloud Environment
 pip-requirements-file: requirements.txt
 
 exclude:
@@ -21,13 +21,13 @@ exclude:
   - .ipynb_checkpoints
 
 parameters:
-  # Cloud Environment
+# Cloud Environment
   data_dir:                     /public/toxic_comments
   embedding_filepath:           /public/models/fasttext/crawl-300d-2M.vec
   single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
   experiment_dir:               /output/trained_pipelines/fasttext_dpcnn
 
-  # Local Environment
+# Local Environment
 #  data_dir:                     /path/to/toxic/data
 #  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
 #  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
@@ -38,8 +38,8 @@ parameters:
   num_workers: 4
   n_cv_splits: 10
 
-  # Preprocessing
-  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
+# Preprocessing
+  max_features_char: None # 100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: None
   maxlen_words: 200
@@ -51,7 +51,7 @@ parameters:
   fill_na_with: ' '
   deduplication_threshold: 10
 
-  # Architecture
+# Architecture
   filter_nr: 64
   kernel_size: 3
   repeat_block: 3
@@ -65,15 +65,15 @@ parameters:
   word_embedding_size: 300
   char_embedding_size: None
 
-  # General Architecture
+# General Architecture
   use_prelu: 1
 
- # Log Reg Params
+# Log Reg Params
   log_reg_c: None
   log_reg_penalty: None
   max_iter: None
 
-  # Training schedule
+# Training schedule
   epochs_nr: 1000
   batch_size_train: 128
   batch_size_inference: 128
@@ -82,7 +82,7 @@ parameters:
   gamma: 0.8
   patience: 5
 
-  # Regularization
+# Regularization
   batch_norm_first: 1
   use_batch_norm: 1
   dropout_embedding: 0.5
@@ -98,11 +98,11 @@ parameters:
   conv_kernel_reg_l2: 0.00001
   conv_bias_reg_l2: 0.00001
 
-  # Postprocessing
+# Postprocessing
   clipper__lower: None
   clipper__upper: None
 
-  # Ensemble Catboost
+# Ensemble Catboost
   catboost__iterations: None
   catboost__learning_rate: None
   catboost__depth: None
@@ -112,7 +112,7 @@ parameters:
   catboost__rsm: None
   catboost__verbose: None
 
-  # Ensemble XGBoost
+# Ensemble XGBoost
   xgboost__objective: None
   xgboost__eval_metric: None
   xgboost__n_estimators: None
@@ -125,7 +125,7 @@ parameters:
   xgboost__reg_lambda: None
   xgboost__reg_alpha: None
 
-  # Ensemble Blender
+# Ensemble Blender
   blender__method: None
   blender__runs: None
   blender__maxiter: None
