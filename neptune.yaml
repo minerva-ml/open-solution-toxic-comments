@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-pip-requirements-file: requirements.txt
+#pip-requirements-file: requirements.txt
 
 exclude:
   - output
