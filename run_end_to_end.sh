@@ -73,6 +73,7 @@ fasttext_lstm \
 fasttext_dpcnn \
 fasttext_scnn
 
+#Train second level models
 neptune run \
 --config best_configs/xgboost_ensemble.yaml \
 -- train_evaluate_predict_cv_pipeline -p xgboost_ensemble -m second
