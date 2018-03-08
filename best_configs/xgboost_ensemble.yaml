@@ -22,16 +22,16 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir:                     /public/toxic_comments
-#  embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
-#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
-#  experiment_dir:               /output/trained_pipelines/xgboost_ensemble
+  data_dir:                     /public/toxic_comments
+  embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+  experiment_dir:               /output/trained_pipelines/xgboost_ensemble
 
   # Local Environment
-  data_dir:                     /mnt/ml-team/minerva/toxic/data
-  embedding_filepath:           None
-  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_03072018
-  experiment_dir:              /mnt/ml-team/minerva/toxic/trained_pipelines/xgboost_ensemble
+#  data_dir:                     /path/to/toxic/data
+#  embedding_filepath:           /path/to/embedding i.e. ~/word2vec/GoogleNews-vectors-negative300.bin
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/xgboost_ensemble
 
   bad_words_filepath: None
   overwrite: 1

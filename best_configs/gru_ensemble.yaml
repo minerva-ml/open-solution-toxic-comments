@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [ensemble, rnn, predictions]
+tags: [ensemble, gru, predictions]
 
 
 metric:
@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-#pip-requirements-file: requirements.txt
+pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,29 +22,29 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir:                     /public/toxic_comments
-#  embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
-#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
-#  experiment_dir:               /output/trained_pipelines/rnn_ensemble
+  data_dir:                     /public/toxic_comments
+  embedding_filepath:           None
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+  experiment_dir:               /output/trained_pipelines/gru_stacker_ensemble
 
   # Local Environment
-  data_dir:                     /mnt/ml-team/minerva/toxic/data
-  embedding_filepath:           None
-  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
-  experiment_dir:              /mnt/ml-team/minerva/toxic/trained_pipelines/rnn_ensemble
+#  data_dir:                     /path/to/toxic/data
+#  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/gru_stacker_ensemble
 
   bad_words_filepath: None
   overwrite: 1
   num_workers: 4
-  n_cv_splits: 10
+  n_cv_splits: 5
 
   # Preprocessing
-  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_char: None
   max_features_word: None
   maxlen_char: None
   maxlen_words: None
   char_ngram_max: None
-  drop_punctuation: None # Do I want to preprocess in that way for all models?
+  drop_punctuation: None
   drop_newline: None
   drop_multispaces: None
   all_lower_case: None
@@ -52,17 +52,13 @@ parameters:
   deduplication_threshold: None
 
   # Architecture
-  filter_nr:
-    value: [32,64,128]
+  filter_nr: 128
   kernel_size: None
-  repeat_block:
-    value: [1,2]
+  repeat_block: 1
   dense_size: 256
-  repeat_dense:
-    value: [0,1]
+  repeat_dense: 0
   max_pooling: 1
-  mean_pooling:
-    value: [0,1]
+  mean_pooling: 1
   weighted_average_attention: 0
   concat_mode:  'concat'
   trainable_embedding: None
@@ -70,7 +66,7 @@ parameters:
   char_embedding_size: None
 
   # General Architecture
-  use_prelu: 0
+  use_prelu: None
 
  # Log Reg Params
   log_reg_c: None
@@ -78,14 +74,14 @@ parameters:
   max_iter: None
 
   # Ensemble Catboost
-  catboost__iterations: None
-  catboost__learning_rate: None
-  catboost__depth: None
-  catboost__l2_leaf_reg: None
-  catboost__border_count: None
-  catboost__model_size_reg: None
-  catboost__rsm: None
-  catboost__verbose: None
+  catboost__iterations: 500
+  catboost__learning_rate: 0.02
+  catboost__depth: 3
+  catboost__l2_leaf_reg: 1
+  catboost__border_count: 100
+  catboost__model_size_reg: 0.25
+  catboost__rsm: 1.25
+  catboost__verbose: 0
 
   # Ensemble Blender
   blender__method: None
@@ -111,12 +107,12 @@ parameters:
 
   # Training schedule
   epochs_nr: 1000
-  batch_size_train: 32
-  batch_size_inference: 32
-  lr: 0.01
+  batch_size_train: 64
+  batch_size_inference: 64
+  lr: 0.002
   momentum: None
-  gamma: 0.7
-  patience: 5
+  gamma: 0.8
+  patience: 10
 
   # Regularization
   batch_norm_first: 0
@@ -126,12 +122,10 @@ parameters:
   dense_dropout: 0.25
   conv_dropout: None
   dropout_mode: 'simple'
-  rnn_kernel_reg_l2: 0.00001
-  rnn_recurrent_reg_l2: 0.00001
-  rnn_bias_reg_l2: 0.00001
-  dense_kernel_reg_l2: 0.00001
-  dense_bias_reg_l2: 0.00001
+  rnn_kernel_reg_l2: 0.000001
+  rnn_recurrent_reg_l2: 0.000001
+  rnn_bias_reg_l2: 0.000001
+  dense_kernel_reg_l2: 0.000001
+  dense_bias_reg_l2: 0.000001
   conv_kernel_reg_l2: None
   conv_bias_reg_l2: None
-
-

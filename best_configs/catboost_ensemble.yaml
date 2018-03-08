@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-#pip-requirements-file: requirements.txt
+pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,15 +22,16 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir: /public/toxic_comments
-#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
-#  experiment_dir: /output/trained_pipelines/catboost_ensemble
-#  embedding_filepath: None
+  data_dir:                     /public/toxic_comments
+  embedding_filepath:           None
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+  experiment_dir:               /output/trained_pipelines/catboost_ensemble
+
   # Local Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_03072018
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/catboost_ensemble
-  embedding_filepath: None
+#  data_dir:                     /path/to/toxic/data
+#  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/catboost_ensemble
 
   bad_words_filepath: None
   overwrite: 1

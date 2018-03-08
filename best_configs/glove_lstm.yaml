@@ -9,7 +9,7 @@ metric:
   goal: maximize
 
 #Comment out if not in Cloud Environment
-#pip-requirements-file: requirements.txt
+pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -22,15 +22,16 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir: /public/toxic_comments
-#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
-#  experiment_dir: /output/trained_pipelines/glove_lstm
-#  embedding_filepath: /public/models/glove/glove.840B.300d.txt
+  data_dir:                     /public/toxic_comments
+  embedding_filepath:           /public/models/glove/glove.840B.300d.txt
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+  experiment_dir:               /output/trained_pipelines/glove_lstm
+
   # Local Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  single_model_predictions_dir: None
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/glove_lstm
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/glove/glove.840B.300d.txt
+#  data_dir:                     /path/to/toxic/data
+#  embedding_filepath:           /path/to/embedding i.e. ~/glove/glove.840B.300d.txt
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/glove_lstm
 
   bad_words_filepath: None
   overwrite: 1
