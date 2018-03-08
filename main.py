@@ -5,14 +5,16 @@ import subprocess
 import click
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import StratifiedKFold
 from deepsense import neptune
+from sklearn.model_selection import StratifiedKFold
 
 from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS, CV_LABELS, ID_LABEL
 from pipelines import PIPELINES
 from preprocessing import split_train_data, translate_data
 from utils import init_logger, get_logger, read_params, read_data, read_predictions, multi_roc_auc_score, \
-    create_submission, create_submission_df, save_submission
+    create_submission, create_predictions_df, save_submission
+
+RANDOM_STATE = 1234
 
 logger = get_logger()
 ctx = neptune.Context()
@@ -63,7 +65,7 @@ def _train_pipeline(pipeline_name):
             }
 
     pipeline = PIPELINES[pipeline_name]['train'](SOLUTION_CONFIG)
-    output = pipeline.fit_transform(data)
+    _ = pipeline.fit_transform(data)
 
 
 @action.command()
@@ -151,193 +153,7 @@ def evaluate_predict_pipeline(pipeline_name):
 
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
-@click.option('-m', '--model_level', help='first or second level', default='second', required=False)
-def train_evaluate_predict_cv_pipeline_OLD(pipeline_name, model_level):
-    if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
-        shutil.rmtree(params.experiment_dir)
-
-    if model_level == 'first':
-        train = read_data(data_dir=params.data_dir, filename='train_translated.csv')
-        test = read_data(data_dir=params.data_dir, filename='test_translated.csv')
-    elif model_level == 'second':
-        train, test = read_predictions(prediction_dir=params.single_model_predictions_dir)
-    else:
-        raise NotImplementedError("""only 'first' and 'second' """)
-
-    train.reset_index(drop=True, inplace=True)
-    test.reset_index(drop=True, inplace=True)
-
-    fold_scores, valid_predictions_out_of_fold, test_predictions_by_fold = [], [], []
-    if model_level == 'first':
-        cv_label = train[CV_LABELS].values
-        cv = StratifiedKFold(n_splits=params.n_cv_splits, shuffle=True, random_state=1234)
-        cv.get_n_splits(cv_label)
-        for i, (train_idx, valid_idx) in enumerate(cv.split(cv_label, cv_label)):
-            logger.info('Fold {} started'.format(i))
-
-            train_split = train.iloc[train_idx]
-            valid_split = train.iloc[valid_idx]
-            y_valid = valid_split[Y_COLUMNS].values
-
-            data_train = {'input': {'meta': train_split,
-                                    'meta_valid': valid_split,
-                                    'train_mode': True,
-                                    },
-                          }
-            data_valid = {'input': {'meta': valid_split,
-                                    'meta_valid': None,
-                                    'train_mode': False,
-                                    }
-                          }
-
-            data_test = {'input': {'meta': test,
-                                   'meta_valid': None,
-                                   'train_mode': False,
-                                   }
-                         }
-            logger.info('Training')
-            pipeline = PIPELINES[pipeline_name]['train'](SOLUTION_CONFIG)
-            _ = pipeline.fit_transform(data_train)
-
-            logger.info('Evaluation')
-            pipeline = PIPELINES[pipeline_name]['inference'](SOLUTION_CONFIG)
-            output_valid = pipeline.transform(data_valid)
-            y_valid_pred = output_valid['y_pred']
-            valid_oof_submission = create_submission_df(valid_split, y_valid_pred, Y_COLUMNS)
-            valid_oof_submission['fold_id'] = i
-            valid_oof_submission.reset_index(drop=True, inplace=True)
-            valid_predictions_out_of_fold.append(valid_oof_submission)
-            logger.info('Saving fold {} oof predictions'.format(i))
-            save_submission(valid_oof_submission, params.experiment_dir,
-                            '{}_predictions_valid_fold{}.csv'.format(pipeline_name, i), logger)
-            score = multi_roc_auc_score(y_valid, y_valid_pred)
-            logger.info('Score on fold {} is {}'.format(i, score))
-            fold_scores.append(score)
-
-            logger.info('Prediction')
-            output_test = pipeline.transform(data_test)
-            y_test_pred = output_test['y_pred']
-            test_submission = create_submission_df(test, y_test_pred, Y_COLUMNS)
-            test_submission['fold_id'] = i
-            test_submission.reset_index(drop=True, inplace=True)
-            test_predictions_by_fold.append(test_submission)
-            logger.info('Saving fold {} test predictions'.format(i))
-            save_submission(test_submission, params.experiment_dir,
-                            '{}_predictions_test_fold{}.csv'.format(pipeline_name, i), logger)
-
-            if i + 1 != params.n_cv_splits:
-                subprocess.call('rm -rf {}/transformers'.format(params.experiment_dir), shell=True)
-
-        mean_score = np.mean(fold_scores)
-        logger.info('Score on validation is {}'.format(mean_score))
-        ctx.channel_send('Final Validation Score ROC_AUC', 0, mean_score)
-
-        logger.info('Concatenating out of fold valid predictions')
-        combined_oof_predictions = pd.concat(valid_predictions_out_of_fold, axis=0)
-        save_submission(combined_oof_predictions, params.experiment_dir,
-                        '{}_predictions_train_oof.csv'.format(pipeline_name), logger)
-
-        logger.info('Concatenating out of fold test predictions')
-        combined_test_predictions = pd.concat(test_predictions_by_fold, axis=0)
-        save_submission(combined_test_predictions, params.experiment_dir,
-                        '{}_predictions_test_oof.csv'.format(pipeline_name), logger)
-        logger.info('Averaging out of fold test predictions')
-        test_predictions_by_fold = [prediction[Y_COLUMNS].values for prediction in test_predictions_by_fold]
-        test_predictions_by_fold = np.stack(test_predictions_by_fold, axis=-1)
-        mean_test_prediction = np.mean(test_predictions_by_fold, axis=-1)
-        create_submission(params.experiment_dir, '{}_predictions_test_am.csv'.format(pipeline_name),
-                          test, mean_test_prediction, Y_COLUMNS, logger)
-
-    elif model_level == 'second':
-        for i in range(params.n_cv_splits):
-            train_split = train[train['fold_id'] != i]
-            valid_split = train[train['fold_id'] == i]
-            test_split = test[test['fold_id'] == i]
-
-            y_train = train_split[Y_COLUMNS].values
-            y_valid = valid_split[Y_COLUMNS].values
-            columns_to_drop_train = Y_COLUMNS + ID_LABEL + ['fold_id']
-            X_train = train_split.drop(columns_to_drop_train, axis=1).values
-            X_valid = valid_split.drop(columns_to_drop_train, axis=1).values
-
-            columns_to_drop_test = ID_LABEL + ['fold_id']
-            X_test = test_split.drop(columns_to_drop_test, axis=1).values
-
-            data_train = {'input': {'X': X_train,
-                                    'y': y_train,
-                                    'X_valid': X_valid,
-                                    'y_valid': y_valid
-                                    },
-                          }
-            data_valid = {'input': {'X': X_valid,
-                                    'y': y_valid,
-                                    }
-                          }
-
-            data_test = {'input': {'X': X_test,
-                                   'y': None,
-                                   }
-                         }
-
-            logger.info('Training')
-            pipeline = PIPELINES[pipeline_name]['train'](SOLUTION_CONFIG)
-            _ = pipeline.fit_transform(data_train)
-
-            logger.info('Evaluation')
-            pipeline = PIPELINES[pipeline_name]['inference'](SOLUTION_CONFIG)
-            output_valid = pipeline.transform(data_valid)
-            y_valid_pred = output_valid['y_pred']
-            valid_oof_submission = create_submission_df(valid_split, y_valid_pred, Y_COLUMNS)
-            valid_oof_submission.reset_index(drop=True, inplace=True)
-            valid_predictions_out_of_fold.append(valid_oof_submission)
-            logger.info('Saving fold {} oof predictions'.format(i))
-            save_submission(valid_oof_submission, params.experiment_dir,
-                            '{}_predictions_valid_fold{}.csv'.format(pipeline_name, i), logger)
-            score = multi_roc_auc_score(y_valid, y_valid_pred)
-            logger.info('Score on fold {} is {}'.format(i, score))
-            fold_scores.append(score)
-
-            logger.info('Prediction')
-            output_test = pipeline.transform(data_test)
-            y_test_pred = output_test['y_pred']
-            test_submission = create_submission_df(test_split, y_test_pred, Y_COLUMNS)
-            test_submission.reset_index(drop=True, inplace=True)
-            print(y_test_pred.shape, test_submission.shape)
-            test_predictions_by_fold.append(test_submission)
-            logger.info('Saving fold {} test predictions'.format(i))
-            save_submission(test_submission, params.experiment_dir,
-                            '{}_predictions_test_fold{}.csv'.format(pipeline_name, i), logger)
-
-            if i + 1 != params.n_cv_splits:
-                subprocess.call('rm -rf {}/transformers'.format(params.experiment_dir), shell=True)
-
-        mean_score = np.mean(fold_scores)
-        logger.info('Score on validation is {}'.format(mean_score))
-        ctx.channel_send('Final Validation Score ROC_AUC', 0, mean_score)
-
-        logger.info('Concatenating out of fold valid predictions')
-        combined_oof_predictions = pd.concat(valid_predictions_out_of_fold, axis=0)
-        save_submission(combined_oof_predictions, params.experiment_dir,
-                        '{}_predictions_train_oof.csv'.format(pipeline_name), logger)
-
-        logger.info('Concatenating out of fold test predictions')
-        combined_test_predictions = pd.concat(test_predictions_by_fold, axis=0)
-        save_submission(combined_test_predictions, params.experiment_dir,
-                        '{}_predictions_test_oof.csv'.format(pipeline_name), logger)
-        logger.info('Averaging out of fold test predictions')
-        test_predictions_by_fold = [prediction[Y_COLUMNS].values for prediction in test_predictions_by_fold]
-        test_predictions_by_fold = np.stack(test_predictions_by_fold, axis=-1)
-        mean_test_prediction = np.mean(test_predictions_by_fold, axis=-1)
-        create_submission(params.experiment_dir, '{}_predictions_test_am.csv'.format(pipeline_name),
-                          test, mean_test_prediction, Y_COLUMNS, logger)
-
-    else:
-        raise NotImplementedError("""only 'first' and 'second' """)
-
-
-@action.command()
-@click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
-@click.option('-m', '--model_level', help='first or second level', default='second', required=False)
+@click.option('-m', '--model_level', help='choices are "first" or "second"', default='second', required=False)
 def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
     if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
@@ -348,7 +164,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
     elif model_level == 'second':
         train, test = read_predictions(prediction_dir=params.single_model_predictions_dir)
     else:
-        raise NotImplementedError("""only 'first' and 'second' """)
+        raise NotImplementedError("""only 'first' or 'second' """)
 
     train.reset_index(drop=True, inplace=True)
     test.reset_index(drop=True, inplace=True)
@@ -356,7 +172,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
     fold_scores, valid_predictions_out_of_fold, test_predictions_by_fold = [], [], []
     if model_level == 'first':
         cv_label = train[CV_LABELS].values
-        cv = StratifiedKFold(n_splits=params.n_cv_splits, shuffle=True, random_state=1234)
+        cv = StratifiedKFold(n_splits=params.n_cv_splits, shuffle=True, random_state=RANDOM_STATE)
         cv.get_n_splits(cv_label)
         for i, (train_idx, valid_idx) in enumerate(cv.split(cv_label, cv_label)):
             logger.info('Fold {} started'.format(i))
@@ -382,20 +198,22 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
                                    }
                          }
 
-            score, valid_oof_submission, test_submission = _fold_fit_loop(data_train, data_valid, data_test, y_valid,
-                                                                          valid_split, test,
-                                                                          i, pipeline_name)
-            _fold_save_loop(valid_oof_submission, test_submission, i, pipeline_name)
+            score, out_of_fold_predictions, test_submission = _fold_fit_loop(data_train, data_valid, data_test,
+                                                                             y_valid, valid_split,
+                                                                             test,
+                                                                             i,
+                                                                             pipeline_name)
+            _fold_save_loop(out_of_fold_predictions, test_submission, i, pipeline_name)
             _dump_transformers(i, params.n_cv_splits)
 
             fold_scores.append(score)
-            valid_predictions_out_of_fold.append(valid_oof_submission)
+            valid_predictions_out_of_fold.append(out_of_fold_predictions)
             test_predictions_by_fold.append(test_submission)
 
-        (combined_oof_predictions,
-         combined_test_predictions,
-         mean_test_prediction) = _aggregate_fold_outputs(fold_scores, valid_predictions_out_of_fold,
-                                                         test_predictions_by_fold)
+        (combined_oof_predictions, combined_test_predictions, mean_test_prediction) = _aggregate_fold_outputs(
+            fold_scores,
+            valid_predictions_out_of_fold,
+            test_predictions_by_fold)
 
         _save_aggregate_fold_outputs(combined_oof_predictions, combined_test_predictions, mean_test_prediction,
                                      pipeline_name)
@@ -431,20 +249,21 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
                                    }
                          }
 
-            score, valid_oof_submission, test_submission = _fold_fit_loop(data_train, data_valid, data_test, y_valid,
-                                                                          valid_split, test_split,
-                                                                          i, pipeline_name)
-            _fold_save_loop(valid_oof_submission, test_submission, i, pipeline_name)
+            score, out_of_fold_predictions, test_submission = _fold_fit_loop(data_train, data_valid, data_test, y_valid,
+                                                                             valid_split, test_split,
+                                                                             i,
+                                                                             pipeline_name)
+            _fold_save_loop(out_of_fold_predictions, test_submission, i, pipeline_name)
             _dump_transformers(i, params.n_cv_splits)
 
             fold_scores.append(score)
-            valid_predictions_out_of_fold.append(valid_oof_submission)
+            valid_predictions_out_of_fold.append(out_of_fold_predictions)
             test_predictions_by_fold.append(test_submission)
 
-        (combined_oof_predictions,
-         combined_test_predictions,
-         mean_test_prediction) = _aggregate_fold_outputs(fold_scores, valid_predictions_out_of_fold,
-                                                         test_predictions_by_fold)
+        (combined_oof_predictions, combined_test_predictions, mean_test_prediction) = _aggregate_fold_outputs(
+            fold_scores,
+            valid_predictions_out_of_fold,
+            test_predictions_by_fold)
 
         _save_aggregate_fold_outputs(combined_oof_predictions, combined_test_predictions, mean_test_prediction,
                                      pipeline_name)
@@ -461,6 +280,7 @@ def prepare_single_model_predictions_dir(pipeline_names):
     train_labels_source = os.path.join(params.data_dir, 'train_translated.csv')
     train_labels_destination = os.path.join(params.single_model_predictions_dir, 'labels.csv')
     logger.info('copying train from {} to {}'.format(train_labels_source, train_labels_destination))
+
     train = pd.read_csv(train_labels_source)
     train_labels = train[ID_LABEL + Y_COLUMNS]
     train_labels.to_csv(train_labels_destination, index=None)
@@ -486,28 +306,28 @@ def prepare_single_model_predictions_dir(pipeline_names):
 def _fold_fit_loop(data_train, data_valid, data_test, y_valid,
                    valid_split, test_split,
                    i, pipeline_name):
-    logger.info('Training')
+    logger.info('Training...')
     pipeline = PIPELINES[pipeline_name]['train'](SOLUTION_CONFIG)
     _ = pipeline.fit_transform(data_train)
 
-    logger.info('Evaluation')
+    logger.info('Evaluating...')
     pipeline = PIPELINES[pipeline_name]['inference'](SOLUTION_CONFIG)
     output_valid = pipeline.transform(data_valid)
     y_valid_pred = output_valid['y_pred']
-    valid_oof_submission = create_submission_df(valid_split, y_valid_pred, Y_COLUMNS)
-    valid_oof_submission['fold_id'] = i
-    valid_oof_submission.reset_index(drop=True, inplace=True)
+    out_of_fold_predictions = create_predictions_df(valid_split, y_valid_pred, Y_COLUMNS)
+    out_of_fold_predictions['fold_id'] = i
+    out_of_fold_predictions.reset_index(drop=True, inplace=True)
     score = multi_roc_auc_score(y_valid, y_valid_pred)
     logger.info('Score on fold {} is {}'.format(i, score))
 
-    logger.info('Prediction')
+    logger.info('Predicting...')
     output_test = pipeline.transform(data_test)
     y_test_pred = output_test['y_pred']
-    test_submission = create_submission_df(test_split, y_test_pred, Y_COLUMNS)
+    test_submission = create_predictions_df(test_split, y_test_pred, Y_COLUMNS)
     test_submission['fold_id'] = i
     test_submission.reset_index(drop=True, inplace=True)
 
-    return score, valid_oof_submission, test_submission
+    return score, out_of_fold_predictions, test_submission
 
 
 def _dump_transformers(i, nr_splits):
@@ -519,6 +339,7 @@ def _fold_save_loop(valid_oof_submission, test_submission, i, pipeline_name):
     logger.info('Saving fold {} oof predictions'.format(i))
     save_submission(valid_oof_submission, params.experiment_dir,
                     '{}_predictions_valid_fold{}.csv'.format(pipeline_name, i), logger)
+
     logger.info('Saving fold {} test predictions'.format(i))
     save_submission(test_submission, params.experiment_dir,
                     '{}_predictions_test_fold{}.csv'.format(pipeline_name, i), logger)
@@ -550,6 +371,7 @@ def _save_aggregate_fold_outputs(combined_oof_predictions, combined_test_predict
     logger.info('Saving out of fold test predictions')
     save_submission(combined_test_predictions, params.experiment_dir,
                     '{}_predictions_test_oof.csv'.format(pipeline_name), logger)
+
     logger.info('Saving averaged out of fold test predictions')
     save_submission(mean_test_prediction, params.experiment_dir,
                     '{}_predictions_test_am.csv'.format(pipeline_name), logger)

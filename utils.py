@@ -1,8 +1,8 @@
+import glob
 import logging
 import os
 from functools import reduce
 
-import glob
 import numpy as np
 import pandas as pd
 import yaml
@@ -76,6 +76,7 @@ def read_predictions(prediction_dir, concat_mode='concat'):
 
     return train_dfs, test_dfs
 
+
 def _clean_columns(df, keep_colnames):
     new_colnames = []
     for i,colname in enumerate(df.columns):
@@ -85,7 +86,8 @@ def _clean_columns(df, keep_colnames):
             new_colnames.append(colname)
     return new_colnames
 
-def create_submission_df(meta, predictions, columns):
+
+def create_predictions_df(meta, predictions, columns):
     submission = meta[['id']]
     predictions_ = pd.DataFrame(predictions, columns=columns)
     submission.reset_index(drop=True, inplace=True)
@@ -103,7 +105,7 @@ def save_submission(submission, experiments_dir, filename, logger):
 
 
 def create_submission(experiments_dir, filename, meta, predictions, columns, logger):
-    submission_df = create_submission_df(meta, predictions, columns)
+    submission_df = create_predictions_df(meta, predictions, columns)
     save_submission(submission_df, experiments_dir, filename, logger)
 
 
