@@ -357,7 +357,7 @@ def _aggregate_fold_outputs(fold_scores, valid_predictions_out_of_fold, test_pre
     combined_test_predictions = pd.concat(test_predictions_by_fold, axis=0)
 
     logger.info('Averaging out of fold test predictions')
-    mean_test_prediction = combined_test_predictions.groupby('id').mean().reset_index(drop=True).drop('fold_id', axis=1)
+    mean_test_prediction = combined_test_predictions.groupby('id').mean().reset_index().drop('fold_id', axis=1)
 
     return combined_oof_predictions, combined_test_predictions, mean_test_prediction
 
