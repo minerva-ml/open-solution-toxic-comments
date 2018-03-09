@@ -3,13 +3,15 @@ import os
 from attrdict import AttrDict
 from deepsense import neptune
 
-from utils import read_params
+from utils import read_params, multi_roc_auc_score
 
 ctx = neptune.Context()
 params = read_params(ctx)
 
-X_COLUMNS = ['comment_text']
+X_COLUMNS = ['comment_text_english']
 Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
+CV_LABELS = ['toxic']
+ID_LABEL = ['id']
 
 SOLUTION_CONFIG = AttrDict({
     'env': {'cache_dirpath': params.experiment_dir},
@@ -93,7 +95,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {},
         },
     },
     'scnn_network': {
@@ -139,7 +141,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {},
         },
     },
     'lstm_network': {
@@ -184,7 +186,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {},
         },
     },
     'gru_network': {
@@ -229,7 +231,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {},
         },
     },
     'char_vdcnn_network': {
@@ -273,10 +275,10 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': False},
+            'neptune_monitor': {},
         },
     },
-    'gru_stacker': {
+    'rnn_stacker': {
         'architecture_config': {'model_params': {'unit_nr': params.filter_nr,
                                                  'repeat_block': params.repeat_block,
                                                  'max_pooling': bool(params.max_pooling),
@@ -314,7 +316,7 @@ SOLUTION_CONFIG = AttrDict({
             'save_weights_only': False},
             'lr_scheduler': {'gamma': params.gamma},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {'multi_run': True},
+            'neptune_monitor': {},
         },
     },
     'logistic_regression_multilabel': {'label_nr': 6,
@@ -332,4 +334,24 @@ SOLUTION_CONFIG = AttrDict({
                           'border_count': params.catboost__border_count,
                           'verbose': bool(params.catboost__verbose),
                           },
+    'blender_ensemble': {'func': multi_roc_auc_score,
+                         'min': False,
+                         'method': params.blender__method,
+                         'runs': params.blender__runs,
+                         'maxiter': params.blender__maxiter},
+    'xgboost_ensemble': {'label_nr': 6,
+                         'objective': params.xgboost__objective,
+                         'eval_metric': params.xgboost__eval_metric,
+                         'n_estimators': params.xgboost__n_estimators,
+                         'learning_rate': params.xgboost__learning_rate,
+                         'max_depth': params.xgboost__max_depth,
+                         'min_child_weight': params.xgboost__min_child_weight,
+                         'gamma': params.xgboost__gamma,
+                         'colsample_bytree': params.xgboost__colsample_bytree,
+                         'subsample': params.xgboost__subsample,
+                         'reg_lambda': params.xgboost__reg_lambda,
+                         'reg_alpha': params.xgboost__reg_alpha,
+                         'n_jobs': params.num_workers},
+    'clipper': {'lower': eval(params.clipper__lower),
+                'upper': eval(params.clipper__upper)}
 })

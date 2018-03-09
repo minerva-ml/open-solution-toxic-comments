@@ -1,60 +1,56 @@
 #!/usr/bin/env bash
 
-
 #Train single models
 neptune run \
---config best_configs/count_logreg.yaml \
--- train_evaluate_predict_pipeline -p count_logreg
-neptune run \
 --config best_configs/bad_word_logreg.yaml \
--- train_evaluate_predict_pipeline -p bad_word_logreg
+-- train_evaluate_predict_cv_pipeline -p bad_word_logreg -m first
+neptune run \
+--config best_configs/count_logreg.yaml \
+-- train_evaluate_predict_cv_pipeline -p count_logreg -m first
 neptune run \
 --config best_configs/tfidf_logreg.yaml \
--- train_evaluate_predict_pipeline -p tfidf_logreg
+-- train_evaluate_predict_cv_pipeline -p tfidf_logreg -m first
 
 neptune run \
 --config best_configs/char_vdcnn.yaml \
--- train_evaluate_predict_pipeline -p char_vdcnn
-
+-- train_evaluate_predict_cv_pipeline -p char_vdcnn -m first
 neptune run \
 --config best_configs/fasttext_gru.yaml \
--- train_evaluate_predict_pipeline -p fasttext_gru
+-- train_evaluate_predict_cv_pipeline -p fasttext_gru -m first
 neptune run \
 --config best_configs/fasttext_lstm.yaml \
--- train_evaluate_predict_pipeline -p fasttext_lstm
-neptune run \
---config best_configs/fasttext_dpcnn.yaml \
--- train_evaluate_predict_pipeline -p fasttext_dpcnn
-neptune run \
---config best_configs/fasttext_scnn.yaml \
--- train_evaluate_predict_pipeline -p fasttext_scnn
-
+-- train_evaluate_predict_cv_pipeline -p fasttext_lstm -m first
 neptune run \
 --config best_configs/glove_gru.yaml \
--- train_evaluate_predict_pipeline -p glove_gru
+-- train_evaluate_predict_cv_pipeline -p glove_gru -m first
 neptune run \
 --config best_configs/glove_lstm.yaml \
--- train_evaluate_predict_pipeline -p glove_lstm
+-- train_evaluate_predict_cv_pipeline -p glove_lstm -m first
 neptune run \
---config best_configs/glove_dpcnn.yaml \
--- train_evaluate_predict_pipeline -p glove_dpcnn
+--config best_configs/fasttext_scnn.yaml \
+-- train_evaluate_predict_cv_pipeline -p fasttext_scnn -m first
 neptune run \
 --config best_configs/glove_scnn.yaml \
--- train_evaluate_predict_pipeline -p glove_scnn
+-- train_evaluate_predict_cv_pipeline -p glove_scnn -m first
+neptune run \
+--config best_configs/fasttext_dpcnn.yaml \
+-- train_evaluate_predict_cv_pipeline -p fasttext_dpcnn -m first
 
+neptune run \
+--config best_configs/glove_dpcnn.yaml \
+-- train_evaluate_predict_cv_pipeline -p glove_dpcnn -m first
 neptune run \
 --config best_configs/word2vec_gru.yaml \
--- train_evaluate_predict_pipeline -p word2vec_gru
+-- train_evaluate_predict_cv_pipeline -p word2vec_gru -m first
 neptune run \
 --config best_configs/word2vec_lstm.yaml \
--- train_evaluate_predict_pipeline -p word2vec_lstm
+-- train_evaluate_predict_cv_pipeline -p word2vec_lstm -m first
 neptune run \
 --config best_configs/word2vec_dpcnn.yaml \
--- train_evaluate_predict_pipeline -p word2vec_dpcnn
+-- train_evaluate_predict_cv_pipeline -p word2vec_dpcnn -m first
 neptune run \
 --config best_configs/word2vec_scnn.yaml \
--- train_evaluate_predict_pipeline -p word2vec_scnn
-
+-- train_evaluate_predict_cv_pipeline -p word2vec_scnn -m first
 
 #Copy single model predictions for stacking
 neptune run \
@@ -77,10 +73,7 @@ fasttext_lstm \
 fasttext_dpcnn \
 fasttext_scnn
 
-# Model stacking
+#Train second level models
 neptune run \
---config best_configs/catboost_ensemble.yaml \
--- train_evaluate_cv_pipeline --model_level second --pipeline_name catboost_ensemble
-neptune run \
---config best_configs/catboost_ensemble.yaml \
--- predict_pipeline --model_level second --pipeline_name catboost_ensemble
+--config best_configs/xgboost_ensemble.yaml \
+-- train_evaluate_predict_cv_pipeline -p xgboost_ensemble -m second

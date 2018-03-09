@@ -2,7 +2,7 @@ from keras import regularizers
 from keras.activations import relu
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.layers import Input, Embedding, PReLU, Bidirectional, Lambda, \
-    CuDNNLSTM, CuDNNGRU, Conv1D, Dense, BatchNormalization, Dropout, SpatialDropout1D, \
+    CuDNNLSTM, CuDNNGRU, SimpleRNN, Conv1D, Dense, BatchNormalization, Dropout, SpatialDropout1D, \
     GlobalMaxPool1D, GlobalAveragePooling1D, MaxPooling1D
 from keras.layers.merge import add, concatenate
 from keras.models import Model
@@ -145,7 +145,7 @@ class WordCuDNNGRU(PretrainedEmbeddingModel):
                          use_prelu, use_batch_norm, batch_norm_first)
 
 
-class StackerGru(BasicClassifier):
+class StackerRNN(BasicClassifier):
     def _build_model(self, unit_nr, repeat_block,
                      dense_size, repeat_dense,
                      max_pooling, mean_pooling, weighted_average_attention, concat_mode,
@@ -525,6 +525,29 @@ def _cudnn_gru_block(unit_nr, return_sequences, bidirectional,
                              recurrent_regularizer=regularizers.l2(recurrent_reg_l2),
                              bias_regularizer=regularizers.l2(bias_reg_l2)
                              )
+        if bidirectional:
+            x = Bidirectional(gru_layer)(x)
+        else:
+            x = gru_layer(x)
+        x = _bn_relu_dropout_block(use_batch_norm=use_batch_norm, batch_norm_first=batch_norm_first,
+                                   dropout=dropout, dropout_mode=dropout_mode,
+                                   use_prelu=use_prelu)(x)
+        return x
+
+    return f
+
+
+def _cudnn_rnn_block(unit_nr, return_sequences, bidirectional,
+                     kernel_reg_l2, recurrent_reg_l2, bias_reg_l2,
+                     use_batch_norm, batch_norm_first,
+                     dropout, dropout_mode, use_prelu):
+    def f(x):
+        gru_layer = SimpleRNN(units=unit_nr,
+                              return_sequences=return_sequences,
+                              kernel_regularizer=regularizers.l2(kernel_reg_l2),
+                              recurrent_regularizer=regularizers.l2(recurrent_reg_l2),
+                              bias_regularizer=regularizers.l2(bias_reg_l2)
+                              )
         if bidirectional:
             x = Bidirectional(gru_layer)(x)
         else:
