@@ -19,7 +19,9 @@ tokenizer=TweetTokenizer()
 nltk.download('wordnet')
 nltk.download('stopwords')
 eng_stopwords = set(stopwords.words("english"))
-APPO = json.load(open('../external_data/apostrophes.json'))
+
+with open('../external_data/apostrophes.json', 'r') as f:
+    APPO = json.load(f)
 
 
 class WordListFilter(BaseTransformer):
