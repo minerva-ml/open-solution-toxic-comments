@@ -1,13 +1,27 @@
 import re
 import string
 
+import json
 import numpy as np
 import pandas as pd
+
 from sklearn.externals import joblib
 from sklearn.feature_extraction import text
 import sklearn.preprocessing as sk_prep
-
+from nltk.tokenize import word_tokenize
+from nltk.tokenize import TweetTokenizer
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.corpus import stopwords
 from .base import BaseTransformer
+
+lem = WordNetLemmatizer()
+tokenizer=TweetTokenizer()
+nltk.download('wordnet')
+nltk.download('stopwords')
+eng_stopwords = set(stopwords.words("english"))
+
+with open('../external_data/apostrophes.json', 'r') as f:
+    APPO = json.load(f)
 
 
 class WordListFilter(BaseTransformer):
@@ -42,13 +56,16 @@ class WordListFilter(BaseTransformer):
 
 class TextCleaner(BaseTransformer):
     def __init__(self, drop_punctuation, drop_newline, drop_multispaces,
-                 all_lower_case, fill_na_with, deduplication_threshold):
+                 all_lower_case, fill_na_with, deduplication_threshold, anonymize, apostrophes, use_stopwords):
         self.drop_punctuation = drop_punctuation
         self.drop_newline = drop_newline
         self.drop_multispaces = drop_multispaces
         self.all_lower_case = all_lower_case
         self.fill_na_with = fill_na_with
         self.deduplication_threshold = deduplication_threshold
+        self.anonymize = anonymize
+        self.apostrophes = apostrophes
+        self.use_stopwords = use_stopwords
 
     def transform(self, X):
         X = pd.DataFrame(X, columns=['text']).astype(str)
@@ -68,6 +85,33 @@ class TextCleaner(BaseTransformer):
             x = self._substitute_multiple_spaces(x)
         if self.deduplication_threshold is not None:
             x = self._deduplicate(x)
+        if self.anonymize:
+            x = self._anonymize(x)
+        if self.apostrophes:
+            x = self._apostrophes(x)
+        if self.use_stopwords:
+            x = self._use_stopwords(x)            
+        return x
+
+    def _use_stopwords(self,x):
+        words=tokenizer.tokenize(x)
+        words = [w for w in words if not w in eng_stopwords]
+        x = " ".join(words)
+        return x
+
+    def _apostrophes(self,x):
+        words=tokenizer.tokenize(x)
+        words=[APPO[word] if word in APPO else word for word in words]
+        words=[lem.lemmatize(word, "v") for word in words]
+        words = [w for w in words if not w in eng_stopwords]
+        x = " ".join(words)
+        return x
+
+    def _anonymize(self,x):
+        # remove leaky elements like ip,user
+        x=re.sub("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"," ",x)
+        #removing usernames
+        x=re.sub("\[\[.*\]"," ",x)        
         return x
 
     def _lower(self, x):
