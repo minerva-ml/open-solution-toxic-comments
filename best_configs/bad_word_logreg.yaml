@@ -50,6 +50,9 @@ parameters:
   all_lower_case: 0
   fill_na_with: ' '
   deduplication_threshold: 10
+  anonymize: 0
+  apostrophes: 0
+  use_stopwords: 0
 
 # Architecture
   filter_nr: None
