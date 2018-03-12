@@ -128,14 +128,14 @@ class TextCleaner(BaseTransformer):
     def _substitute_multiple_spaces(self, x):
         return ' '.join(x.split())
 
-    def _deduplicate(self,x):
+    def _deduplicate(self, x):
         word_list = x.split()
         num_words = len(word_list)
-        if num_words ==0:
+        if num_words == 0:
             return x
         else:
             num_unique_words = len(set(word_list))
-            unique_ratio = num_words/num_unique_words
+            unique_ratio = num_words / num_unique_words
             if unique_ratio > self.deduplication_threshold:
                 x = ' '.join(x.split()[:num_unique_words])
             return x
@@ -254,6 +254,50 @@ class Normalizer(BaseTransformer):
 
     def save(self, filepath):
         joblib.dump(self.normalizer, filepath)
+
+
+class MinMaxScaler(BaseTransformer):
+    def __init__(self):
+        self.minmax_scaler = sk_prep.MinMaxScaler()
+
+    def fit(self, X):
+        self.minmax_scaler.fit(X)
+        return self
+
+    def transform(self, X):
+        X = self.minmax_scaler.transform(X)
+        return {'X': X}
+
+    def load(self, filepath):
+        self.minmax_scaler = joblib.load(filepath)
+        return self
+
+    def save(self, filepath):
+        joblib.dump(self.minmax_scaler, filepath)
+
+
+class MinMaxScalerMultilabel(BaseTransformer):
+    def __init__(self):
+        self.minmax_scalers = []
+
+    def fit(self, X):
+        for i in range(X.shape[1]):
+            minmax_scaler = sk_prep.MinMaxScaler()
+            minmax_scaler.fit(X[:, i, :])
+            self.minmax_scalers.append(minmax_scaler)
+        return self
+
+    def transform(self, X):
+        for i, minmax_scaler in enumerate(self.minmax_scalers):
+            X[:, i, :] = minmax_scaler.transform(X[:, i, :])
+        return {'X': X}
+
+    def load(self, filepath):
+        self.minmax_scalers = joblib.load(filepath)
+        return self
+
+    def save(self, filepath):
+        joblib.dump(self.minmax_scalers, filepath)
 
 
 def char_count(x):

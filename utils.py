@@ -1,7 +1,8 @@
+import glob
 import logging
 import os
+from functools import reduce
 
-import glob
 import numpy as np
 import pandas as pd
 import yaml
@@ -50,40 +51,62 @@ def read_data(data_dir, filename):
     return meta_data
 
 
-def read_predictions(prediction_dir, mode='valid', valid_columns=None, stacking_mode='flat'):
-    valid_labels = pd.read_csv(os.path.join(prediction_dir, 'valid_split.csv'))
-    sample_submission = pd.read_csv(os.path.join(prediction_dir, 'sample_submission.csv'))
-    predictions = []
-    for filepath in sorted(glob.glob('{}/{}/*'.format(prediction_dir, mode))):
-        prediction_single = pd.read_csv(filepath)
-        prediction_single.drop('id', axis=1, inplace=True)
-        predictions.append(prediction_single)
+def read_predictions(prediction_dir, concat_mode='concat'):
+    labels = pd.read_csv(os.path.join(prediction_dir, 'labels.csv'))
 
-    if stacking_mode == 'flat':
-        X = np.hstack(predictions)
-    elif stacking_mode == 'rnn':
-        X = np.stack(predictions, axis=2)
-    else:
-        raise NotImplementedError("""only stacking_mode options 'flat' and 'rnn' are supported""")
+    filepaths_train, filepaths_test = [], []
+    for filepath in sorted(glob.glob('{}/*'.format(prediction_dir))):
+        if filepath.endswith('predictions_train_oof.csv'):
+            filepaths_train.append(filepath)
+        elif filepath.endswith('predictions_test_oof.csv'):
+            filepaths_test.append(filepath)
 
-    if mode == 'valid':
-        y = valid_labels[valid_columns].values
-        return X, y
-    elif mode == 'test':
-        return X, sample_submission
-    else:
-        raise NotImplementedError
+    train_dfs = []
+    for filepath in filepaths_train:
+        train_dfs.append(pd.read_csv(filepath))
+    train_dfs = reduce(lambda df1, df2: pd.merge(df1, df2, on=['id', 'fold_id']), train_dfs)
+    train_dfs.columns = _clean_columns(train_dfs, keep_colnames = ['id','fold_id'])
+    train_dfs = pd.merge(train_dfs, labels, on=['id'])
+
+    test_dfs = []
+    for filepath in filepaths_test:
+        test_dfs.append(pd.read_csv(filepath))
+    test_dfs = reduce(lambda df1, df2: pd.merge(df1, df2, on=['id', 'fold_id']), test_dfs)
+    test_dfs.columns = _clean_columns(test_dfs, keep_colnames = ['id','fold_id'])
+
+    return train_dfs, test_dfs
 
 
-def create_submission(experiments_dir, filename, meta, predictions, columns, logger):
+def _clean_columns(df, keep_colnames):
+    new_colnames = []
+    for i,colname in enumerate(df.columns):
+        if colname not in keep_colnames:
+            new_colnames.append(i)
+        else:
+            new_colnames.append(colname)
+    return new_colnames
+
+
+def create_predictions_df(meta, predictions, columns):
     submission = meta[['id']]
     predictions_ = pd.DataFrame(predictions, columns=columns)
+    submission.reset_index(drop=True, inplace=True)
+    predictions_.reset_index(drop=True, inplace=True)
     submission = pd.concat([submission, predictions_], axis=1)
+    return submission
+
+
+def save_submission(submission, experiments_dir, filename, logger):
     logger.info('submission head \n\n {}'.format(submission.head()))
 
     submission_filepath = os.path.join(experiments_dir, filename)
     submission.to_csv(submission_filepath, index=None)
     logger.info('submission saved to {}'.format(submission_filepath))
+
+
+def create_submission(experiments_dir, filename, meta, predictions, columns, logger):
+    submission_df = create_predictions_df(meta, predictions, columns)
+    save_submission(submission_df, experiments_dir, filename, logger)
 
 
 def multi_log_loss(y_true, y_pred):
