@@ -8,19 +8,19 @@ import pandas as pd
 from sklearn.externals import joblib
 from sklearn.feature_extraction import text
 import sklearn.preprocessing as sk_prep
-from nltk.tokenize import word_tokenize
+import nltk
 from nltk.tokenize import TweetTokenizer
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
 from .base import BaseTransformer
 
 lem = WordNetLemmatizer()
-tokenizer=TweetTokenizer()
+tokenizer = TweetTokenizer()
 nltk.download('wordnet')
 nltk.download('stopwords')
 eng_stopwords = set(stopwords.words("english"))
 
-with open('../external_data/apostrophes.json', 'r') as f:
+with open('external_data/apostrophes.json', 'r') as f:
     APPO = json.load(f)
 
 
@@ -90,28 +90,28 @@ class TextCleaner(BaseTransformer):
         if self.apostrophes:
             x = self._apostrophes(x)
         if self.use_stopwords:
-            x = self._use_stopwords(x)            
+            x = self._use_stopwords(x)
         return x
 
-    def _use_stopwords(self,x):
-        words=tokenizer.tokenize(x)
+    def _use_stopwords(self, x):
+        words = tokenizer.tokenize(x)
         words = [w for w in words if not w in eng_stopwords]
         x = " ".join(words)
         return x
 
-    def _apostrophes(self,x):
-        words=tokenizer.tokenize(x)
-        words=[APPO[word] if word in APPO else word for word in words]
-        words=[lem.lemmatize(word, "v") for word in words]
+    def _apostrophes(self, x):
+        words = tokenizer.tokenize(x)
+        words = [APPO[word] if word in APPO else word for word in words]
+        words = [lem.lemmatize(word, "v") for word in words]
         words = [w for w in words if not w in eng_stopwords]
         x = " ".join(words)
         return x
 
-    def _anonymize(self,x):
+    def _anonymize(self, x):
         # remove leaky elements like ip,user
-        x=re.sub("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"," ",x)
-        #removing usernames
-        x=re.sub("\[\[.*\]"," ",x)        
+        x = re.sub("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", " ", x)
+        # removing usernames
+        x = re.sub("\[\[.*\]", " ", x)
         return x
 
     def _lower(self, x):
