@@ -16,7 +16,7 @@ You need to be registered to neptune.ml to be able to use our predictions for yo
 * save your submission file 
 * click on browse files and find your submission file to download it.
 
-Running the notebook as is got **0.9849** on the LB.
+Running the notebook as is got **0.986+** on the LB.
 
 ## The idea
 We are contributing starter code that is easy to use and extend. We did it before with [Cdiscount’s Image Classification Challenge](https://github.com/deepsense-ai/cdiscount-starter) and we believe that it is correct way to open data science to the wider community and encourage more people to participate in Challenges. This starter is ready-to-use end-to-end solution. Since all computations are organized in separate steps, it is also easy to extend. Check [devbook.ipynb](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/devbook.ipynb) for more information about different pipelines.
@@ -40,10 +40,11 @@ $ pip3 install neptune-cli
 $ neptune login
 ```
 
-start experiment
+start experiment 
 ```bash
-$ neptune send --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium -- train_evaluate_predict_pipeline --pipeline_name glove_lstm
+$ neptune send --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium -- train_evaluate_predict_cv_pipeline --pipeline_name glove_gru
 ```
+This should get you to **0.9862**
 **Happy Training :)**
 
 Refer to [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) and [Getting started: Neptune Cloud](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Getting-started:-Neptune-Cloud) for more.
