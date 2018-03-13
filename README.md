@@ -42,7 +42,7 @@ $ neptune login
 
 start experiment 
 ```bash
-$ neptune send --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium -- train_evaluate_predict_cv_pipeline --pipeline_name glove_gru
+$ neptune send --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config best_configs/glove_gru.yaml -- train_evaluate_predict_cv_pipeline --pipeline_name glove_gru
 ```
 This should get you to **0.9862**
 **Happy Training :)**

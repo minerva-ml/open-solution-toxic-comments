@@ -26,13 +26,13 @@ parameters:
 # Cloud Environment
   data_dir:                     /public/toxic_comments
   embedding_filepath:           /public/models/fasttext/crawl-300d-2M.vec
-  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03092018
   experiment_dir:               /output/trained_pipelines/fasttext_gru
 
 # Local Environment
 #  data_dir:                     /path/to/toxic/data
 #  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
-#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03092018
 #  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/fasttext_gru
 
   bad_words_filepath: None
