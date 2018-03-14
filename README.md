@@ -8,9 +8,10 @@ You need to be registered to neptune.ml to be able to use our predictions for yo
 * click `start notebook` 
 * choose `browse` button
 * select the `neptune_ensembling.ipynb` file from this repository. 
-* choose worker type: `gcp-large` takes over an hour `gcp-gpu-medium` less 20min
+* choose worker type: `gcp-large` is the reccomended one. 
 * run first few cells to load our predictions on the held out validation set along with the labels
-* train your second level, ensemble model
+* grid search over many possible parameter options. the more runs you choose the longer it will run.
+* train your second level, ensemble model (it should take less than an hour once you have the parameters)
 * load our predictions on the test set
 * feed our test set predictions to your ensemble model and get final predictions
 * save your submission file 
