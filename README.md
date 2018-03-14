@@ -43,9 +43,9 @@ $ neptune login
 
 start experiment 
 ```bash
-$ neptune send --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config best_configs/glove_gru.yaml -- train_evaluate_predict_cv_pipeline --pipeline_name glove_gru --model_level first
+$ neptune send --environment keras-2.0-gpu-py3 --worker gcp-gpu-medium --config best_configs/fasttext_gru.yaml -- train_evaluate_predict_cv_pipeline --pipeline_name fasttext_gru --model_level first
 ```
-This should get you to **0.9862**
+This should get you to **0.9852**
 **Happy Training :)**
 
 Refer to [Neptune documentation](https://docs.neptune.ml/cli/neptune_send/) and [Getting started: Neptune Cloud](https://github.com/neptune-ml/kaggle-toxic-starter/wiki/Getting-started:-Neptune-Cloud) for more.
