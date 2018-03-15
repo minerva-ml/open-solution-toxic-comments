@@ -228,12 +228,12 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, add_features)
                                      pipeline_name)
 
     elif model_level == 'second':
-        for i in range(params.n_cv_splits):
+        if add_features:
+            logger.info('joining predictions with features')
+            train = pd.merge(train, train_features, on='id')
+            test = pd.merge(test, test_features, on='id')
 
-            if add_features:
-                logger.info('joining predictions with features')
-                train = pd.merge(train, train_features, on='id')
-                test = pd.merge(test, test_features, on='id')
+        for i in range(params.n_cv_splits):
 
             train_split = train[train['fold_id'] != i]
             valid_split = train[train['fold_id'] == i]
