@@ -117,7 +117,8 @@ parameters:
 
 # Ensemble XGBoost
   xgboost__objective: None
-  xgboostsingle_model_predictions_20180226__eval_metric: None
+  xgboost__eval_metric: None
+  xgboost__scale_pos_weight: None
   xgboost__n_estimators: None
   xgboost__learning_rate: None
   xgboost__max_depth: None

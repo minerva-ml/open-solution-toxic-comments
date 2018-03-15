@@ -71,43 +71,6 @@ parameters:
 # General Architecture
   use_prelu: None
 
-# Log Reg Params
-  log_reg_c: None
-  log_reg_penalty: None
-  max_iter: None
-
-# Ensemble Catboost
-  catboost__iterations: 500
-  catboost__learning_rate: 0.02
-  catboost__depth: 3
-  catboost__l2_leaf_reg: 1
-  catboost__border_count: 100
-  catboost__model_size_reg: 0.25
-  catboost__rsm: 1.25
-  catboost__verbose: 0
-
-# Ensemble Blender
-  blender__method: None
-  blender__runs: None
-  blender__maxiter: None
-
-# Ensemble XGBoost
-  xgboost__objective: None
-  xgboost__eval_metric: None
-  xgboost__n_estimators: None
-  xgboost__learning_rate: None
-  xgboost__max_depth: None
-  xgboost__min_child_weight: None
-  xgboost__gamma: None
-  xgboost__subsample: None
-  xgboost__colsample_bytree: None
-  xgboost__reg_lambda: None
-  xgboost__reg_alpha: None
-
-# Postprocessing
-  clipper__lower: None
-  clipper__upper: None
-
 # Training schedule
   epochs_nr: 1000
   batch_size_train: 64
@@ -132,3 +95,42 @@ parameters:
   dense_bias_reg_l2: 0.000001
   conv_kernel_reg_l2: None
   conv_bias_reg_l2: None
+
+# Log Reg Params
+  log_reg_c: None
+  log_reg_penalty: None
+  max_iter: None
+
+# Ensemble Catboost
+  catboost__iterations: 500
+  catboost__learning_rate: 0.02
+  catboost__depth: 3
+  catboost__l2_leaf_reg: 1
+  catboost__border_count: 100
+  catboost__model_size_reg: 0.25
+  catboost__rsm: 1.25
+  catboost__verbose: 0
+
+# Ensemble Blender
+  blender__method: None
+  blender__runs: None
+  blender__maxiter: None
+
+# Ensemble XGBoost
+  xgboost__objective: None
+  xgboost__eval_metric: None
+  xgboost__scale_pos_weight: None
+  xgboost__n_estimators: None
+  xgboost__learning_rate: None
+  xgboost__max_depth: None
+  xgboost__min_child_weight: None
+  xgboost__gamma: None
+  xgboost__subsample: None
+  xgboost__colsample_bytree: None
+  xgboost__reg_lambda: None
+  xgboost__reg_alpha: None
+
+# Postprocessing
+  clipper__lower: None
+  clipper__upper: None
+
