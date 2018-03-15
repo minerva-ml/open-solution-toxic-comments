@@ -22,7 +22,7 @@ class NeptuneMonitor(Callback):
     def on_epoch_end(self, epoch, logs={}):
         self.epoch_id += 1
         self.ctx.channel_send(self.epoch_loss_channel_name, self.epoch_id, logs['loss'])
-        self.ctx.channel_send(self.epoch_val_loss_channel_name, self.epoch_id, logs['loss'])
+        self.ctx.channel_send(self.epoch_val_loss_channel_name, self.epoch_id, logs['val_loss'])
 
 
 class ReduceLR(Callback):
