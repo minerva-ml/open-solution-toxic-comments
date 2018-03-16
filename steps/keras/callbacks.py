@@ -38,6 +38,9 @@ class UnfreezeLayers(Callback):
     def __init__(self, unfreeze_on_epoch):
         self.unfreeze_on_epoch = unfreeze_on_epoch
 
+        self.epoch_id = 0
+        self.batch_id = 0
+
     def on_epoch_end(self, epoch, logs={}):
         if self.epoch_id == self.unfreeze_on_epoch:
             for layer in self.model.layers:
