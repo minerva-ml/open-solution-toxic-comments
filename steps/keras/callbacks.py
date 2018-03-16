@@ -44,7 +44,7 @@ class UnfreezeLayers(Callback):
     def on_epoch_end(self, epoch, logs={}):
         if self.epoch_id == self.unfreeze_on_epoch:
             for layer in self.model.layers:
-                K.set_value(layer.trainable, True)
+                layer.trainable = True
         self.epoch_id += 1
 
 
