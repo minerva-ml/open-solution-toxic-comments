@@ -754,7 +754,7 @@ def get_text_features(train_meta, test_meta):
                           deduplication_threshold=10,
                           anonymize=True,
                           apostrophes=True,
-                          use_stopwords=True
+                          use_stopwords=False
                           )
     extractor = TextCounter()
 
