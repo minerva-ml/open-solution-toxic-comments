@@ -542,7 +542,8 @@ def _cudnn_rnn_block(unit_nr, return_sequences, bidirectional,
                      use_batch_norm, batch_norm_first,
                      dropout, dropout_mode, use_prelu):
     def f(x):
-        gru_layer = SimpleRNN(units=unit_nr, return_sequences=return_sequences,
+        gru_layer = SimpleRNN(units=unit_nr,
+                              return_sequences=return_sequences,
                               kernel_regularizer=regularizers.l2(kernel_reg_l2),
                               recurrent_regularizer=regularizers.l2(recurrent_reg_l2),
                               bias_regularizer=regularizers.l2(bias_reg_l2)

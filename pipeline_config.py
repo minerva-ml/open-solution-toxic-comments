@@ -23,7 +23,10 @@ SOLUTION_CONFIG = AttrDict({
                      'drop_multispaces': bool(params.drop_multispaces),
                      'all_lower_case': bool(params.all_lower_case),
                      'fill_na_with': params.fill_na_with,
-                     'deduplication_threshold': params.deduplication_threshold
+                     'deduplication_threshold': params.deduplication_threshold,
+                     'anonymize': bool(params.anonymize),
+                     'apostrophes': bool(params.apostrophes),
+                     'use_stopwords': bool(params.use_stopwords)
                      },
     'bad_word_filter': {'word_list_filepath': params.bad_words_filepath},
     'char_tokenizer': {'char_level': True,
@@ -278,7 +281,7 @@ SOLUTION_CONFIG = AttrDict({
             'neptune_monitor': {},
         },
     },
-    'gru_stacker': {
+    'rnn_stacker': {
         'architecture_config': {'model_params': {'unit_nr': params.filter_nr,
                                                  'repeat_block': params.repeat_block,
                                                  'max_pooling': bool(params.max_pooling),

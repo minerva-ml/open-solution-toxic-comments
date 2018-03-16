@@ -8,7 +8,7 @@ metric:
   channel: 'Final Validation Score ROC_AUC'
   goal: maximize
 
-#Comment out if not in Cloud Environment
+# Comment out if not in Cloud Environment
 pip-requirements-file: requirements.txt
 
 exclude:
@@ -21,16 +21,16 @@ exclude:
   - .ipynb_checkpoints
 
 parameters:
-  # Cloud Environment
+# Cloud Environment
   data_dir:                     /public/toxic_comments
   embedding_filepath:           None
-  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03092018
   experiment_dir:               /output/trained_pipelines/gru_stacker_ensemble
 
-  # Local Environment
+# Local Environment
 #  data_dir:                     /path/to/toxic/data
 #  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
-#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_20180226
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03092018
 #  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/gru_stacker_ensemble
 
   bad_words_filepath: None
@@ -38,7 +38,7 @@ parameters:
   num_workers: 4
   n_cv_splits: 5
 
-  # Preprocessing
+# Preprocessing
   max_features_char: None
   max_features_word: None
   maxlen_char: None
@@ -50,8 +50,11 @@ parameters:
   all_lower_case: None
   fill_na_with: None
   deduplication_threshold: None
+  anonymize: 0
+  apostrophes: 0
+  use_stopwords: 0
 
-  # Architecture
+# Architecture
   filter_nr: 128
   kernel_size: None
   repeat_block: 1
@@ -65,15 +68,15 @@ parameters:
   word_embedding_size: None
   char_embedding_size: None
 
-  # General Architecture
+# General Architecture
   use_prelu: None
 
- # Log Reg Params
+# Log Reg Params
   log_reg_c: None
   log_reg_penalty: None
   max_iter: None
 
-  # Ensemble Catboost
+# Ensemble Catboost
   catboost__iterations: 500
   catboost__learning_rate: 0.02
   catboost__depth: 3
@@ -83,12 +86,12 @@ parameters:
   catboost__rsm: 1.25
   catboost__verbose: 0
 
-  # Ensemble Blender
+# Ensemble Blender
   blender__method: None
   blender__runs: None
   blender__maxiter: None
 
-  # Ensemble XGBoost
+# Ensemble XGBoost
   xgboost__objective: None
   xgboost__eval_metric: None
   xgboost__n_estimators: None
@@ -101,11 +104,11 @@ parameters:
   xgboost__reg_lambda: None
   xgboost__reg_alpha: None
 
-  # Postprocessing
+# Postprocessing
   clipper__lower: None
   clipper__upper: None
 
-  # Training schedule
+# Training schedule
   epochs_nr: 1000
   batch_size_train: 64
   batch_size_inference: 64
@@ -114,7 +117,7 @@ parameters:
   gamma: 0.8
   patience: 10
 
-  # Regularization
+# Regularization
   batch_norm_first: 0
   use_batch_norm: 0
   dropout_embedding: 0.1

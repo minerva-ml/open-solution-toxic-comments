@@ -35,7 +35,7 @@ class ReduceLR(Callback):
 
 
 def get_correct_channel_name(ctx, name):
-    channels_with_name = [channel for channel in ctx.job._channels if name in channel.name]
+    channels_with_name = [channel for channel in ctx._experiment._channels if name in channel.name]
     if len(channels_with_name) == 0:
         return name
     else:
