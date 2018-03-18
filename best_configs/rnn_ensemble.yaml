@@ -1,7 +1,7 @@
 project-key: TOX
 
 name: toxic
-tags: [ensemble, logreg, predictions]
+tags: [ensemble, rnn, predictions]
 
 
 metric:
@@ -22,15 +22,16 @@ exclude:
 
 parameters:
   # Cloud Environment
-#  data_dir: /public/toxic_comments
-#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
-#  experiment_dir: /output/trained_pipelines/logreg_ensemble
-#  embedding_filepath: None
+#  data_dir:                     /public/toxic_comments
+#  embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
+#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_20180226
+#  experiment_dir:               /output/trained_pipelines/rnn_ensemble
+
   # Local Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_03072018
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/logreg_ensemble
-  embedding_filepath: None
+  data_dir:                     /mnt/ml-team/minerva/toxic/data
+  embedding_filepath:           None
+  single_model_predictions_dir: /mnt/ml-team/minerva/toxic/single_model_predictions_newest
+  experiment_dir:              /mnt/ml-team/minerva/toxic/trained_pipelines/rnn_ensemble
 
   bad_words_filepath: None
   overwrite: 1
@@ -54,52 +55,30 @@ parameters:
   use_stopwords: 0
 
   # Architecture
-  filter_nr: None
+  filter_nr:
+    value: [32,64,128]
   kernel_size: None
-  repeat_block: None
-  dense_size: None
-  repeat_dense: None
-  max_pooling: None
-  mean_pooling: None
-  weighted_average_attention: None
-  concat_mode:  None
+  repeat_block:
+    value: [1,2]
+  dense_size: 256
+  repeat_dense:
+    value: [0,1]
+  max_pooling: 1
+  mean_pooling:
+    value: [0,1]
+  weighted_average_attention: 0
+  concat_mode:  'concat'
   trainable_embedding: None
   word_embedding_size: None
   char_embedding_size: None
 
   # General Architecture
-  use_prelu: None
+  use_prelu: 0
 
  # Log Reg Params
-  log_reg_c: 4.0
-  log_reg_penalty: 'l2'
-  max_iter: 1000
-
-  # Training schedule
-  epochs_nr: None
-  batch_size_train: None
-  batch_size_inference: None
-  lr: None
-  momentum: None
-  gamma: None
-  patience: None
-  unfreeze_on_epoch: None
-
-  # Regularization
-  batch_norm_first: None
-  use_batch_norm: None
-  dropout_embedding: None
-  rnn_dropout: None
-  dense_dropout: None
-  conv_dropout: None
-  dropout_mode: None
-  rnn_kernel_reg_l2: None
-  rnn_recurrent_reg_l2: None
-  rnn_bias_reg_l2: None
-  dense_kernel_reg_l2: None
-  dense_bias_reg_l2: None
-  conv_kernel_reg_l2: None
-  conv_bias_reg_l2: None
+  log_reg_c: None
+  log_reg_penalty: None
+  max_iter: None
 
   # Ensemble Catboost
   catboost__iterations: None
@@ -132,3 +111,31 @@ parameters:
   # Postprocessing
   clipper__lower: None
   clipper__upper: None
+
+  # Training schedule
+  epochs_nr: 1000
+  batch_size_train: 32
+  batch_size_inference: 32
+  lr: 0.01
+  momentum: None
+  gamma: 0.7
+  patience: 5
+  unfreeze_on_epoch: None
+
+  # Regularization
+  batch_norm_first: 0
+  use_batch_norm: 0
+  dropout_embedding: 0.1
+  rnn_dropout: 0.25
+  dense_dropout: 0.25
+  conv_dropout: None
+  dropout_mode: 'simple'
+  rnn_kernel_reg_l2: 0.00001
+  rnn_recurrent_reg_l2: 0.00001
+  rnn_bias_reg_l2: 0.00001
+  dense_kernel_reg_l2: 0.00001
+  dense_bias_reg_l2: 0.00001
+  conv_kernel_reg_l2: None
+  conv_bias_reg_l2: None
+
+
