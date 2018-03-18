@@ -35,16 +35,19 @@ class ReduceLR(Callback):
 
 
 class UnfreezeLayers(Callback):
-    def __init__(self, unfreeze_on_epoch):
+    def __init__(self, unfreeze_on_epoch, from_layer=0, to_layer=1):
         self.unfreeze_on_epoch = unfreeze_on_epoch
+        self.from_layer = from_layer
+        self.to_layer = to_layer
 
         self.epoch_id = 0
         self.batch_id = 0
 
     def on_epoch_end(self, epoch, logs={}):
         if self.epoch_id == self.unfreeze_on_epoch:
-            for layer in self.model.layers:
-                layer.trainable = True
+            for i, layer in enumerate(self.model.layers):
+                if i >= self.from_layer and i <= self.to_layer:
+                    layer.trainable = True
         self.epoch_id += 1
 
 

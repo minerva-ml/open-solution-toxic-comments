@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from deepsense import neptune
 from sklearn.model_selection import StratifiedKFold
+from keras import backend as K
 
 from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS, CV_LABELS, ID_LABEL
 from pipelines import PIPELINES, get_text_features
@@ -213,7 +214,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, add_features)
                                                                              i,
                                                                              pipeline_name)
             _fold_save_loop(out_of_fold_predictions, test_submission, i, pipeline_name)
-            _dump_transformers(i, params.n_cv_splits)
+            _clean_env(i, params.n_cv_splits)
 
             fold_scores.append(score)
             valid_predictions_out_of_fold.append(out_of_fold_predictions)
@@ -234,7 +235,6 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, add_features)
             test = pd.merge(test, test_features, on='id')
 
         for i in range(params.n_cv_splits):
-
             train_split = train[train['fold_id'] != i]
             valid_split = train[train['fold_id'] == i]
             test_split = test[test['fold_id'] == i]
@@ -269,7 +269,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, add_features)
                                                                              i,
                                                                              pipeline_name)
             _fold_save_loop(out_of_fold_predictions, test_submission, i, pipeline_name)
-            _dump_transformers(i, params.n_cv_splits)
+            _clean_env(i, params.n_cv_splits)
 
             fold_scores.append(score)
             valid_predictions_out_of_fold.append(out_of_fold_predictions)
@@ -345,7 +345,8 @@ def _fold_fit_loop(data_train, data_valid, data_test, y_valid,
     return score, out_of_fold_predictions, test_submission
 
 
-def _dump_transformers(i, nr_splits):
+def _clean_env(i, nr_splits):
+    K.clear_session()
     if i + 1 != nr_splits:
         subprocess.call('rm -rf {}/transformers'.format(params.experiment_dir), shell=True)
 
