@@ -61,7 +61,7 @@ parameters:
   dense_size: 256
   repeat_dense: 0
   max_pooling: 1
-  mean_pooling: 0
+  mean_pooling: 1
   weighted_average_attention: 0
   concat_mode: 'concat'
   trainable_embedding: 0
