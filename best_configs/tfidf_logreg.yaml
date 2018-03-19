@@ -8,8 +8,8 @@ metric:
   channel: 'Final Validation Score ROC_AUC'
   goal: maximize
 
-#Comment out if not in Cloud Environment
-#pip-requirements-file: requirements.txt
+# Comment out if not in Cloud Environment
+pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -21,28 +21,30 @@ exclude:
   - .ipynb_checkpoints
 
 parameters:
-  # Cloud Environment
-#  data_dir: /public/toxic_comments
-#  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
-#  experiment_dir: /output/trained_pipelines/tfidf_logreg
-#  embedding_filepath: None
-  # Local Environment
-  data_dir: /mnt/ml-team/minerva/toxic/data
-  single_model_predictions_dir: None
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/tfidf_logreg
-  embedding_filepath: None
+# Cloud Environment
+  data_dir:                     /public/toxic_comments
+  embedding_filepath:           None
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03092018
+  experiment_dir:               /output/trained_pipelines/tfidf_logreg
+
+# Local Environment
+#  data_dir:                     /path/to/toxic/data
+#  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03092018
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/tfidf_logreg
 
   bad_words_filepath: None
   overwrite: 1
   num_workers: 4
   n_cv_splits: 10
 
-  # Preprocessing
-  max_features_char: 100000 #100 for vdcnn, for tfidf something like 20000 should be used
+# Preprocessing
+  max_features_char: 100000 # 100 for vdcnn, for tfidf something like 20000 should be used
   max_features_word: 100000
   maxlen_char: 512
   maxlen_words: 100
   char_ngram_max: 4
+  truncated_svd__n_components: None
   drop_punctuation: 1
   drop_newline: 1
   drop_multispaces: 1
@@ -53,7 +55,7 @@ parameters:
   apostrophes: 0
   use_stopwords: 0
 
-  # Architecture
+# Architecture
   filter_nr: None
   kernel_size: None
   repeat_block: None
@@ -67,15 +69,15 @@ parameters:
   word_embedding_size: None
   char_embedding_size: None
 
-  # General Architecture
+# General Architecture
   use_prelu: None
 
- # Log Reg Params
+# Log Reg Params
   log_reg_c: 1.0
   log_reg_penalty: 'l2'
   max_iter: 1000
 
-  # Training schedule
+# Training schedule
   epochs_nr: None
   batch_size_train: None
   batch_size_inference: None
@@ -85,7 +87,7 @@ parameters:
   patience: None
   unfreeze_on_epoch: None
 
-  # Regularization
+# Regularization
   batch_norm_first: None
   use_batch_norm: None
   dropout_embedding: None
@@ -101,11 +103,11 @@ parameters:
   conv_kernel_reg_l2: None
   conv_bias_reg_l2: None
 
-  # Postprocessing
+# Postprocessing
   clipper__lower: None
   clipper__upper: None
 
-  # Ensemble Catboost
+# Ensemble Catboost
   catboost__iterations: None
   catboost__learning_rate: None
   catboost__depth: None
@@ -115,9 +117,10 @@ parameters:
   catboost__rsm: None
   catboost__verbose: None
 
-  # Ensemble XGBoost
+# Ensemble XGBoost
   xgboost__objective: None
   xgboost__eval_metric: None
+  xgboost__scale_pos_weight: None
   xgboost__n_estimators: None
   xgboost__learning_rate: None
   xgboost__max_depth: None
@@ -128,7 +131,7 @@ parameters:
   xgboost__reg_lambda: None
   xgboost__reg_alpha: None
 
-  # Ensemble Blender
+# Ensemble Blender
   blender__method: None
   blender__runs: None
   blender__maxiter: None

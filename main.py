@@ -209,6 +209,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
             fold_scores.append(score)
             valid_predictions_out_of_fold.append(out_of_fold_predictions)
             test_predictions_by_fold.append(test_submission)
+            break
 
         (combined_oof_predictions, combined_test_predictions, mean_test_prediction) = _aggregate_fold_outputs(
             fold_scores,
