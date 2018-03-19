@@ -127,10 +127,8 @@ parameters:
   xgboost__max_depth: 5
   xgboost__min_child_weight: 7
   xgboost__gamma: 0.01
-  xgboost__subsample:
-      value: [1.0,0.8,0.6]
-  xgboost__colsample_bytree:
-      value: [1.0,0.8,0.6,0.4]
+  xgboost__subsample: 1.0
+  xgboost__colsample_bytree: 1.0
   xgboost__reg_lambda:  0.0
   xgboost__reg_alpha: 0.0
 
