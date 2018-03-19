@@ -117,16 +117,17 @@ parameters:
   blender__maxiter: None
 
 # Ensemble XGBoost
-  xgboost__objective: 'rank:pairwise'
+  xgboost__objective: 'binary:logistic'
   xgboost__eval_metric: 'auc'
-  xgboost__n_estimators: 100
+  xgboost__scale_pos_weight: 10
+  xgboost__n_estimators: 125
   xgboost__learning_rate: 0.1
   xgboost__max_depth: 3
-  xgboost__min_child_weight: 5
-  xgboost__gamma: 0.05
+  xgboost__min_child_weight: 10
+  xgboost__gamma: 0.0
   xgboost__subsample: 0.8
-  xgboost__colsample_bytree: 0.3
-  xgboost__reg_lambda:  0.01
+  xgboost__colsample_bytree: 0.45
+  xgboost__reg_lambda:  0.2
   xgboost__reg_alpha: 0.0
 
 # Postprocessing

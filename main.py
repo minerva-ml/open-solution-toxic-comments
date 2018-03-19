@@ -9,7 +9,7 @@ from deepsense import neptune
 from sklearn.model_selection import StratifiedKFold
 
 from pipeline_config import SOLUTION_CONFIG, Y_COLUMNS, CV_LABELS, ID_LABEL
-from pipelines import PIPELINES
+from pipelines import PIPELINES, get_text_features
 from preprocessing import split_train_data, translate_data
 from utils import init_logger, get_logger, read_params, read_data, read_predictions, multi_roc_auc_score, \
     create_submission, create_predictions_df, save_submission
@@ -153,16 +153,24 @@ def evaluate_predict_pipeline(pipeline_name):
 
 @action.command()
 @click.option('-p', '--pipeline_name', help='pipeline to be trained', required=True)
-@click.option('-m', '--model_level', help='choices are "first" or "second"', default='second', required=False)
-def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
+@click.option('-m', '--model_level', help='choices are "first" or "second"', required=True)
+@click.option('-f', '--add_features', help='add hand crafted features to ensemble', default=False, required=False)
+def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, add_features):
     if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
 
     if model_level == 'first':
+        logger.info('loading data (first model level)')
         train = read_data(data_dir=params.data_dir, filename='train_translated.csv')
         test = read_data(data_dir=params.data_dir, filename='test_translated.csv')
     elif model_level == 'second':
+        logger.info('loading data (second model level)')
         train, test = read_predictions(prediction_dir=params.single_model_predictions_dir)
+        if add_features:
+            logger.info('building features')
+            train_meta = read_data(data_dir=params.data_dir, filename='train_translated.csv')
+            test_meta = read_data(data_dir=params.data_dir, filename='test_translated.csv')
+            train_features, test_features = get_text_features(train_meta, test_meta)
     else:
         raise NotImplementedError("""only 'first' or 'second' """)
 
@@ -219,6 +227,11 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level):
                                      pipeline_name)
 
     elif model_level == 'second':
+        if add_features:
+            logger.info('joining predictions with features')
+            train = pd.merge(train, train_features, on='id')
+            test = pd.merge(test, test_features, on='id')
+
         for i in range(params.n_cv_splits):
             train_split = train[train['fold_id'] != i]
             valid_split = train[train['fold_id'] == i]

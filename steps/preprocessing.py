@@ -55,8 +55,16 @@ class WordListFilter(BaseTransformer):
 
 
 class TextCleaner(BaseTransformer):
-    def __init__(self, drop_punctuation, drop_newline, drop_multispaces,
-                 all_lower_case, fill_na_with, deduplication_threshold, anonymize, apostrophes, use_stopwords):
+    def __init__(self,
+                 drop_punctuation,
+                 drop_newline,
+                 drop_multispaces,
+                 all_lower_case,
+                 fill_na_with,
+                 deduplication_threshold,
+                 anonymize,
+                 apostrophes,
+                 use_stopwords):
         self.drop_punctuation = drop_punctuation
         self.drop_newline = drop_newline
         self.drop_multispaces = drop_multispaces
@@ -206,11 +214,11 @@ class TextCounter(BaseTransformer):
     def transform(self, X):
         X = pd.DataFrame(X, columns=['text']).astype(str)
         X = X['text'].apply(self._transform)
-        X['caps_vs_length'] = X.apply(lambda row: float(row['upper_case_count']) / float(row['char_count']), axis=1)
+        X['caps_vs_length'] = self._caps_vs_length(X)
         X['num_symbols'] = X['text'].apply(lambda comment: sum(comment.count(w) for w in '*&$%'))
         X['num_words'] = X['text'].apply(lambda comment: len(comment.split()))
         X['num_unique_words'] = X['text'].apply(lambda comment: len(set(w for w in comment.split())))
-        X['words_vs_unique'] = X['num_unique_words'] / X['num_words']
+        X['words_vs_unique'] = self._words_vs_unique(X)
         X['mean_word_len'] = X['text'].apply(lambda x: np.mean([len(w) for w in str(x).split()]))
         X.drop('text', axis=1, inplace=True)
         X.fillna(0.0, inplace=True)
@@ -228,6 +236,18 @@ class TextCounter(BaseTransformer):
         features['space_count'] = space_count(x)
         features['newline_count'] = newline_count(x)
         return pd.Series(features)
+
+    def _caps_vs_length(self, X):
+        try:
+            return X.apply(lambda row: float(row['upper_case_count']) / float(row['char_count']), axis=1)
+        except ZeroDivisionError:
+            return 0
+
+    def _words_vs_unique(self, X):
+        try:
+            return X['num_unique_words'] / X['num_words']
+        except ZeroDivisionError:
+            return 0
 
     def load(self, filepath):
         return self

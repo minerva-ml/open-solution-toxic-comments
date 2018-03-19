@@ -65,21 +65,21 @@ def read_predictions(prediction_dir, concat_mode='concat'):
     for filepath in filepaths_train:
         train_dfs.append(pd.read_csv(filepath))
     train_dfs = reduce(lambda df1, df2: pd.merge(df1, df2, on=['id', 'fold_id']), train_dfs)
-    train_dfs.columns = _clean_columns(train_dfs, keep_colnames = ['id','fold_id'])
+    train_dfs.columns = _clean_columns(train_dfs, keep_colnames=['id', 'fold_id'])
     train_dfs = pd.merge(train_dfs, labels, on=['id'])
 
     test_dfs = []
     for filepath in filepaths_test:
         test_dfs.append(pd.read_csv(filepath))
     test_dfs = reduce(lambda df1, df2: pd.merge(df1, df2, on=['id', 'fold_id']), test_dfs)
-    test_dfs.columns = _clean_columns(test_dfs, keep_colnames = ['id','fold_id'])
+    test_dfs.columns = _clean_columns(test_dfs, keep_colnames=['id', 'fold_id'])
 
     return train_dfs, test_dfs
 
 
 def _clean_columns(df, keep_colnames):
     new_colnames = []
-    for i,colname in enumerate(df.columns):
+    for i, colname in enumerate(df.columns):
         if colname not in keep_colnames:
             new_colnames.append(i)
         else:

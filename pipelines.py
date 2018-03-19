@@ -1,5 +1,7 @@
 from functools import partial
 
+import pandas as pd
+
 from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM, StackerRNN
 from postprocessing import Blender
 from steps.base import Step, Dummy, sparse_hstack_inputs, to_tuple_inputs
@@ -741,6 +743,33 @@ def rnn_ensemble(config, is_train):
         rnn_stacker_ensemble.overwrite_transformer = True
 
     return output
+
+
+def get_text_features(train_meta, test_meta):
+    cleaner = TextCleaner(drop_punctuation=False,
+                          drop_newline=False,
+                          drop_multispaces=False,
+                          all_lower_case=False,
+                          fill_na_with='',
+                          deduplication_threshold=10,
+                          anonymize=True,
+                          apostrophes=True,
+                          use_stopwords=True
+                          )
+    extractor = TextCounter()
+
+    train_features = cleaner.fit_transform(train_meta['comment_text_english'].values)['X']
+    train_features = extractor.fit_transform(train_features)['X'].values
+
+    test_features = cleaner.transform(test_meta['comment_text_english'].values)['X']
+    test_features = extractor.transform(test_features)['X'].values
+
+    train_features = pd.DataFrame(train_features)
+    train_features['id'] = train_meta['id'].values
+
+    test_features = pd.DataFrame(test_features)
+    test_features['id'] = test_meta['id'].values
+    return train_features, test_features
 
 
 def _preprocessing(config, is_train=True):

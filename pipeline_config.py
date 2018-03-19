@@ -345,6 +345,7 @@ SOLUTION_CONFIG = AttrDict({
     'xgboost_ensemble': {'label_nr': 6,
                          'objective': params.xgboost__objective,
                          'eval_metric': params.xgboost__eval_metric,
+                         'scale_pos_weight': params.xgboost__scale_pos_weight,
                          'n_estimators': params.xgboost__n_estimators,
                          'learning_rate': params.xgboost__learning_rate,
                          'max_depth': params.xgboost__max_depth,
