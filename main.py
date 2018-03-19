@@ -161,12 +161,11 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, add_features)
         shutil.rmtree(params.experiment_dir)
 
     if model_level == 'first':
-        logger.info('loading data')
+        logger.info('loading data (first model level)')
         train = read_data(data_dir=params.data_dir, filename='train_translated.csv')
         test = read_data(data_dir=params.data_dir, filename='test_translated.csv')
     elif model_level == 'second':
-        logger.info('loading data')
-
+        logger.info('loading data (second model level)')
         train, test = read_predictions(prediction_dir=params.single_model_predictions_dir)
         if add_features:
             logger.info('building features')
