@@ -44,6 +44,7 @@ parameters:
   maxlen_char: None
   maxlen_words: None
   char_ngram_max: None
+  truncated_svd__n_components: None
   drop_punctuation: None # Do I want to preprocess in that way for all models?
   drop_newline: None
   drop_multispaces: None
@@ -84,6 +85,7 @@ parameters:
   momentum: None
   gamma: None
   patience: None
+  unfreeze_on_epoch: None
 
 # Regularization
   batch_norm_first: None
@@ -119,6 +121,7 @@ parameters:
 # Ensemble XGBoost
   xgboost__objective: None
   xgboost__eval_metric: None
+  xgboost__scale_pos_weight: None
   xgboost__n_estimators: None
   xgboost__learning_rate: None
   xgboost__max_depth: None
