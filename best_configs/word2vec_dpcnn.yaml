@@ -44,6 +44,7 @@ parameters:
   maxlen_char: None
   maxlen_words: 200
   char_ngram_max: 4
+  truncated_svd__n_components: None
   drop_punctuation: 1
   drop_newline: 1
   drop_multispaces: 1
@@ -84,6 +85,7 @@ parameters:
   momentum: 0.9
   gamma: 0.8
   patience: 5
+  unfreeze_on_epoch: 10
 
 # Regularization
   batch_norm_first: 1
@@ -117,7 +119,8 @@ parameters:
 
 # Ensemble XGBoost
   xgboost__objective: None
-  xgboostsingle_model_predictions_20180226__eval_metric: None
+  xgboost__eval_metric: None
+  xgboost__scale_pos_weight: None
   xgboost__n_estimators: None
   xgboost__learning_rate: None
   xgboost__max_depth: None

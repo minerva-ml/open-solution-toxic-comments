@@ -44,6 +44,7 @@ parameters:
   maxlen_char: None
   maxlen_words: None
   char_ngram_max: None
+  truncated_svd__n_components: None
   drop_punctuation: None
   drop_newline: None
   drop_multispaces: None
@@ -71,6 +72,32 @@ parameters:
 # General Architecture
   use_prelu: None
 
+# Training schedule
+  epochs_nr: 1000
+  batch_size_train: 64
+  batch_size_inference: 64
+  lr: 0.002
+  momentum: None
+  gamma: 0.8
+  patience: 10
+  unfreeze_on_epoch: 10
+
+# Regularization
+  batch_norm_first: 0
+  use_batch_norm: 0
+  dropout_embedding: 0.1
+  rnn_dropout: 0.25
+  dense_dropout: 0.25
+  conv_dropout: None
+  dropout_mode: 'simple'
+  rnn_kernel_reg_l2: 0.000001
+  rnn_recurrent_reg_l2: 0.000001
+  rnn_bias_reg_l2: 0.000001
+  dense_kernel_reg_l2: 0.000001
+  dense_bias_reg_l2: 0.000001
+  conv_kernel_reg_l2: None
+  conv_bias_reg_l2: None
+
 # Log Reg Params
   log_reg_c: None
   log_reg_penalty: None
@@ -94,6 +121,7 @@ parameters:
 # Ensemble XGBoost
   xgboost__objective: None
   xgboost__eval_metric: None
+  xgboost__scale_pos_weight: None
   xgboost__n_estimators: None
   xgboost__learning_rate: None
   xgboost__max_depth: None
@@ -108,27 +136,3 @@ parameters:
   clipper__lower: None
   clipper__upper: None
 
-# Training schedule
-  epochs_nr: 1000
-  batch_size_train: 64
-  batch_size_inference: 64
-  lr: 0.002
-  momentum: None
-  gamma: 0.8
-  patience: 10
-
-# Regularization
-  batch_norm_first: 0
-  use_batch_norm: 0
-  dropout_embedding: 0.1
-  rnn_dropout: 0.25
-  dense_dropout: 0.25
-  conv_dropout: None
-  dropout_mode: 'simple'
-  rnn_kernel_reg_l2: 0.000001
-  rnn_recurrent_reg_l2: 0.000001
-  rnn_bias_reg_l2: 0.000001
-  dense_kernel_reg_l2: 0.000001
-  dense_bias_reg_l2: 0.000001
-  conv_kernel_reg_l2: None
-  conv_bias_reg_l2: None
