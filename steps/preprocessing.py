@@ -55,8 +55,16 @@ class WordListFilter(BaseTransformer):
 
 
 class TextCleaner(BaseTransformer):
-    def __init__(self, drop_punctuation, drop_newline, drop_multispaces,
-                 all_lower_case, fill_na_with, deduplication_threshold, anonymize, apostrophes, use_stopwords):
+    def __init__(self,
+                 drop_punctuation,
+                 drop_newline,
+                 drop_multispaces,
+                 all_lower_case,
+                 fill_na_with,
+                 deduplication_threshold,
+                 anonymize,
+                 apostrophes,
+                 use_stopwords):
         self.drop_punctuation = drop_punctuation
         self.drop_newline = drop_newline
         self.drop_multispaces = drop_multispaces
