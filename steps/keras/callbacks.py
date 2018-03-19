@@ -22,7 +22,7 @@ class NeptuneMonitor(Callback):
     def on_epoch_end(self, epoch, logs={}):
         self.epoch_id += 1
         self.ctx.channel_send(self.epoch_loss_channel_name, self.epoch_id, logs['loss'])
-        self.ctx.channel_send(self.epoch_val_loss_channel_name, self.epoch_id, logs['loss'])
+        self.ctx.channel_send(self.epoch_val_loss_channel_name, self.epoch_id, logs['val_loss'])
 
 
 class ReduceLR(Callback):
@@ -32,6 +32,23 @@ class ReduceLR(Callback):
     def on_epoch_end(self, epoch, logs={}):
         if self.gamma is not None:
             K.set_value(self.model.optimizer.lr, self.gamma * K.get_value(self.model.optimizer.lr))
+
+
+class UnfreezeLayers(Callback):
+    def __init__(self, unfreeze_on_epoch, from_layer=0, to_layer=1):
+        self.unfreeze_on_epoch = unfreeze_on_epoch
+        self.from_layer = from_layer
+        self.to_layer = to_layer
+
+        self.epoch_id = 0
+        self.batch_id = 0
+
+    def on_epoch_end(self, epoch, logs={}):
+        if self.epoch_id == self.unfreeze_on_epoch:
+            for i, layer in enumerate(self.model.layers):
+                if i >= self.from_layer and i <= self.to_layer:
+                    layer.trainable = True
+        self.epoch_id += 1
 
 
 def get_correct_channel_name(ctx, name):

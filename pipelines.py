@@ -754,8 +754,7 @@ def get_text_features(train_meta, test_meta):
                           deduplication_threshold=10,
                           anonymize=True,
                           apostrophes=True,
-                          use_stopwords=True
-                          )
+                          use_stopwords=True)
     extractor = TextCounter()
 
     train_features = cleaner.fit_transform(train_meta['comment_text_english'].values)['X']

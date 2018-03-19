@@ -5,10 +5,10 @@ from keras.layers import Input, Embedding, PReLU, Bidirectional, Lambda, \
     CuDNNLSTM, CuDNNGRU, SimpleRNN, Conv1D, Dense, BatchNormalization, Dropout, SpatialDropout1D, \
     GlobalMaxPool1D, GlobalAveragePooling1D, MaxPooling1D
 from keras.layers.merge import add, concatenate
-from keras.models import Model
+from keras.models import Model, load_model
 from keras.optimizers import Adam
 
-from steps.keras.callbacks import NeptuneMonitor, ReduceLR
+from steps.keras.callbacks import NeptuneMonitor, ReduceLR, UnfreezeLayers
 from steps.keras.contrib import AttentionWeightedAverage
 from steps.keras.models import ClassifierXY
 from steps.utils import create_filepath
@@ -23,12 +23,13 @@ class BasicClassifier(ClassifierXY):
 
     def _create_callbacks(self, **kwargs):
         lr_scheduler = ReduceLR(**kwargs['lr_scheduler'])
+        unfreeze_layers = UnfreezeLayers(**kwargs['unfreeze_layers'])
         early_stopping = EarlyStopping(**kwargs['early_stopping'])
         checkpoint_filepath = kwargs['model_checkpoint']['filepath']
         create_filepath(checkpoint_filepath)
         model_checkpoint = ModelCheckpoint(**kwargs['model_checkpoint'])
         neptune = NeptuneMonitor(**kwargs['neptune_monitor'])
-        return [neptune, lr_scheduler, early_stopping, model_checkpoint]
+        return [neptune, lr_scheduler, unfreeze_layers, early_stopping, model_checkpoint]
 
 
 class CharVDCNN(BasicClassifier):
@@ -278,12 +279,12 @@ def cudnn_lstm(embedding_matrix, embedding_size, trainable_embedding,
     x = _dropout(dropout_embedding, dropout_mode)(x)
 
     for _ in range(repeat_block):
-        x = _cudnn_gru_block(unit_nr=unit_nr, return_sequences=True, bidirectional=True,
-                             kernel_reg_l2=rnn_kernel_reg_l2,
-                             recurrent_reg_l2=rnn_recurrent_reg_l2,
-                             bias_reg_l2=rnn_bias_reg_l2,
-                             use_batch_norm=use_batch_norm, batch_norm_first=batch_norm_first,
-                             dropout=rnn_dropout, dropout_mode=dropout_mode, use_prelu=use_prelu)(x)
+        x = _cudnn_lstm_block(unit_nr=unit_nr, return_sequences=True, bidirectional=True,
+                              kernel_reg_l2=rnn_kernel_reg_l2,
+                              recurrent_reg_l2=rnn_recurrent_reg_l2,
+                              bias_reg_l2=rnn_bias_reg_l2,
+                              use_batch_norm=use_batch_norm, batch_norm_first=batch_norm_first,
+                              dropout=rnn_dropout, dropout_mode=dropout_mode, use_prelu=use_prelu)(x)
 
     predictions = _classification_block(dense_size=dense_size, repeat_dense=repeat_dense,
                                         max_pooling=max_pooling,
@@ -498,7 +499,7 @@ def _cudnn_lstm_block(unit_nr, return_sequences, bidirectional,
                       use_batch_norm, batch_norm_first,
                       dropout, dropout_mode, use_prelu):
     def f(x):
-        gru_layer = CuDNNLSTM(uunits=unit_nr, return_sequences=return_sequences,
+        gru_layer = CuDNNLSTM(units=unit_nr, return_sequences=return_sequences,
                               kernel_regularizer=regularizers.l2(kernel_reg_l2),
                               recurrent_regularizer=regularizers.l2(recurrent_reg_l2),
                               bias_regularizer=regularizers.l2(bias_reg_l2)

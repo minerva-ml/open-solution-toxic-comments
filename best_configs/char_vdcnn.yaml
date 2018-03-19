@@ -84,6 +84,7 @@ parameters:
   momentum: 0.9
   gamma: 0.8
   patience: 10
+  unfreeze_on_epoch: 0
 
 # Regularization
   batch_norm_first: 1
