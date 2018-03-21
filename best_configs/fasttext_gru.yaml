@@ -66,6 +66,8 @@ parameters:
   mean_pooling: 1
   weighted_average_attention: 0
   concat_mode: 'concat'
+  output_size: 6
+  output_activation: 'sigmoid'
   trainable_embedding: 0
   word_embedding_size: 300
   char_embedding_size: None
