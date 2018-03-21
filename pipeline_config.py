@@ -9,6 +9,8 @@ ctx = neptune.Context()
 params = read_params(ctx)
 
 X_COLUMNS = ['comment_text_english']
+assert params.filename_suffix == '_translated' and X_COLUMNS[0] == 'comment_text_english', """
+if original, filename_suffix: '' data is used then X_COLUMNS should be set to 'comment_text' in the pipeline_config.py"""
 Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 CV_LABELS = ['toxic']
 ID_LABEL = ['id']

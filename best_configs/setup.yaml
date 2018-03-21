@@ -30,6 +30,7 @@ parameters:
 
 # Local Environment
 #  data_dir:                     /path/to/toxic/data
+#  filename_suffix: '_translated'
 #  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
 #  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03192018
 #  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines
