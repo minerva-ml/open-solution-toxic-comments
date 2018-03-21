@@ -23,14 +23,15 @@ exclude:
 parameters:
 # Cloud Environment
   data_dir:                     /public/toxic_comments
+  filename_suffix: '_translated'
   embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
-  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03092018
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03192018
   experiment_dir:               /output/trained_pipelines/xgboost_ensemble
 
 # Local Environment
 #  data_dir:                     /path/to/toxic/data
 #  embedding_filepath:           /path/to/embedding i.e. ~/word2vec/GoogleNews-vectors-negative300.bin
-#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03092018
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03192018
 #  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/xgboost_ensemble
 
   bad_words_filepath: None

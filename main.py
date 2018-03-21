@@ -30,15 +30,21 @@ def action():
 @action.command()
 def translate_to_english():
     logger.info('translating train')
-    translate_data(data_dir=params.data_dir, filename='train.csv', filename_translated='train_translated.csv')
+    translate_data(data_dir=params.data_dir,
+                   filename='train.csv',
+                   filename_translated='train{}.csv'.format(params.filename_suffix))
     logger.info('translating test')
-    translate_data(data_dir=params.data_dir, filename='test.csv', filename_translated='test_translated.csv')
+    translate_data(data_dir=params.data_dir,
+                   filename='test.csv',
+                   filename_translated='test{}.csv'.format(params.filename_suffix))
 
 
 @action.command()
 def train_valid_split():
     logger.info('preprocessing training data')
-    split_train_data(data_dir=params.data_dir, filename='train_translated.csv', target_columns=CV_LABELS,
+    split_train_data(data_dir=params.data_dir,
+                     filename='train{}.csv'.format(params.filename_suffix),
+                     target_columns=CV_LABELS,
                      n_splits=params.n_cv_splits)
 
 
@@ -52,8 +58,10 @@ def _train_pipeline(pipeline_name):
     if bool(params.overwrite) and os.path.isdir(params.experiment_dir):
         shutil.rmtree(params.experiment_dir)
 
-    train = read_data(data_dir=params.data_dir, filename='train_split_translated.csv')
-    valid = read_data(data_dir=params.data_dir, filename='valid_split_translated.csv')
+    train = read_data(data_dir=params.data_dir,
+                      filename='train_split{}.csv'.format(params.filename_suffix))
+    valid = read_data(data_dir=params.data_dir,
+                      filename='valid_split{}.csv'.format(params.filename_suffix))
 
     data = {'input': {'meta': train,
                       'meta_valid': valid,
@@ -76,7 +84,8 @@ def evaluate_pipeline(pipeline_name):
 
 
 def _evaluate_pipeline(pipeline_name):
-    valid = read_data(data_dir=params.data_dir, filename='valid_split_translated.csv')
+    valid = read_data(data_dir=params.data_dir,
+                      filename='valid_split{}.csv'.format(params.filename_suffix))
 
     data = {'input': {'meta': valid,
                       'meta_valid': None,
@@ -108,7 +117,8 @@ def predict_pipeline(pipeline_name):
 
 
 def _predict_pipeline(pipeline_name):
-    test = read_data(data_dir=params.data_dir, filename='test_translated.csv')
+    test = read_data(data_dir=params.data_dir,
+                     filename='test{}.csv'.format(params.filename_suffix))
     data = {'input': {'meta': test,
                       'meta_valid': None,
                       'train_mode': False,
@@ -162,15 +172,19 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, add_features)
 
     if model_level == 'first':
         logger.info('loading data (first model level)')
-        train = read_data(data_dir=params.data_dir, filename='train_translated.csv')
-        test = read_data(data_dir=params.data_dir, filename='test_translated.csv')
+        train = read_data(data_dir=params.data_dir,
+                          filename='train{}.csv'.format(params.filename_suffix))
+        test = read_data(data_dir=params.data_dir,
+                         filename='test{}.csv'.format(params.filename_suffix))
     elif model_level == 'second':
         logger.info('loading data (second model level)')
         train, test = read_predictions(prediction_dir=params.single_model_predictions_dir)
         if add_features:
             logger.info('building features')
-            train_meta = read_data(data_dir=params.data_dir, filename='train_translated.csv')
-            test_meta = read_data(data_dir=params.data_dir, filename='test_translated.csv')
+            train_meta = read_data(data_dir=params.data_dir,
+                                   filename='train{}.csv'.format(params.filename_suffix))
+            test_meta = read_data(data_dir=params.data_dir,
+                                  filename='test{}.csv'.format(params.filename_suffix))
             train_features, test_features = get_text_features(train_meta, test_meta)
     else:
         raise NotImplementedError("""only 'first' or 'second' """)
@@ -291,7 +305,7 @@ def train_evaluate_predict_cv_pipeline(pipeline_name, model_level, add_features)
 def prepare_single_model_predictions_dir(pipeline_names):
     os.makedirs(params.single_model_predictions_dir, exist_ok=True)
 
-    train_labels_source = os.path.join(params.data_dir, 'train_translated.csv')
+    train_labels_source = os.path.join(params.data_dir, 'train{}.csv'.format(params.filename_suffix))
     train_labels_destination = os.path.join(params.single_model_predictions_dir, 'labels.csv')
     logger.info('copying train from {} to {}'.format(train_labels_source, train_labels_destination))
 

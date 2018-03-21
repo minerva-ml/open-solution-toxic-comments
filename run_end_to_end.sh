@@ -10,6 +10,9 @@ neptune run \
 neptune run \
 --config best_configs/tfidf_logreg.yaml \
 -- train_evaluate_predict_cv_pipeline -p tfidf_logreg -m first
+neptune run \
+--config best_configs/svd_xgboost.yaml \
+-- train_evaluate_predict_cv_pipeline -p svd_xgboost -m first
 
 neptune run \
 --config best_configs/char_vdcnn.yaml \

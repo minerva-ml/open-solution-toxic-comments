@@ -3,7 +3,7 @@ import os
 from attrdict import AttrDict
 from deepsense import neptune
 
-from utils import read_params, multi_roc_auc_score
+from utils import read_params
 
 ctx = neptune.Context()
 params = read_params(ctx)

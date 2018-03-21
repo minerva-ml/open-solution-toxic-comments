@@ -1,9 +1,7 @@
-# Bidirectional shallow GRU with concatenated average and max
-
 project-key: TOX
 
 name: toxic
-tags: [fasttext, gru, adam]
+tags: [char, vdcnn, adam]
 
 
 metric:
@@ -26,14 +24,13 @@ parameters:
   # Cloud Environment
 #  data_dir: /public/toxic_comments
 #  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_newest
-#  experiment_dir: /output/trained_pipelines/fasttext_gru
-#  embedding_filepath: /public/models/fasttext/crawl-300d-2M.vec
+#  experiment_dir: /output/trained_pipelines/char_vdcnn
+#  embedding_filepath: None
   # Local Environment
   data_dir: /mnt/ml-team/minerva/toxic/data
-  filename_suffix: '_translated'
   single_model_predictions_dir: None
-  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/fasttext_gru_dev
-  embedding_filepath: /mnt/ml-team/minerva/pretrained/fasttext/crawl-300d-2M.vec
+  experiment_dir: /mnt/ml-team/minerva/toxic/trained_pipelines/char_vdcnn
+  embedding_filepath: None
 
   bad_words_filepath: None
   overwrite: 1
@@ -41,14 +38,14 @@ parameters:
   n_cv_splits: 10
 
   # Preprocessing
-  max_features_char: None #100 for vdcnn, for tfidf something like 20000 should be used
-  max_features_word: 100000
-  maxlen_char: None
-  maxlen_words: 200
-  char_ngram_max: 4
-  drop_punctuation: 1
-  drop_newline: 1
-  drop_multispaces: 1
+  max_features_char: 100 #100 for vdcnn, for tfidf something like 20000 should be used
+  max_features_word: None
+  maxlen_char: 1000
+  maxlen_words: None
+  char_ngram_max: None
+  drop_punctuation: 0
+  drop_newline: 0
+  drop_multispaces: 0
   all_lower_case: 1
   fill_na_with: ' '
   deduplication_threshold: 10
@@ -57,20 +54,18 @@ parameters:
   use_stopwords: 0
 
   # Architecture
-  filter_nr: 512
-  kernel_size: None
-  repeat_block: 1
+  filter_nr: 64
+  kernel_size: 3
+  repeat_block: 6
   dense_size: 256
-  repeat_dense: 0
+  repeat_dense: 2
   max_pooling: 1
   mean_pooling: 1
   weighted_average_attention: 0
   concat_mode: 'concat'
-  output_size: 6
-  output_activation: 'sigmoid'
-  trainable_embedding: 0
-  word_embedding_size: 300
-  char_embedding_size: None
+  trainable_embedding: 1
+  word_embedding_size: None
+  char_embedding_size: 16
 
   # General Architecture
   use_prelu: 1
@@ -84,27 +79,28 @@ parameters:
   epochs_nr: 1000
   batch_size_train: 128
   batch_size_inference: 128
-  lr: 0.001
+  lr: 0.005
   momentum: 0.9
-  gamma: 0.7
-  patience: 5
+  gamma: 0.8
+  patience: 10
   unfreeze_on_epoch: 7
 
+
   # Regularization
-  batch_norm_first: 0
-  use_batch_norm: 0
-  dropout_embedding: 0.5
-  rnn_dropout: 0.5
-  dense_dropout: 0.5
-  conv_dropout: None
+  batch_norm_first: 1
+  use_batch_norm: 1
+  dropout_embedding: 0.0
+  rnn_dropout: 0.0
+  dense_dropout: 0.2
+  conv_dropout: 0.2
   dropout_mode: 'spatial'
-  rnn_kernel_reg_l2: 0.0001
-  rnn_recurrent_reg_l2: 0.0001
-  rnn_bias_reg_l2: 0.0001
-  dense_kernel_reg_l2: 0.0001
-  dense_bias_reg_l2: 0.0001
-  conv_kernel_reg_l2: None
-  conv_bias_reg_l2: None
+  rnn_kernel_reg_l2: None
+  rnn_recurrent_reg_l2: None
+  rnn_bias_reg_l2: None
+  dense_kernel_reg_l2: 0.00001
+  dense_bias_reg_l2: 0.00001
+  conv_kernel_reg_l2: 0.00001
+  conv_bias_reg_l2: 0.00001
 
   # Postprocessing
   clipper__lower: None
@@ -123,7 +119,6 @@ parameters:
   # Ensemble XGBoost
   xgboost__objective: None
   xgboost__eval_metric: None
-  xgboost__scale_pos_weight: None
   xgboost__n_estimators: None
   xgboost__learning_rate: None
   xgboost__max_depth: None
@@ -138,4 +133,3 @@ parameters:
   blender__method: None
   blender__runs: None
   blender__maxiter: None
-
