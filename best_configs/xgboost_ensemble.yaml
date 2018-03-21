@@ -46,6 +46,7 @@ parameters:
   maxlen_char: None
   maxlen_words: None
   char_ngram_max: None
+  truncated_svd__n_components: None
   drop_punctuation: None # Do I want to preprocess in that way for all models?
   drop_newline: None
   drop_multispaces: None

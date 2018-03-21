@@ -7,7 +7,7 @@ from steps.base import Step, Dummy, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
 from steps.keras.embeddings import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter, \
-    MinMaxScaler
+    MinMaxScaler, TruncatedSVD
 from steps.sklearn.models import LogisticRegressionMultilabel, XGBoostClassifierMultilabel
 
 
@@ -68,6 +68,34 @@ def count_features_logreg(config):
                   transformer=Dummy(),
                   input_steps=[count_logreg],
                   adapter={'y_pred': ([('count_logreg', 'prediction_probability')]),
+                           },
+                  cache_dirpath=config.env.cache_dirpath)
+    return output
+
+
+def svd_xgboost(config):
+    preprocessed_input = _preprocessing(config, is_train=False)
+    tfidf_char_vectorizer, tfidf_word_vectorizer = _tfidf(preprocessed_input, config)
+
+    truncated_svd = Step(name='truncated_svd',
+                         transformer=TruncatedSVD(**config.truncated_svd),
+                         input_steps=[tfidf_char_vectorizer, tfidf_word_vectorizer],
+                         adapter={'features': ([('tfidf_char_vectorizer', 'features'),
+                                                ('tfidf_word_vectorizer', 'features')], sparse_hstack_inputs),
+                                  },
+                         cache_dirpath=config.env.cache_dirpath)
+
+    xgboost = Step(name='xgboost',
+                   transformer=XGBoostClassifierMultilabel(**config.xgboost),
+                   input_steps=[preprocessed_input, truncated_svd],
+                   adapter={'X': ([('truncated_svd', 'features')]),
+                            'y': ([('cleaning_output', 'y')]),
+                            },
+                   cache_dirpath=config.env.cache_dirpath)
+    output = Step(name='xgboost_output',
+                  transformer=Dummy(),
+                  input_steps=[xgboost],
+                  adapter={'y_pred': ([('xgboost', 'prediction_probability')]),
                            },
                   cache_dirpath=config.env.cache_dirpath)
     return output
@@ -807,6 +835,8 @@ PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
                                  'inference': bad_word_logreg},
              'count_logreg': {'train': count_features_logreg,
                               'inference': count_features_logreg},
+             'svd_xgboost': {'train': svd_xgboost,
+                             'inference': svd_xgboost},
 
              'xgboost_ensemble': {'train': partial(xgboost_ensemble, is_train=True),
                                   'inference': partial(xgboost_ensemble, is_train=False)},

@@ -53,6 +53,7 @@ SOLUTION_CONFIG = AttrDict({
                               'ngram_range': (1, 1),
                               'max_features': params.max_features_word
                               },
+    'truncated_svd': {'n_components': params.truncated_svd__n_components},
     'embeddings': {'pretrained_filepath': params.embedding_filepath,
                    'max_features': params.max_features_word,
                    'embedding_size': params.word_embedding_size
@@ -103,7 +104,7 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'dpcnn'},
         },
     },
     'scnn_network': {
@@ -152,7 +153,7 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'scnn'},
         },
     },
     'lstm_network': {
@@ -200,7 +201,7 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'lstm'},
         },
     },
     'gru_network': {
@@ -248,7 +249,7 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'gru'},
         },
     },
     'char_vdcnn_network': {
@@ -295,7 +296,7 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'char_vdcnn'},
         },
     },
     'xgboost_ensemble': {'label_nr': 6,

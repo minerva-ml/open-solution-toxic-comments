@@ -46,6 +46,7 @@ parameters:
   maxlen_char: None
   maxlen_words: 200
   char_ngram_max: 4
+  truncated_svd__n_components: None
   drop_punctuation: 1
   drop_newline: 1
   drop_multispaces: 1
