@@ -73,62 +73,6 @@ def count_features_logreg(config):
     return output
 
 
-def bad_word_count_features_logreg(config):
-    preprocessed_input = _preprocessing(config, is_train=False)
-    normalizer = _count_features(config)
-    xy_split = normalizer.get_step('xy_split')
-    tfidf_word_vectorizer = _bad_word_tfidf(preprocessed_input, config)
-
-    bad_word_count_logreg = Step(name='bad_word_count_logreg',
-                                 transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
-                                 input_steps=[xy_split, normalizer, tfidf_word_vectorizer],
-                                 adapter={'X': ([('normalizer', 'X'),
-                                                 ('bad_word_tfidf_word_vectorizer', 'features')], sparse_hstack_inputs),
-                                          'y': ([('xy_split', 'y')]),
-                                          },
-                                 cache_dirpath=config.env.cache_dirpath)
-
-    output = Step(name='bad_word_count_features_logreg_output',
-                  transformer=Dummy(),
-                  input_steps=[bad_word_count_logreg],
-                  adapter={'y_pred': ([('bad_word_count_logreg', 'prediction_probability')]),
-                           },
-                  cache_dirpath=config.env.cache_dirpath)
-    return output
-
-
-def hand_crafted_all_logreg(config):
-    preprocessed_input = _preprocessing(config, is_train=False)
-    tfidf_char_vectorizer, tfidf_word_vectorizer = _tfidf(preprocessed_input, config)
-    normalizer = _count_features(config)
-    xy_split = normalizer.get_step('xy_split')
-    bad_word_vectorizer = _bad_word_tfidf(preprocessed_input, config)
-
-    all_handcrafted_logreg = Step(name='all_handcrafted_logreg',
-                                  transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
-                                  input_steps=[xy_split,
-                                               normalizer,
-                                               tfidf_char_vectorizer,
-                                               tfidf_word_vectorizer,
-                                               bad_word_vectorizer],
-                                  adapter={'X': ([('normalizer', 'X'),
-                                                  ('tfidf_char_vectorizer', 'features'),
-                                                  ('tfidf_word_vectorizer', 'features'),
-                                                  ('bad_word_tfidf_word_vectorizer', 'features')],
-                                                 sparse_hstack_inputs),
-                                           'y': ([('xy_split', 'y')]),
-                                           },
-                                  cache_dirpath=config.env.cache_dirpath)
-
-    output = Step(name='hand_crafted_all_logreg_output',
-                  transformer=Dummy(),
-                  input_steps=[all_handcrafted_logreg],
-                  adapter={'y_pred': ([('all_handcrafted_logreg', 'prediction_probability')]),
-                           },
-                  cache_dirpath=config.env.cache_dirpath)
-    return output
-
-
 def char_vdcnn(config, is_train):
     preprocessed_input = _preprocessing(config, is_train)
     char_tokenizer = _char_tokenizer(preprocessed_input, config, is_train)
