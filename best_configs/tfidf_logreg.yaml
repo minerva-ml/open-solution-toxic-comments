@@ -23,12 +23,14 @@ exclude:
 parameters:
 # Cloud Environment
   data_dir:                     /public/toxic_comments
+  filename_suffix: '_translated'
   embedding_filepath:           None
   single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03092018
   experiment_dir:               /output/trained_pipelines/tfidf_logreg
 
 # Local Environment
 #  data_dir:                     /path/to/toxic/data
+#  filename_suffix: '_translated'
 #  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
 #  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03092018
 #  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/tfidf_logreg
@@ -44,6 +46,7 @@ parameters:
   maxlen_char: 512
   maxlen_words: 100
   char_ngram_max: 4
+  truncated_svd__n_components: None
   drop_punctuation: 1
   drop_newline: 1
   drop_multispaces: 1
@@ -64,6 +67,8 @@ parameters:
   mean_pooling: None
   weighted_average_attention: None
   concat_mode:  None
+  output_size: None
+  output_activation: None
   trainable_embedding: None
   word_embedding_size: None
   char_embedding_size: None

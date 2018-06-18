@@ -1,15 +1,15 @@
 project-key: TOX
 
 name: toxic
-tags: [ensemble, catboost, predictions]
+tags: [svd, xgboost, tfidf]
 
 
 metric:
   channel: 'Final Validation Score ROC_AUC'
   goal: maximize
 
-# Comment out if not in Cloud Environment
-pip-requirements-file: requirements.txt
+#Comment out if not in Cloud Environment
+#pip-requirements-file: requirements.txt
 
 exclude:
   - output
@@ -23,38 +23,41 @@ exclude:
 parameters:
 # Cloud Environment
   data_dir:                     /public/toxic_comments
+  filename_suffix: '_translated'
   embedding_filepath:           None
-  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03092018
-  experiment_dir:               /output/trained_pipelines/catboost_ensemble
+  single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03192018
+  experiment_dir:               /output/trained_pipelines/svd_xgboost
 
 # Local Environment
 #  data_dir:                     /path/to/toxic/data
+#  filename_suffix: '_translated'
 #  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
-#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03092018
-#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/catboost_ensemble
+#  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03192018
+#  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/svd_xgboost
 
   bad_words_filepath: None
   overwrite: 1
-  num_workers: 4
+  num_workers: 36
   n_cv_splits: 10
 
-# Preprocessing
-  max_features_char: None # 100 for vdcnn, for tfidf something like 20000 should be used
-  max_features_word: None
+  # Preprocessing
+  max_features_char: 100000
+  max_features_word: 100000
   maxlen_char: None
   maxlen_words: None
-  char_ngram_max: None
-  drop_punctuation: None # Do I want to preprocess in that way for all models?
-  drop_newline: None
-  drop_multispaces: None
-  all_lower_case: None
-  fill_na_with: None
-  deduplication_threshold: None
+  char_ngram_max: 4
+  truncated_svd__n_components: 300
+  drop_punctuation: 1
+  drop_newline: 1
+  drop_multispaces: 1
+  all_lower_case: 1
+  fill_na_with: ''
+  deduplication_threshold: 10
   anonymize: 0
   apostrophes: 0
   use_stopwords: 0
 
-# Architecture
+  # Architecture
   filter_nr: None
   kernel_size: None
   repeat_block: None
@@ -64,19 +67,21 @@ parameters:
   mean_pooling: None
   weighted_average_attention: None
   concat_mode:  None
+  output_size: None
+  output_activation: None
   trainable_embedding: None
   word_embedding_size: None
   char_embedding_size: None
 
-# General Architecture
+  # General Architecture
   use_prelu: None
 
-# Log Reg Params
+ # Log Reg Params
   log_reg_c: None
   log_reg_penalty: None
   max_iter: None
 
-# Training schedule
+  # Training schedule
   epochs_nr: None
   batch_size_train: None
   batch_size_inference: None
@@ -86,7 +91,7 @@ parameters:
   patience: None
   unfreeze_on_epoch: None
 
-# Regularization
+  # Regularization
   batch_norm_first: None
   use_batch_norm: None
   dropout_embedding: None
@@ -102,35 +107,36 @@ parameters:
   conv_kernel_reg_l2: None
   conv_bias_reg_l2: None
 
-# Ensemble Catboost
-  catboost__iterations: 1
-  catboost__learning_rate: 0.02
-  catboost__depth: 3
-  catboost__l2_leaf_reg: 1
-  catboost__border_count: 100
-  catboost__model_size_reg: 0.25
-  catboost__rsm: 1.25
-  catboost__verbose: 0
 
-# Ensemble Blender
+  # Ensemble Catboost
+  catboost__iterations: None
+  catboost__learning_rate: None
+  catboost__depth: None
+  catboost__l2_leaf_reg: None
+  catboost__border_count: None
+  catboost__model_size_reg: None
+  catboost__rsm: None
+  catboost__verbose: None
+
+  # Ensemble Blender
   blender__method: None
   blender__runs: None
   blender__maxiter: None
 
-# Ensemble XGBoost
-  xgboost__objective: None
-  xgboost__eval_metric: None
-  xgboost__scale_pos_weight: None
-  xgboost__n_estimators: None
-  xgboost__learning_rate: None
-  xgboost__max_depth: None
-  xgboost__min_child_weight: None
-  xgboost__gamma: None
-  xgboost__subsample: None
-  xgboost__colsample_bytree: None
-  xgboost__reg_lambda: None
-  xgboost__reg_alpha: None
+  # Ensemble XGBoost
+  xgboost__objective: 'binary:logistic'
+  xgboost__eval_metric: 'auc'
+  xgboost__scale_pos_weight: 10
+  xgboost__n_estimators: 125
+  xgboost__learning_rate: 0.1
+  xgboost__max_depth: 5
+  xgboost__min_child_weight: 7
+  xgboost__gamma: 0.01
+  xgboost__subsample: 1.0
+  xgboost__colsample_bytree: 1.0
+  xgboost__reg_lambda:  0.01
+  xgboost__reg_alpha: 0.0
 
-# Postprocessing
+  # Postprocessing
   clipper__lower: None
   clipper__upper: None

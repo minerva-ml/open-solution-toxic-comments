@@ -2,14 +2,13 @@ from functools import partial
 
 import pandas as pd
 
-from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM, StackerRNN
-from postprocessing import Blender
+from models import CharVDCNN, WordSCNN, WordDPCNN, WordCuDNNGRU, WordCuDNNLSTM
 from steps.base import Step, Dummy, sparse_hstack_inputs, to_tuple_inputs
 from steps.keras.loaders import Tokenizer
-from steps.keras.models import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
+from steps.keras.embeddings import GloveEmbeddingsMatrix, Word2VecEmbeddingsMatrix, FastTextEmbeddingsMatrix
 from steps.preprocessing import XYSplit, TextCleaner, TfidfVectorizer, WordListFilter, Normalizer, TextCounter, \
-    MinMaxScaler, MinMaxScalerMultilabel
-from steps.sklearn.models import LogisticRegressionMultilabel, CatboostClassifierMultilabel, XGBoostClassifierMultilabel
+    MinMaxScaler, TruncatedSVD
+from steps.sklearn.models import LogisticRegressionMultilabel, XGBoostClassifierMultilabel
 
 
 def tfidf_logreg(config):
@@ -74,57 +73,29 @@ def count_features_logreg(config):
     return output
 
 
-def bad_word_count_features_logreg(config):
-    preprocessed_input = _preprocessing(config, is_train=False)
-    normalizer = _count_features(config)
-    xy_split = normalizer.get_step('xy_split')
-    tfidf_word_vectorizer = _bad_word_tfidf(preprocessed_input, config)
-
-    bad_word_count_logreg = Step(name='bad_word_count_logreg',
-                                 transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
-                                 input_steps=[xy_split, normalizer, tfidf_word_vectorizer],
-                                 adapter={'X': ([('normalizer', 'X'),
-                                                 ('bad_word_tfidf_word_vectorizer', 'features')], sparse_hstack_inputs),
-                                          'y': ([('xy_split', 'y')]),
-                                          },
-                                 cache_dirpath=config.env.cache_dirpath)
-
-    output = Step(name='bad_word_count_features_logreg_output',
-                  transformer=Dummy(),
-                  input_steps=[bad_word_count_logreg],
-                  adapter={'y_pred': ([('bad_word_count_logreg', 'prediction_probability')]),
-                           },
-                  cache_dirpath=config.env.cache_dirpath)
-    return output
-
-
-def hand_crafted_all_logreg(config):
+def svd_xgboost(config):
     preprocessed_input = _preprocessing(config, is_train=False)
     tfidf_char_vectorizer, tfidf_word_vectorizer = _tfidf(preprocessed_input, config)
-    normalizer = _count_features(config)
-    xy_split = normalizer.get_step('xy_split')
-    bad_word_vectorizer = _bad_word_tfidf(preprocessed_input, config)
 
-    all_handcrafted_logreg = Step(name='all_handcrafted_logreg',
-                                  transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
-                                  input_steps=[xy_split,
-                                               normalizer,
-                                               tfidf_char_vectorizer,
-                                               tfidf_word_vectorizer,
-                                               bad_word_vectorizer],
-                                  adapter={'X': ([('normalizer', 'X'),
-                                                  ('tfidf_char_vectorizer', 'features'),
-                                                  ('tfidf_word_vectorizer', 'features'),
-                                                  ('bad_word_tfidf_word_vectorizer', 'features')],
-                                                 sparse_hstack_inputs),
-                                           'y': ([('xy_split', 'y')]),
-                                           },
-                                  cache_dirpath=config.env.cache_dirpath)
+    truncated_svd = Step(name='truncated_svd',
+                         transformer=TruncatedSVD(**config.truncated_svd),
+                         input_steps=[tfidf_char_vectorizer, tfidf_word_vectorizer],
+                         adapter={'features': ([('tfidf_char_vectorizer', 'features'),
+                                                ('tfidf_word_vectorizer', 'features')], sparse_hstack_inputs),
+                                  },
+                         cache_dirpath=config.env.cache_dirpath)
 
-    output = Step(name='hand_crafted_all_logreg_output',
+    xgboost = Step(name='xgboost',
+                   transformer=XGBoostClassifierMultilabel(**config.xgboost),
+                   input_steps=[preprocessed_input, truncated_svd],
+                   adapter={'X': ([('truncated_svd', 'features')]),
+                            'y': ([('cleaning_output', 'y')]),
+                            },
+                   cache_dirpath=config.env.cache_dirpath)
+    output = Step(name='xgboost_output',
                   transformer=Dummy(),
-                  input_steps=[all_handcrafted_logreg],
-                  adapter={'y_pred': ([('all_handcrafted_logreg', 'prediction_probability')]),
+                  input_steps=[xgboost],
+                  adapter={'y_pred': ([('xgboost', 'prediction_probability')]),
                            },
                   cache_dirpath=config.env.cache_dirpath)
     return output
@@ -582,85 +553,7 @@ def word2vec_scnn(config, is_train):
     return output
 
 
-def blender_ensemble(config, is_train):
-    minmax_scaler = Step(name='minmax_scaler',
-                         transformer=MinMaxScalerMultilabel(),
-                         input_data=['input'],
-                         adapter={'X': ([('input', 'X')])},
-                         cache_dirpath=config.env.cache_dirpath)
-
-    blender_ensemble = Step(name='blender_ensemble',
-                            transformer=Blender(**config.blender_ensemble),
-                            input_data=['input'],
-                            input_steps=[minmax_scaler],
-                            adapter={'X': ([('minmax_scaler', 'X')]), 'y': ([('input', 'y')])},
-                            cache_dirpath=config.env.cache_dirpath)
-
-    output = Step(name='output',
-                  transformer=Dummy(),
-                  input_steps=[blender_ensemble],
-                  adapter={'y_pred': ([('blender_ensemble', 'predictions')])},
-                  cache_dirpath=config.env.cache_dirpath)
-
-    if is_train:
-        blender_ensemble.overwrite_transformer = True
-
-    return output
-
-
-def logreg_ensemble(config, is_train):
-    minmax_scaler = Step(name='minmax_scaler',
-                         transformer=MinMaxScaler(),
-                         input_data=['input'],
-                         adapter={'X': ([('input', 'X')])},
-                         cache_dirpath=config.env.cache_dirpath)
-
-    logreg_ensemble = Step(name='logreg_ensemble',
-                           transformer=LogisticRegressionMultilabel(**config.logistic_regression_multilabel),
-                           input_data=['input'],
-                           input_steps=[minmax_scaler],
-                           adapter={'X': ([('minmax_scaler', 'X')]), 'y': ([('input', 'y')])},
-                           cache_dirpath=config.env.cache_dirpath)
-
-    output = Step(name='output',
-                  transformer=Dummy(),
-                  input_steps=[logreg_ensemble],
-                  adapter={'y_pred': ([('logreg_ensemble', 'prediction_probability')])},
-                  cache_dirpath=config.env.cache_dirpath)
-
-    if is_train:
-        logreg_ensemble.overwrite_transformer = True
-
-    return output
-
-
-def catboost_ensemble(config, is_train):
-    minmax_scaler = Step(name='minmax_scaler',
-                         transformer=MinMaxScaler(),
-                         input_data=['input'],
-                         adapter={'X': ([('input', 'X')])},
-                         cache_dirpath=config.env.cache_dirpath)
-
-    catboost_ensemble = Step(name='catboost_ensemble',
-                             transformer=CatboostClassifierMultilabel(**config.catboost_ensemble),
-                             input_data=['input'],
-                             input_steps=[minmax_scaler],
-                             adapter={'X': ([('minmax_scaler', 'X')]), 'y': ([('input', 'y')])},
-                             cache_dirpath=config.env.cache_dirpath)
-
-    output = Step(name='output',
-                  transformer=Dummy(),
-                  input_steps=[catboost_ensemble],
-                  adapter={'y_pred': ([('catboost_ensemble', 'prediction_probability')])},
-                  cache_dirpath=config.env.cache_dirpath)
-
-    if is_train:
-        catboost_ensemble.overwrite_transformer = True
-
-    return output
-
-
-def xgboost_ensemble(config, is_train):
+def xgboost_ensemble(config):
     minmax_scaler = Step(name='minmax_scaler',
                          transformer=MinMaxScaler(),
                          input_data=['input'],
@@ -671,7 +564,8 @@ def xgboost_ensemble(config, is_train):
                             transformer=XGBoostClassifierMultilabel(**config.xgboost_ensemble),
                             input_data=['input'],
                             input_steps=[minmax_scaler],
-                            adapter={'X': ([('minmax_scaler', 'X')]), 'y': ([('input', 'y')])},
+                            adapter={'X': ([('minmax_scaler', 'X')]),
+                                     'y': ([('input', 'y')])},
                             cache_dirpath=config.env.cache_dirpath)
 
     output = Step(name='output',
@@ -679,69 +573,6 @@ def xgboost_ensemble(config, is_train):
                   input_steps=[xgboost_ensemble],
                   adapter={'y_pred': ([('xgboost_ensemble', 'prediction_probability')])},
                   cache_dirpath=config.env.cache_dirpath)
-
-    if is_train:
-        xgboost_ensemble.overwrite_transformer = True
-
-    return output
-
-
-def rnn_ensemble(config, is_train):
-    if is_train:
-        minmax_scaler = Step(name='minmax_scaler',
-                             transformer=MinMaxScalerMultilabel(),
-                             input_data=['input'],
-                             adapter={'X': ([('input', 'X')])},
-                             cache_dirpath=config.env.cache_dirpath)
-
-        minmax_scaler_valid_ = Step(name='minmax_scaler',
-                                    transformer=MinMaxScalerMultilabel(),
-                                    input_data=['input'],
-                                    adapter={'X': ([('input', 'X_valid')])},
-                                    cache_dirpath=config.env.cache_dirpath)
-
-        minmax_scaler_valid = Step(name='minmax_scaler_valid',
-                                   transformer=Dummy(),
-                                   input_steps=[minmax_scaler_valid_],
-                                   adapter={'X_valid': ([('minmax_scaler', 'X')]),
-                                            },
-                                   cache_dirpath=config.env.cache_dirpath)
-
-        rnn_stacker_ensemble = Step(name='rnn_stacker_ensemble',
-                                    transformer=StackerRNN(**config.rnn_stacker),
-                                    input_data=['input'],
-                                    input_steps=[minmax_scaler, minmax_scaler_valid],
-                                    adapter={'X': ([('minmax_scaler', 'X')]),
-                                             'y': ([('input', 'y')]),
-                                             'validation_data': (
-                                                 [('minmax_scaler_valid', 'X_valid'), ('input', 'y_valid')],
-                                                 to_tuple_inputs),
-                                             },
-                                    cache_dirpath=config.env.cache_dirpath)
-    else:
-        minmax_scaler = Step(name='minmax_scaler',
-                             transformer=MinMaxScalerMultilabel(),
-                             input_data=['input'],
-                             adapter={'X': ([('input', 'X')])},
-                             cache_dirpath=config.env.cache_dirpath)
-
-        rnn_stacker_ensemble = Step(name='rnn_stacker_ensemble',
-                                    transformer=StackerRNN(**config.rnn_stacker),
-                                    input_data=['input'],
-                                    input_steps=[minmax_scaler],
-                                    adapter={'X': ([('minmax_scaler', 'X')]),
-                                             'y': ([('input', 'y')]),
-                                             },
-                                    cache_dirpath=config.env.cache_dirpath)
-    output = Step(name='output',
-                  transformer=Dummy(),
-                  input_steps=[rnn_stacker_ensemble],
-                  adapter={'y_pred': ([('rnn_stacker_ensemble', 'prediction_probability')])},
-                  cache_dirpath=config.env.cache_dirpath)
-
-    if is_train:
-        rnn_stacker_ensemble.overwrite_transformer = True
-
     return output
 
 
@@ -1004,18 +835,9 @@ PIPELINES = {'fasttext_gru': {'train': partial(fasttext_gru, is_train=True),
                                  'inference': bad_word_logreg},
              'count_logreg': {'train': count_features_logreg,
                               'inference': count_features_logreg},
-             'bad_word_count_logreg': {'train': bad_word_count_features_logreg,
-                                       'inference': bad_word_count_features_logreg},
-             'hand_crafted_all_logreg': {'train': hand_crafted_all_logreg,
-                                         'inference': hand_crafted_all_logreg},
-             'blender_ensemble': {'train': partial(blender_ensemble, is_train=True),
-                                  'inference': partial(blender_ensemble, is_train=False)},
-             'logreg_ensemble': {'train': partial(logreg_ensemble, is_train=True),
-                                 'inference': partial(logreg_ensemble, is_train=False)},
-             'catboost_ensemble': {'train': partial(catboost_ensemble, is_train=True),
-                                   'inference': partial(catboost_ensemble, is_train=False)},
+             'svd_xgboost': {'train': svd_xgboost,
+                             'inference': svd_xgboost},
+
              'xgboost_ensemble': {'train': partial(xgboost_ensemble, is_train=True),
                                   'inference': partial(xgboost_ensemble, is_train=False)},
-             'rnn_ensemble': {'train': partial(rnn_ensemble, is_train=True),
-                              'inference': partial(rnn_ensemble, is_train=False)},
              }

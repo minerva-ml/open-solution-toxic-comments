@@ -23,12 +23,14 @@ exclude:
 parameters:
 # Cloud Environment
   data_dir:                     /public/toxic_comments
+  filename_suffix: '_translated'
   embedding_filepath:           /public/models/word2vec/GoogleNews-vectors-negative300.bin
   single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03092018
   experiment_dir:               /output/trained_pipelines/word2vec_scnn
 
 # Local Environment
 #  data_dir:                     /path/to/toxic/data
+#  filename_suffix: '_translated'
 #  embedding_filepath:           /path/to/embedding i.e. ~/word2vec/GoogleNews-vectors-negative300.bin
 #  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03092018
 #  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/word2vec_scnn
@@ -44,6 +46,7 @@ parameters:
   maxlen_char: None
   maxlen_words: 200
   char_ngram_max: 4
+  truncated_svd__n_components: None
   drop_punctuation: 1
   drop_newline: 1
   drop_multispaces: 1
@@ -64,6 +67,8 @@ parameters:
   mean_pooling: 1
   weighted_average_attention: 0
   concat_mode: 'concat'
+  output_size: 6
+  output_activation: 'sigmoid'
   trainable_embedding: 0
   word_embedding_size: 300
   char_embedding_size: None

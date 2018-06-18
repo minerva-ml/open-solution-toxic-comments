@@ -6,11 +6,13 @@ from keras.callbacks import Callback
 
 
 class NeptuneMonitor(Callback):
-    def __init__(self, **kwargs):
+    def __init__(self, model_name):
+        super().__init__()
+        self.model_name = model_name
         self.ctx = neptune.Context()
-        self.batch_loss_channel_name = get_correct_channel_name(self.ctx, 'Batch Log-loss training')
-        self.epoch_loss_channel_name = get_correct_channel_name(self.ctx, 'Log-loss training')
-        self.epoch_val_loss_channel_name = get_correct_channel_name(self.ctx, 'Log-loss validation')
+        self.batch_loss_channel_name = get_correct_channel_name(self.ctx, '{} Batch Log-loss training'.format(self.model_name))
+        self.epoch_loss_channel_name = get_correct_channel_name(self.ctx, '{} Log-loss training'.format(self.model_name))
+        self.epoch_val_loss_channel_name = get_correct_channel_name(self.ctx, '{} Log-loss validation'.format(self.model_name))
 
         self.epoch_id = 0
         self.batch_id = 0

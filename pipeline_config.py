@@ -3,12 +3,14 @@ import os
 from attrdict import AttrDict
 from deepsense import neptune
 
-from utils import read_params, multi_roc_auc_score
+from utils import read_params
 
 ctx = neptune.Context()
 params = read_params(ctx)
 
 X_COLUMNS = ['comment_text_english']
+assert params.filename_suffix == '_translated' and X_COLUMNS[0] == 'comment_text_english', """
+if original, filename_suffix: '' data is used then X_COLUMNS should be set to 'comment_text' in the pipeline_config.py"""
 Y_COLUMNS = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 CV_LABELS = ['toxic']
 ID_LABEL = ['id']
@@ -51,6 +53,7 @@ SOLUTION_CONFIG = AttrDict({
                               'ngram_range': (1, 1),
                               'max_features': params.max_features_word
                               },
+    'truncated_svd': {'n_components': params.truncated_svd__n_components},
     'embeddings': {'pretrained_filepath': params.embedding_filepath,
                    'max_features': params.max_features_word,
                    'embedding_size': params.word_embedding_size
@@ -65,6 +68,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'repeat_block': params.repeat_block,
                                                  'dense_size': params.dense_size,
                                                  'repeat_dense': params.repeat_dense,
+                                                 'output_size': params.output_size,
+                                                 'output_activation': params.output_activation,
                                                  'max_pooling': bool(params.max_pooling),
                                                  'mean_pooling': bool(params.mean_pooling),
                                                  'weighted_average_attention': bool(params.weighted_average_attention),
@@ -99,7 +104,7 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'dpcnn'},
         },
     },
     'scnn_network': {
@@ -112,6 +117,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'repeat_block': params.repeat_block,
                                                  'dense_size': params.dense_size,
                                                  'repeat_dense': params.repeat_dense,
+                                                 'output_size': params.output_size,
+                                                 'output_activation': params.output_activation,
                                                  'max_pooling': bool(params.max_pooling),
                                                  'mean_pooling': bool(params.mean_pooling),
                                                  'weighted_average_attention': bool(params.weighted_average_attention),
@@ -146,7 +153,7 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'scnn'},
         },
     },
     'lstm_network': {
@@ -165,6 +172,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'dropout_embedding': params.dropout_embedding,
                                                  'rnn_dropout': params.rnn_dropout,
                                                  'dense_dropout': params.dense_dropout,
+                                                 'output_size': params.output_size,
+                                                 'output_activation': params.output_activation,
                                                  'dropout_mode': params.dropout_mode,
                                                  'rnn_kernel_reg_l2': params.rnn_kernel_reg_l2,
                                                  'rnn_recurrent_reg_l2': params.rnn_kernel_reg_l2,
@@ -192,7 +201,7 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'lstm'},
         },
     },
     'gru_network': {
@@ -211,6 +220,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'dropout_embedding': params.dropout_embedding,
                                                  'rnn_dropout': params.rnn_dropout,
                                                  'dense_dropout': params.dense_dropout,
+                                                 'output_size': params.output_size,
+                                                 'output_activation': params.output_activation,
                                                  'dropout_mode': params.dropout_mode,
                                                  'rnn_kernel_reg_l2': params.rnn_kernel_reg_l2,
                                                  'rnn_recurrent_reg_l2': params.rnn_kernel_reg_l2,
@@ -238,7 +249,7 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'gru'},
         },
     },
     'char_vdcnn_network': {
@@ -257,6 +268,8 @@ SOLUTION_CONFIG = AttrDict({
                                                  'dropout_embedding': params.dropout_embedding,
                                                  'conv_dropout': params.conv_dropout,
                                                  'dense_dropout': params.dense_dropout,
+                                                 'output_size': params.output_size,
+                                                 'output_activation': params.output_activation,
                                                  'dropout_mode': params.dropout_mode,
                                                  'conv_kernel_reg_l2': params.conv_kernel_reg_l2,
                                                  'conv_bias_reg_l2': params.conv_bias_reg_l2,
@@ -283,71 +296,9 @@ SOLUTION_CONFIG = AttrDict({
             'lr_scheduler': {'gamma': params.gamma},
             'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
             'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
+            'neptune_monitor': {'model_name': 'char_vdcnn'},
         },
     },
-    'rnn_stacker': {
-        'architecture_config': {'model_params': {'unit_nr': params.filter_nr,
-                                                 'repeat_block': params.repeat_block,
-                                                 'max_pooling': bool(params.max_pooling),
-                                                 'mean_pooling': bool(params.mean_pooling),
-                                                 'weighted_average_attention': bool(params.weighted_average_attention),
-                                                 'concat_mode': params.concat_mode,
-                                                 'dense_size': params.dense_size,
-                                                 'repeat_dense': params.repeat_dense,
-                                                 'dropout_embedding': params.dropout_embedding,
-                                                 'rnn_dropout': params.rnn_dropout,
-                                                 'dense_dropout': params.dense_dropout,
-                                                 'dropout_mode': params.dropout_mode,
-                                                 'rnn_kernel_reg_l2': params.rnn_kernel_reg_l2,
-                                                 'rnn_recurrent_reg_l2': params.rnn_kernel_reg_l2,
-                                                 'rnn_bias_reg_l2': params.rnn_bias_reg_l2,
-                                                 'dense_kernel_reg_l2': params.dense_kernel_reg_l2,
-                                                 'dense_bias_reg_l2': params.dense_bias_reg_l2,
-                                                 'use_prelu': bool(params.use_prelu),
-                                                 'use_batch_norm': bool(params.use_batch_norm),
-                                                 'batch_norm_first': bool(params.batch_norm_first),
-                                                 },
-                                'optimizer_params': {'lr': params.lr,
-                                                     'momentum': params.momentum,
-                                                     'nesterov': True
-                                                     },
-                                },
-        'training_config': {'epochs': params.epochs_nr,
-                            'batch_size': params.batch_size_train,
-                            },
-        'callbacks_config': {'model_checkpoint': {
-            'filepath': os.path.join(params.experiment_dir, 'checkpoints',
-                                     'stacker_gru',
-                                     'best_model.h5'),
-            'save_best_only': True,
-            'save_weights_only': False},
-            'lr_scheduler': {'gamma': params.gamma},
-            'unfreeze_layers': {'unfreeze_on_epoch': params.unfreeze_on_epoch},
-            'early_stopping': {'patience': params.patience},
-            'neptune_monitor': {},
-        },
-    },
-    'logistic_regression_multilabel': {'label_nr': 6,
-                                       'C': params.log_reg_c,
-                                       'penalty': params.log_reg_penalty,
-                                       'solver': 'sag',
-                                       'max_iter': params.max_iter,
-                                       'n_jobs': params.num_workers,
-                                       },
-    'catboost_ensemble': {'label_nr': 6,
-                          'iterations': params.catboost__iterations,
-                          'learning_rate': params.catboost__learning_rate,
-                          'depth': params.catboost__depth,
-                          'l2_leaf_reg': params.catboost__l2_leaf_reg,
-                          'border_count': params.catboost__border_count,
-                          'verbose': bool(params.catboost__verbose),
-                          },
-    'blender_ensemble': {'func': multi_roc_auc_score,
-                         'min': False,
-                         'method': params.blender__method,
-                         'runs': params.blender__runs,
-                         'maxiter': params.blender__maxiter},
     'xgboost_ensemble': {'label_nr': 6,
                          'objective': params.xgboost__objective,
                          'eval_metric': params.xgboost__eval_metric,

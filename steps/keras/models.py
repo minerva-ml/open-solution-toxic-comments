@@ -1,15 +1,13 @@
 import shutil
 
-import numpy as np
 from keras.models import load_model
-from sklearn.externals import joblib
-from gensim.models import KeyedVectors
 
 from steps.base import BaseTransformer
-from .contrib import AttentionWeightedAverage
+from steps.keras.contrib import AttentionWeightedAverage
+from steps.keras.architectures import vdcnn, scnn, dpcnn, cudnn_gru, cudnn_lstm
 
 
-class BasicClassifier(BaseTransformer):
+class KerasModelTransformer(BaseTransformer):
     """
     Todo:
         load the best model at the end of the fit and save it
@@ -56,8 +54,8 @@ class BasicClassifier(BaseTransformer):
         return self
 
 
-class ClassifierXY(BasicClassifier):
-    def fit(self, X, y, validation_data):
+class ClassifierXY(KerasModelTransformer):
+    def fit(self, X, y, validation_data, *args, **kwargs):
         self.callbacks = self._create_callbacks(**self.callbacks_config)
         self.model = self._compile_model(**self.architecture_config)
 
@@ -68,13 +66,13 @@ class ClassifierXY(BasicClassifier):
                        **self.training_config)
         return self
 
-    def transform(self, X, y=None, validation_data=None):
+    def transform(self, X, y=None, validation_data=None, *args, **kwargs):
         predictions = self.model.predict(X, verbose=1)
         return {'prediction_probability': predictions}
 
 
-class ClassifierGenerator(BasicClassifier):
-    def fit(self, datagen, validation_datagen):
+class ClassifierGenerator(KerasModelTransformer):
+    def fit(self, datagen, validation_datagen, *args, **kwargs):
         self.callbacks = self._create_callbacks(**self.callbacks_config)
         self.model = self._compile_model(**self.architecture_config)
 
@@ -89,107 +87,127 @@ class ClassifierGenerator(BasicClassifier):
                                  **self.training_config)
         return self
 
-    def transform(self, datagen, validation_datagen=None):
+    def transform(self, datagen, validation_datagen=None, *args, **kwargs):
         test_flow, test_steps = datagen
         predictions = self.model.predict_generator(test_flow, test_steps, verbose=1)
         return {'prediction_probability': predictions}
 
 
-class EmbeddingsMatrix(BaseTransformer):
-    def __init__(self, pretrained_filepath, max_features, embedding_size):
-        self.pretrained_filepath = pretrained_filepath
-        self.max_features = max_features
-        self.embedding_size = embedding_size
-
-    def fit(self, tokenizer):
-        self.embedding_matrix = self._get_embedding_matrix(tokenizer)
+class PretrainedEmbeddingModel(ClassifierXY):
+    def fit(self, X, y, validation_data, embedding_matrix):
+        X_valid, y_valid = validation_data
+        self.callbacks = self._create_callbacks(**self.callbacks_config)
+        self.architecture_config['model_params']['embedding_matrix'] = embedding_matrix
+        self.model = self._compile_model(**self.architecture_config)
+        self.model.fit(X, y,
+                       validation_data=[X_valid, y_valid],
+                       callbacks=self.callbacks,
+                       verbose=1,
+                       **self.training_config)
         return self
 
-    def transform(self, tokenizer):
-        return {'embeddings_matrix': self.embedding_matrix}
-
-    def _get_embedding_matrix(self, tokenizer):
-        return NotImplementedError
-
-    def save(self, filepath):
-        joblib.dump(self.embedding_matrix, filepath)
-
-    def load(self, filepath):
-        self.embedding_matrix = joblib.load(filepath)
-        return self
+    def transform(self, X, y=None, validation_data=None, embedding_matrix=None):
+        predictions = self.model.predict(X, verbose=1)
+        return {'prediction_probability': predictions}
 
 
-class GloveEmbeddingsMatrix(EmbeddingsMatrix):
-    def _get_embedding_matrix(self, tokenizer):
-        embeddings_index = dict()
-        with open(self.pretrained_filepath) as f:
-            for line in f:
-                # Note: use split(' ') instead of split() if you get an error.
-                values = line.split(' ')
-                word = values[0]
-                coefs = np.asarray(values[1:], dtype='float32')
-                embeddings_index[word] = coefs
-
-        all_embs = np.stack(embeddings_index.values())
-        emb_mean, emb_std = all_embs.mean(), all_embs.std()
-
-        word_index = tokenizer.word_index
-        nb_words = min(self.max_features, len(word_index))
-        embedding_matrix = np.random.normal(emb_mean, emb_std, (nb_words, self.embedding_size))
-        for word, i in word_index.items():
-            if i >= self.max_features:
-                continue
-            embedding_vector = embeddings_index.get(word)
-            if embedding_vector is not None:
-                embedding_matrix[i] = embedding_vector
-        return embedding_matrix
+class CharVDCNNTransformer(ClassifierXY):
+    def _build_model(self, embedding_size, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block,
+                     dense_size, repeat_dense, output_size, output_activation,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        return vdcnn(embedding_size, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block,
+                     dense_size, repeat_dense, output_size, output_activation,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first)
 
 
-class Word2VecEmbeddingsMatrix(EmbeddingsMatrix):
-    def _get_embedding_matrix(self, tokenizer):
-        model = KeyedVectors.load_word2vec_format(self.pretrained_filepath, binary=True)
+class WordSCNNTransformer(PretrainedEmbeddingModel):
+    def _build_model(self, embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block,
+                     dense_size, repeat_dense, output_size, output_activation,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        return scnn(embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+                    filter_nr, kernel_size, repeat_block,
+                    dense_size, repeat_dense, output_size, output_activation,
+                    max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                    dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                    conv_kernel_reg_l2, conv_bias_reg_l2,
+                    dense_kernel_reg_l2, dense_bias_reg_l2,
+                    use_prelu, use_batch_norm, batch_norm_first)
 
-        emb_mean, emb_std = model.syn0.mean(), model.syn0.std()
 
-        word_index = tokenizer.word_index
-        nb_words = min(self.max_features, len(word_index))
-        embedding_matrix = np.random.normal(emb_mean, emb_std, (nb_words, self.embedding_size))
-        for word, i in word_index.items():
-            if i >= self.max_features:
-                continue
-            try:
-                embedding_vector = model[word]
-                embedding_matrix[i] = embedding_vector
-            except KeyError:
-                continue
-        return embedding_matrix
+class WordDPCNNTransformer(PretrainedEmbeddingModel):
+    def _build_model(self, embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block,
+                     dense_size, repeat_dense, output_size, output_activation,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        """
+        Implementation of http://ai.tencent.com/ailab/media/publications/ACL3-Brady.pdf
+        """
+        return dpcnn(embedding_matrix, embedding_size, trainable_embedding, maxlen, max_features,
+                     filter_nr, kernel_size, repeat_block,
+                     dense_size, repeat_dense, output_size, output_activation,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, conv_dropout, dense_dropout, dropout_mode,
+                     conv_kernel_reg_l2, conv_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first)
 
 
-class FastTextEmbeddingsMatrix(EmbeddingsMatrix):
-    def _get_embedding_matrix(self, tokenizer):
-        embeddings_index = dict()
-        with open(self.pretrained_filepath) as f:
-            for i, line in enumerate(f):
-                line = line.strip()
-                if i == 0:
-                    continue
-                values = line.split(' ')
-                word = values[0]
-                coefs = np.asarray(values[1:], dtype='float32')
-                if coefs.shape[0] != self.embedding_size:
-                    continue
-                embeddings_index[word] = coefs
+class WordCuDNNLSTMTransformer(PretrainedEmbeddingModel):
+    def _build_model(self, embedding_matrix, embedding_size, trainable_embedding,
+                     maxlen, max_features,
+                     unit_nr, repeat_block,
+                     dense_size, repeat_dense, output_size, output_activation,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+                     rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        return cudnn_lstm(embedding_matrix, embedding_size, trainable_embedding,
+                          maxlen, max_features,
+                          unit_nr, repeat_block,
+                          dense_size, repeat_dense, output_size, output_activation,
+                          max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                          dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+                          rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+                          dense_kernel_reg_l2, dense_bias_reg_l2,
+                          use_prelu, use_batch_norm, batch_norm_first)
 
-        all_embs = np.stack(embeddings_index.values())
-        emb_mean, emb_std = all_embs.mean(), all_embs.std()
 
-        word_index = tokenizer.word_index
-        nb_words = min(self.max_features, len(word_index))
-        embedding_matrix = np.random.normal(emb_mean, emb_std, (nb_words, self.embedding_size))
-        for word, i in word_index.items():
-            if i >= self.max_features:
-                continue
-            embedding_vector = embeddings_index.get(word)
-            if embedding_vector is not None:
-                embedding_matrix[i] = embedding_vector
-        return embedding_matrix
+class WordCuDNNGRUTransformer(PretrainedEmbeddingModel):
+    def _build_model(self, embedding_matrix, embedding_size, trainable_embedding,
+                     maxlen, max_features,
+                     unit_nr, repeat_block,
+                     dense_size, repeat_dense, output_size, output_activation,
+                     max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                     dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+                     rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+                     dense_kernel_reg_l2, dense_bias_reg_l2,
+                     use_prelu, use_batch_norm, batch_norm_first):
+        return cudnn_gru(embedding_matrix, embedding_size, trainable_embedding,
+                         maxlen, max_features,
+                         unit_nr, repeat_block,
+                         dense_size, repeat_dense, output_size, output_activation,
+                         max_pooling, mean_pooling, weighted_average_attention, concat_mode,
+                         dropout_embedding, rnn_dropout, dense_dropout, dropout_mode,
+                         rnn_kernel_reg_l2, rnn_recurrent_reg_l2, rnn_bias_reg_l2,
+                         dense_kernel_reg_l2, dense_bias_reg_l2,
+                         use_prelu, use_batch_norm, batch_norm_first)

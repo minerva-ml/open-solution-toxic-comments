@@ -23,12 +23,14 @@ exclude:
 parameters:
 # Cloud Environment
   data_dir:                     /public/toxic_comments
+  filename_suffix: '_translated'
   embedding_filepath:           None
   single_model_predictions_dir: /public/toxic_comments/single_model_predictions_03092018
   experiment_dir:               /output/trained_pipelines/char_vdcnn
 
 # Local Environment
 #  data_dir:                     /path/to/toxic/data
+#  filename_suffix: '_translated'
 #  embedding_filepath:           /path/to/embedding i.e. ~/fasttext/crawl-300d-2M.vec
 #  single_model_predictions_dir: /path/to/single/model/preds/ i.e. ~/single_model_predictions_03092018
 #  experiment_dir:               /my/working/directory i.e. ~/toxic/trained_pipelines/char_vdcnn
@@ -44,6 +46,7 @@ parameters:
   maxlen_char: 1000
   maxlen_words: None
   char_ngram_max: None
+  truncated_svd__n_components: None
   drop_punctuation: 0
   drop_newline: 0
   drop_multispaces: 0
@@ -64,6 +67,8 @@ parameters:
   mean_pooling: 1
   weighted_average_attention: 0
   concat_mode: 'concat'
+  output_size: 6
+  output_activation: 'sigmoid'
   trainable_embedding: 1
   word_embedding_size: None
   char_embedding_size: 16
