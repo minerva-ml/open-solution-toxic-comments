@@ -30,8 +30,7 @@ You are welcome to extend this pipeline and contribute your own models or proced
 # Installation
 ### option 1: Neptune cloud
 on the [neptune](https://neptune.ml/ 'machine learning lab') site
-* register to receive $5 in GPU and storage time (contact us directly, if you want to receive more credits for training)
-* log in: `neptune login`
+* log in: `neptune accound login`
 * create new project named `toxic`: Follow the link `Projects` (top bar, left side), then click `New project` button. This action will generate project-key `TOX`, which is already listed in the `neptune.yaml`.
 
 run setup commands
