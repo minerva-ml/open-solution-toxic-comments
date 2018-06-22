@@ -19,6 +19,9 @@ You need to be registered to neptune.ml to be able to use our predictions for yo
 
 Running the notebook as is got **0.986+** on the LB.
 
+## Disclaimer
+In this open source solution you will find references to the neptune.ml. It is free platform for community Users, which we use daily to keep track of our experiments. Please note that using neptune.ml is not necessary to proceed with this solution. You may run it as plain Python script :wink:.
+
 ## The idea
 We are contributing starter code that is easy to use and extend. We did it before with [Cdiscount’s Image Classification Challenge](https://github.com/deepsense-ai/cdiscount-starter) and we believe that it is correct way to open data science to the wider community and encourage more people to participate in Challenges. This starter is ready-to-use end-to-end solution. Since all computations are organized in separate steps, it is also easy to extend. Check [devbook.ipynb](https://github.com/neptune-ml/kaggle-toxic-starter/blob/master/devbook.ipynb) for more information about different pipelines.
 
