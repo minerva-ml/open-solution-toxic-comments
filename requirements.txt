@@ -4,7 +4,7 @@ scipy==1.0.0
 click==6.7
 attrdict==2.0.0
 pandas==0.21.0
-neptune_cli==2.7.1
+neptune_cli
 catboost==0.6.1.1
 ipython==6.2.1
 PyYAML==3.12
